@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * @file
+ * Lets drupal 7 site builders create forms and graphs connected to remote databases.
+ * 
+ * Creates custom content storing the form, graph and database connection metadata,
+ * then uses that metadata to create the "connected" forms and graphs as menu callbacks
+ * 
+ */

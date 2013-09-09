@@ -1,0 +1,8 @@
+name = fetchit7
+description = "Allows drupal site builders to create forms and graphs connected to remote databases."
+package = Brannon Developments
+core = 7.x
+files[] = fetchit7.module
+files[] = fetchit7.install
+files[] = fetchit7.admin.inc
+configure = /admin/config/content/fetchit7/settings
