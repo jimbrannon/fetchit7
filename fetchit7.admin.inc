@@ -97,6 +97,50 @@ function fetchit7_admin_dbsettings() {
     '#description' => t('These are the database server types supported by fetchit7.'),
   );
 
+	// set the default database server port number
+	//variable_set('fetchit7_default_db_port', 5432);
+	$form['fetchit7_default_db_port'] = array(
+		'#type' => 'textfield',
+		'#default_value' => variable_get('fetchit7_default_db_port', 5432),
+		'#title' => t('Enter the default database server port number to use for database connections'),
+		'#size' => 10,
+		'#maxlength' => 20,
+		'#required' => TRUE,
+	);
+	
+	// set the default database server database name
+	//variable_set('fetchit7_default_db_name', 'default_db_name');
+	$form['fetchit7_default_db_name'] = array(
+		'#type' => 'textfield',
+		'#default_value' => variable_get('fetchit7_default_db_name', 'default_db_name'),
+		'#title' => t('Enter the default database name to use for database connections'),
+		'#size' => 60,
+		'#maxlength' => 128,
+		'#required' => TRUE,
+	);
+
+	// set the default database server login name
+	//variable_set('fetchit7_default_db_login', 'default_db_login');
+	$form['fetchit7_default_db_login'] = array(
+		'#type' => 'textfield',
+		'#default_value' => variable_get('fetchit7_default_db_login', 'default_db_login'),
+		'#title' => t('Enter the default database login to use for database connections'),
+		'#size' => 60,
+		'#maxlength' => 128,
+		'#required' => TRUE,
+	);
+
+	// set the default database server password
+	//variable_set('fetchit7_default_db_password', 'default_db_password');
+	$form['fetchit7_default_db_password'] = array(
+		'#type' => 'textfield',
+		'#default_value' => variable_get('fetchit7_default_db_password', 'default_db_password'),
+		'#title' => t('Enter the default database password to use for database connections'),
+		'#size' => 60,
+		'#maxlength' => 128,
+		'#required' => TRUE,
+	);
+
 	$form['#submit'][] = 'fetchit7_admin_dbsettings_submit';
 	return system_settings_form($form);
 	

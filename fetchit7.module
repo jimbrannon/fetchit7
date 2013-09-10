@@ -39,7 +39,7 @@ function fetchit7_menu() {
 
 	$items['admin/config/fetchit7/dbsettings'] = array(
 		'title' => 'fetchit7 database default settings',
-		'description' => 'These become the default remote database connection parameters for each node.',
+		'description' => 'These become the default database server connection settings for each node.',
 		'position' => 'right',
 		'weight' => -4,
 		'page callback' => 'drupal_get_form',
