@@ -37,13 +37,13 @@ function fetchit7_menu() {
 		'file path' => drupal_get_path('module', 'fetchit7'),
 	);
 
-	$items['admin/config/fetchit7/reset'] = array(
-		'title' => 'fetchit7 reset',
-		'description' => 'Reset the fetchit7 data. (required after all fetchit7 data changes)',
+	$items['admin/config/fetchit7/dbsettings'] = array(
+		'title' => 'fetchit7 database default settings',
+		'description' => 'These become the default remote database connection parameters for each node.',
 		'position' => 'right',
-		'weight' => -10,
+		'weight' => -4,
 		'page callback' => 'drupal_get_form',
-		'page arguments' => array('fetchit7_admin_reset'),
+		'page arguments' => array('fetchit7_admin_dbsettings'),
 		'access arguments' => array('administer site configuration'),
 		'type' => MENU_NORMAL_ITEM,
 		'file' => 'fetchit7.admin.inc',
