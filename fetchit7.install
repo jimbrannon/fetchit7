@@ -1,0 +1,117 @@
+<?
+
+/**
+ * Implements hook_install()
+ */
+ 
+ function fetchit7_install () {
+	watchdog("fetchit7 module","Installing module");
+ 	
+	// create the fetchit7_contents_type table
+	watchdog("fetchit7 module","creating table fetchit7_content_types");
+	$schema['fetchit7_content_types'] = array(
+	  'description' => 'This table defines the custom content types that will be available to the fetchit7 module',
+	  'fields' => array(
+	    'ndx' => array(
+	      'description' => 'integer index',
+	      'type' => 'int',
+	      'not null' => TRUE,
+	    ),
+	    'name' => array(
+	      'description' => 'machine name',
+	      'type' => 'varchar',
+	      'length' => '60',
+	      'not null' => TRUE,
+	    ),
+	    'title' => array(
+	      'description' => 'displayed name',
+	      'type' => 'varchar',
+	      'length' => '60',
+	      'not null' => TRUE,
+	    ),
+	    'enabled' => array(
+	      'description' => 'whether this type is enabled to display',
+	      'type' => 'int',
+	      'size' => 'tiny',
+	      'not null' => TRUE,
+	      'default' => 1,
+	    ),
+	    'description' => array(
+	      'description' => 'description of this content type',
+	      'type' => 'text',
+	      'not null' => TRUE,
+	    ),
+	    'location' => array(
+	      'description' => 'the default content output location to use when creating content of this type; 0 not displayed, 1 page, 2 block; see table fetchit7_location_types',
+	      'type' => 'int',
+	      'not null' => TRUE,
+	      'default' => 2,
+	    ),
+	    'db_host' => array(
+	      'description' => 'the default db server hostname to use when creating content of this type; localhost, etc.',
+	      'type' => 'varchar',
+	      'length' => '60',
+	      'not null' => TRUE,
+	      'default' => 'localhost',
+	    ),
+	    'db_type' => array(
+	      'description' => 'the default db type to use when creating content of this type; 0 PostgreSQL, 1 MySQL, 2 SQL Server; see table fetchit7_db_types',
+	      'type' => 'int',
+	      'not null' => TRUE,
+	      'default' => 0,
+	    ),
+	    'db_port' => array(
+	      'description' => 'the default db server port number to use when creating content of this type; 5432 for pg, etc.',
+	      'type' => 'int',
+	      'not null' => TRUE,
+	      'default' => 5432,
+	    ),
+	    'db_name' => array(
+	      'description' => 'the default database name to use when creating content of this type',
+	      'type' => 'varchar',
+	      'length' => '60',
+	      'not null' => TRUE,
+	      'default' => 'default_db_name',
+	    ),
+	    'db_login' => array(
+	      'description' => 'the default database login to use when creating content of this type',
+	      'type' => 'varchar',
+	      'length' => '60',
+	      'not null' => TRUE,
+	    ),
+	    'db_password' => array(
+	      'description' => 'the default database login password to use when creating content of this type',
+	      'type' => 'varchar',
+	      'length' => '60',
+	      'not null' => TRUE,
+	    ),
+	  ),
+	  'primary key' => array('ndx'),
+	);
+
+	// add the fetchit7_content_type records
+	$table = 'fetchit7_content_types';
+	$record = new stdClass();
+	// the HTML table record
+	$record->ndx = 0;
+	$record->name = 'fetchit7_html_table';
+	$record->title = 'HTML Table';
+	$record->enabled = TRUE;
+	$record->description = 'these are either plain HTML tables or the new Drupal 7 tableselect elements with selections (radio buttons or checkboxes) in column 1.  Can be used to display a table, select a single record, select multiple records, or delete multiple records.';
+	$record->location = 2; // block
+	$record->db_host = 'localhost';
+	$record->db_type = 0; // pgsql
+	$record->db_port = 5432;
+	$record->db_name = '';
+	$record->db_login = '';
+	$record->db_password = '';
+	drupal_write_record($table,$record);
+}
+
+/**
+ * Implements hook_uninstall()
+ */
+
+function fetchit7_uninstall () {
+	watchdog("fetchit7 module","Uninstalling module");
+}
