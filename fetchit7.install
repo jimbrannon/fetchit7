@@ -5,7 +5,141 @@
  */
  
  function fetchit7_install () {
-	watchdog("fetchit7 module","fetchit7_install: ");
+	watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_content_types");
+	// add the fetchit7_content_type records
+	$table = 'fetchit7_content_types';
+	$record = new stdClass();
+	// HTML table
+	$record->ndx = 0;
+	$record->name = 'fetchit7_html_table';
+	$record->title = 'HTML Table';
+	$record->enabled = TRUE;
+	$record->description = 'these are either plain HTML tables or the new Drupal 7 tableselect elements with selections (radio buttons or checkboxes) in column 1.  Can be used to display a table, select a single record, select multiple records, or delete multiple records.';
+	$record->location = 2; // block
+	$record->db_host = 'localhost';
+	$record->db_type = 0; // pgsql
+	$record->db_port = 5432;
+	$record->db_name = '';
+	$record->db_login = '';
+	$record->db_password = '';
+	drupal_write_record($table,$record);
+	// Google data visualization record
+	$record->ndx = 2;
+	$record->name = 'fetchit7_gviz';
+	$record->title = 'Google Data Visualization';
+	$record->enabled = FALSE;
+	$record->description = 'Google Data Visualization';
+	$record->location = 2; // block
+	$record->db_host = 'localhost';
+	$record->db_type = 0; // pgsql
+	$record->db_port = 5432;
+	$record->db_name = '';
+	$record->db_login = '';
+	$record->db_password = '';
+	drupal_write_record($table,$record);
+	// parameter input
+	$record->ndx = 4;
+	$record->name = 'fetchit7_parameter';
+	$record->title = 'Parameter Input';
+	$record->enabled = FALSE;
+	$record->description = 'Parameter Input';
+	$record->location = 2; // block
+	$record->db_host = 'localhost';
+	$record->db_type = 0; // pgsql
+	$record->db_port = 5432;
+	$record->db_name = '';
+	$record->db_login = '';
+	$record->db_password = '';
+	drupal_write_record($table,$record);
+	// append record
+	$record->ndx = 7;
+	$record->name = 'fetchit7_append';
+	$record->title = 'Append Record Form';
+	$record->enabled = FALSE;
+	$record->description = 'Append Record Form';
+	$record->location = 2; // block
+	$record->db_host = 'localhost';
+	$record->db_type = 0; // pgsql
+	$record->db_port = 5432;
+	$record->db_name = '';
+	$record->db_login = '';
+	$record->db_password = '';
+	drupal_write_record($table,$record);
+	// editable grid
+	$record->ndx = 8;
+	$record->name = 'fetchit7_editable_grid';
+	$record->title = 'Editable HTML Table';
+	$record->enabled = FALSE;
+	$record->description = 'Editable HTML Table';
+	$record->location = 2; // block
+	$record->db_host = 'localhost';
+	$record->db_type = 0; // pgsql
+	$record->db_port = 5432;
+	$record->db_name = '';
+	$record->db_login = '';
+	$record->db_password = '';
+	drupal_write_record($table,$record);
+	// Open layers map
+	$record->ndx = 10;
+	$record->name = 'fetchit7_ol_map';
+	$record->title = 'Open Layers Map';
+	$record->enabled = FALSE;
+	$record->description = 'Open Layers Map';
+	$record->location = 2; // block
+	$record->db_host = 'localhost';
+	$record->db_type = 0; // pgsql
+	$record->db_port = 5432;
+	$record->db_name = '';
+	$record->db_login = '';
+	$record->db_password = '';
+	drupal_write_record($table,$record);
+
+	watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_db_types");
+	// add the fetchit7_db_type records
+	$table = 'fetchit7_db_types';
+	$record = new stdClass();
+	$record->ndx = 0;
+	$record->name = 'postgresql';
+	$record->label = 'PostgreSQL';
+	$record->description = 'PostgreSQL relational database system';
+	$record->enabled = TRUE;
+	drupal_write_record($table,$record);
+	$record->ndx = 1;
+	$record->name = 'mysql';
+	$record->label = 'MySQL';
+	$record->description = 'MySQL relational database system';
+	$record->enabled = FALSE;
+	drupal_write_record($table,$record);
+	$record->ndx = 2;
+	$record->name = 'sqlserver';
+	$record->label = 'SQL Server';
+	$record->description = 'Microsoft SQL Server relational database system';
+	$record->enabled = FALSE;
+	drupal_write_record($table,$record);
+
+	watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_location_types");
+	// add the fetchit7_location_type records
+	$table = 'fetchit7_location_types';
+	$record = new stdClass();
+	$record->ndx = 0;
+	$record->name = 'notdisplayed';
+	$record->label = 'Not displayed';
+	$record->description = 'the fetchit7 output is not displayed';
+	$record->enabled = TRUE;
+	drupal_write_record($table,$record);
+	$record->ndx = 1;
+	$record->name = 'page';
+	$record->label = 'Page';
+	$record->description = 'the fetchit7 output is displayed on a page via a menu hook callback';
+	$record->enabled = TRUE;
+	drupal_write_record($table,$record);
+	$record->ndx = 2;
+	$record->name = 'block';
+	$record->label = 'Block';
+	$record->description = 'the fetchit7 output is displayed in a block via the block system view call';
+	$record->enabled = TRUE;
+	drupal_write_record($table,$record);
+	
  }
  
  function fetchit7_schema () {	
@@ -181,139 +315,5 @@ function fetchit7_uninstall () {
  */
 
 function fetchit7_enable () {
-	watchdog("fetchit7 module","fetchit7_enable: populating table fetchit7_content_types");
-	// add the fetchit7_content_type records
-	$table = 'fetchit7_content_types';
-	$record = new stdClass();
-	// HTML table
-	$record->ndx = 0;
-	$record->name = 'fetchit7_html_table';
-	$record->title = 'HTML Table';
-	$record->enabled = TRUE;
-	$record->description = 'these are either plain HTML tables or the new Drupal 7 tableselect elements with selections (radio buttons or checkboxes) in column 1.  Can be used to display a table, select a single record, select multiple records, or delete multiple records.';
-	$record->location = 2; // block
-	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
-	$record->db_port = 5432;
-	$record->db_name = '';
-	$record->db_login = '';
-	$record->db_password = '';
-	drupal_write_record($table,$record);
-	// Google data visualization record
-	$record->ndx = 2;
-	$record->name = 'fetchit7_gviz';
-	$record->title = 'Google Data Visualization';
-	$record->enabled = FALSE;
-	$record->description = 'Google Data Visualization';
-	$record->location = 2; // block
-	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
-	$record->db_port = 5432;
-	$record->db_name = '';
-	$record->db_login = '';
-	$record->db_password = '';
-	drupal_write_record($table,$record);
-	// parameter input
-	$record->ndx = 4;
-	$record->name = 'fetchit7_parameter';
-	$record->title = 'Parameter Input';
-	$record->enabled = FALSE;
-	$record->description = 'Parameter Input';
-	$record->location = 2; // block
-	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
-	$record->db_port = 5432;
-	$record->db_name = '';
-	$record->db_login = '';
-	$record->db_password = '';
-	drupal_write_record($table,$record);
-	// append record
-	$record->ndx = 7;
-	$record->name = 'fetchit7_append';
-	$record->title = 'Append Record Form';
-	$record->enabled = FALSE;
-	$record->description = 'Append Record Form';
-	$record->location = 2; // block
-	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
-	$record->db_port = 5432;
-	$record->db_name = '';
-	$record->db_login = '';
-	$record->db_password = '';
-	drupal_write_record($table,$record);
-	// editable grid
-	$record->ndx = 8;
-	$record->name = 'fetchit7_editable_grid';
-	$record->title = 'Editable HTML Table';
-	$record->enabled = FALSE;
-	$record->description = 'Editable HTML Table';
-	$record->location = 2; // block
-	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
-	$record->db_port = 5432;
-	$record->db_name = '';
-	$record->db_login = '';
-	$record->db_password = '';
-	drupal_write_record($table,$record);
-	// Open layers map
-	$record->ndx = 10;
-	$record->name = 'fetchit7_ol_map';
-	$record->title = 'Open Layers Map';
-	$record->enabled = FALSE;
-	$record->description = 'Open Layers Map';
-	$record->location = 2; // block
-	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
-	$record->db_port = 5432;
-	$record->db_name = '';
-	$record->db_login = '';
-	$record->db_password = '';
-	drupal_write_record($table,$record);
-
-	watchdog("fetchit7 module","fetchit7_enable: populating table fetchit7_db_types");
-	// add the fetchit7_db_type records
-	$table = 'fetchit7_db_types';
-	$record = new stdClass();
-	$record->ndx = 0;
-	$record->name = 'postgresql';
-	$record->label = 'PostgreSQL';
-	$record->description = 'PostgreSQL relational database system';
-	$record->enabled = TRUE;
-	drupal_write_record($table,$record);
-	$record->ndx = 1;
-	$record->name = 'mysql';
-	$record->label = 'MySQL';
-	$record->description = 'MySQL relational database system';
-	$record->enabled = FALSE;
-	drupal_write_record($table,$record);
-	$record->ndx = 2;
-	$record->name = 'sqlserver';
-	$record->label = 'SQL Server';
-	$record->description = 'Microsoft SQL Server relational database system';
-	$record->enabled = FALSE;
-	drupal_write_record($table,$record);
-
-	watchdog("fetchit7 module","fetchit7_enable: populating table fetchit7_location_types");
-	// add the fetchit7_location_type records
-	$table = 'fetchit7_location_types';
-	$record = new stdClass();
-	$record->ndx = 0;
-	$record->name = 'notdisplayed';
-	$record->label = 'Not displayed';
-	$record->description = 'the fetchit7 output is not displayed';
-	$record->enabled = TRUE;
-	drupal_write_record($table,$record);
-	$record->ndx = 1;
-	$record->name = 'page';
-	$record->label = 'Page';
-	$record->description = 'the fetchit7 output is displayed on a page via a menu hook callback';
-	$record->enabled = TRUE;
-	drupal_write_record($table,$record);
-	$record->ndx = 2;
-	$record->name = 'block';
-	$record->label = 'Block';
-	$record->description = 'the fetchit7 output is displayed in a block via the block system view call';
-	$record->enabled = TRUE;
-	drupal_write_record($table,$record);
-
+	watchdog("fetchit7 module","fetchit7_enable: ");
 }

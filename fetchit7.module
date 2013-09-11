@@ -95,7 +95,7 @@ function fetchit7_menu() {
 		'position' => 'right',
 		'weight' => 10,
 		'page callback' => 'drupal_get_form',
-		'page arguments' => array('fetchit7_xxx_form_99'),
+		'page arguments' => array('fetchit7_tbl_form_13'),
 		'access arguments' => array('administer site configuration'),
 		'type' => MENU_NORMAL_ITEM,
 		'file' => 'fetchit7.forms.inc',
