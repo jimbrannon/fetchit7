@@ -50,5 +50,44 @@ function fetchit7_menu() {
 		'file path' => drupal_get_path('module', 'fetchit7'),
 	);
 
+	$items['admin/config/fetchit7/reset'] = array(
+		'title' => 'fetchit7 database reset',
+		'description' => 'The fetchit7 database tables should be reset whenever fetchit7 settings or content data change.',
+		'position' => 'right',
+		'weight' => -3,
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('fetchit7_admin_reset'),
+		'access arguments' => array('administer site configuration'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'fetchit7.admin.inc',
+		'file path' => drupal_get_path('module', 'fetchit7'),
+	);
+
+	$items['admin/config/fetchit7/backupcontent'] = array(
+		'title' => 'Backup fetchit7 content',
+		'description' => '[Not Available] Allows fetchit7 content to be exported to a file.',
+		'position' => 'right',
+		'weight' => -2,
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('fetchit7_admin_backupcontent'),
+		'access arguments' => array('administer site configuration'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'fetchit7.admin.inc',
+		'file path' => drupal_get_path('module', 'fetchit7'),
+	);
+
+	$items['admin/config/fetchit7/restorecontent'] = array(
+		'title' => 'Restore fetchit7 content',
+		'description' => '[Not Available] Allows fetchit7 content to be restored from a file.',
+		'position' => 'right',
+		'weight' => -1,
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('fetchit7_admin_restorecontent'),
+		'access arguments' => array('administer site configuration'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'fetchit7.admin.inc',
+		'file path' => drupal_get_path('module', 'fetchit7'),
+	);
+
 	return $items;
 }
