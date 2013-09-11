@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Adminsitration page callbacks for the fetchit7 module
+ * Adminisitration page callbacks for the fetchit7 module
  */
  
  /**

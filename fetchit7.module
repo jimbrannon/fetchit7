@@ -89,5 +89,20 @@ function fetchit7_menu() {
 		'file path' => drupal_get_path('module', 'fetchit7'),
 	);
 
+	$items['admin/config/fetchit7/testform'] = array(
+		'title' => 'fetchit7 content test',
+		'description' => 'temporary menu item to allow testing fetchit7 forms content.',
+		'position' => 'right',
+		'weight' => 10,
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('fetchit7_xxx_form_99'),
+		'access arguments' => array('administer site configuration'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'fetchit7.forms.inc',
+		'file path' => drupal_get_path('module', 'fetchit7'),
+	);
+	
 	return $items;
 }
+
+

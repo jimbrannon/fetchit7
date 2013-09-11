@@ -5,12 +5,12 @@
  */
  
  function fetchit7_install () {
-	watchdog("fetchit7 module","Installing module");
+	watchdog("fetchit7 module","fetchit7_install: ");
  }
  
  function fetchit7_schema () {	
 	// create the fetchit7_contents_type table
-	watchdog("fetchit7 module","creating table fetchit7_content_types");
+	watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_content_types");
 	$schema['fetchit7_content_types'] = array(
 	  'description' => 'This table defines the custom content types that will be available to the fetchit7 module',
 	  'fields' => array(
@@ -91,7 +91,7 @@
 	  'primary key' => array('ndx'),
 	);
 	
-	watchdog("fetchit7 module","creating table fetchit7_db_types");
+	watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_db_types");
 	$schema['fetchit7_db_types'] = array(
 	  'description' => 'allowable fetchit7 db types',
 	  'fields' => array(
@@ -128,7 +128,7 @@
 	  'primary key' => array('ndx'),
 	);
 
-	watchdog("fetchit7 module","creating table fetchit7_location_types");
+	watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_location_types");
 	$schema['fetchit7_location_types'] = array(
 	  'description' => 'fetchit7 output location types 0 not displayed, 1 page content, 2 block content',
 	  'fields' => array(
@@ -173,7 +173,7 @@
  */
 
 function fetchit7_uninstall () {
-	watchdog("fetchit7 module","Uninstalling module");
+	watchdog("fetchit7 module","fetchit7_uninstall: ");
 }
 
 /**
@@ -181,7 +181,7 @@ function fetchit7_uninstall () {
  */
 
 function fetchit7_enable () {
-
+	watchdog("fetchit7 module","fetchit7_enable: populating table fetchit7_content_types");
 	// add the fetchit7_content_type records
 	$table = 'fetchit7_content_types';
 	$record = new stdClass();
@@ -270,6 +270,7 @@ function fetchit7_enable () {
 	$record->db_password = '';
 	drupal_write_record($table,$record);
 
+	watchdog("fetchit7 module","fetchit7_enable: populating table fetchit7_db_types");
 	// add the fetchit7_db_type records
 	$table = 'fetchit7_db_types';
 	$record = new stdClass();
@@ -292,6 +293,7 @@ function fetchit7_enable () {
 	$record->enabled = FALSE;
 	drupal_write_record($table,$record);
 
+	watchdog("fetchit7 module","fetchit7_enable: populating table fetchit7_location_types");
 	// add the fetchit7_location_type records
 	$table = 'fetchit7_location_types';
 	$record = new stdClass();

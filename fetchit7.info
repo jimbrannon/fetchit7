@@ -5,4 +5,5 @@ core = 7.x
 files[] = fetchit7.module
 files[] = fetchit7.install
 files[] = fetchit7.admin.inc
+files[] = fetchit7.forms.inc
 configure = /admin/config/content/fetchit7/settings
