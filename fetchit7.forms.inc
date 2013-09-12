@@ -5,22 +5,6 @@
  * Forms page callbacks for the fetchit7 module
  */
 
-/**
- * Implements hook_forms().
- * 
- * Allows the fetchit7 form to be repeated multiple times on a page.
- * See http://drupal.org/node/1970846.
- */
-function fetchit7_forms($form_id, $args) {
-  $forms = array();
-  if (substr($form_id, 0, 18) == 'fetchit7_xxx_form_') {
-    $forms[$form_id] = array('callback' => 'fetchit7_xxx_form');
-  }
-  if (substr($form_id, 0, 18) == 'fetchit7_tbl_form_') {
-    $forms[$form_id] = array('callback' => 'fetchit7_tbl_form');
-  }
-  return $forms;
-}
 
 
 
@@ -34,15 +18,9 @@ function fetchit7_forms($form_id, $args) {
   * @ingroup forms
   * @see system_settings_form().
   */
-function fetchit7_tbl_form($form, &$form_state, $args) {
+function fetchit7_tbl_form($form, &$form_state) {
 	// form builder function
 
-	// get args
-	print_r("hello");
-	print_r($form);
-	print_r($form_state); //['build_info']['args'][0];
-	print_r($args);
-		
 	// text element
 	$myform['fetchit7_tbl_text'] = array(
 		'#type' => 'textfield',

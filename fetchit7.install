@@ -140,9 +140,109 @@
 	$record->enabled = TRUE;
 	drupal_write_record($table,$record);
 	
- }
- 
- function fetchit7_schema () {	
+	// now that the fetchit7 content types table is created and populated
+	// create the fetchit7 content types and extend them via fields (fields API)
+	//    [note: eventually the fetchit7 content types table will be a custom content type (node type) too and extended via fields like this!!]
+	// note that the node_types_rebuild() function causes Drupal 7 to rebuild it's internal node types list - it calls all the hook_node_info functions
+	//   including fetchit7_node_info and creates the content types (node types) described there
+	//   and then adds them to the site's global content type (node type) list
+	//   in other words I don't need to use node_type_save() here to create content types
+	
+	// create base fetchit7 content types
+	node_types_rebuild();
+	/*
+	$object = new stdClass();
+	$object->type = 'fetchit7_tbl_content';
+	$object->name = 'fetchit7 HTML table content type';
+	$object->base = 'node_content';
+	$object->description = 'fetchit7 HTML table content type';
+	$object->help = 'Use this fetchit7 content type to create database-connected tables, including ones that allow selecting one or more records.';
+	$object->custom = FALSE;
+	$object->modified = FALSE;
+	$object->locked = TRUE;
+	$object->disabled = FALSE;
+	$object->has_title = TRUE;
+	$object->title_label = 'label title fetchit7 HTML table content type';
+	$object->module = 'fetchit7';
+	$object->orig_type = 'fetchit7_tbl_type';
+	$returned = node_type_save($object);
+	watchdog("fetchit7 module","fetchit7_install: created fetchit7_tbl_content content type, $returned");
+	*/
+	$types = node_type_get_types();
+	// add the body field to the various fetchit7 content types
+	$body_instance = node_add_body_field($types['fetchit7_tbl_content']);
+	//$body_instance = node_add_body_field($types['fetchit7_par_content']);
+	//$body_instance = node_add_body_field($types['fetchit7_app_content']);
+	//$body_instance = node_add_body_field($types['fetchit7_edt_content']);
+	//$body_instance = node_add_body_field($types['fetchit7_gvz_content']);
+	//$body_instance = node_add_body_field($types['fetchit7_olm_content']);
+	// ...
+	//
+	// here you could modify the body field if you wanted to, such as
+	// $body_instance['type'] = 'text_summary_or_trimmed';
+	// field_update_instance($body_instance);
+	
+	//create the various fields to be used by the fetchit7 content types
+	foreach (_fetchit7_installed_fields() as $field) {
+		field_create_field($field);
+	}	
+	// link the fields to the appropariate content types via "instances"
+	foreach (_fetchit7_installed_instances() as $instance) {
+		$instance['entity_type'] = 'node';
+		$instance['bundle'] = 'fetchit7_tbl_content';
+		field_create_instance($instance);
+	}	
+		
+}
+
+
+/**
+ * function that returns an array of all the fields created by this module 
+ */
+function _fetchit7_installed_fields () {
+	$t = get_t();
+	$fetchit7_fields = array(
+		'fetchit7_content_enabled' => array(
+			'field_name'	=> 'enabled',
+			'label'				=> $t('output location enabled'),
+			'type'				=> 'text',
+		),
+	);
+	
+	return $fetchit7_fields;
+}
+
+
+/**
+ * function that returns an array of all the field instances created by this module 
+ */
+function _fetchit7_installed_instances () {
+	$t = get_t();
+	$fetchit7_instances = array(
+		'fetchit2_content_enabled' => array(
+			'field_name'	=> 'enabled',
+			'label'				=> $t('is this content enabled?'),
+			'type'				=> 'text',
+			'widget'			=> array(
+				'type'							=> 'text_textfield',
+			),
+			'display'			=> array(
+				'example_node_list'	=> array(
+					'label'								=> $t('Output location: 0=none 1=page 2=block'),
+					'type'								=> 'text',
+				),
+			),
+		),
+	);
+	
+	return $fetchit7_instances;
+}
+
+
+/**
+ * Implements hook_schema
+ */
+function fetchit7_schema () {	
 	// create the fetchit7_contents_type table
 	watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_content_types");
 	$schema['fetchit7_content_types'] = array(
@@ -302,13 +402,45 @@
 	return $schema;
 }
 
+
 /**
  * Implements hook_uninstall()
  */
 
 function fetchit7_uninstall () {
 	watchdog("fetchit7 module","fetchit7_uninstall: ");
+
+	// get all the created content for the fetchit7 content types
+	$sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
+	$result = db_query($sql, array(':type' => 'fetchit7_tbl_content'));
+	$nids = array();
+	foreach ($result as $row) {
+		$nids[] = $row->nid;
+	}
+	
+	// delete these nodes
+	node_delete_multiple($nids);
+	
+	// loop over the fetchit7 fields and delete their instances, data and the fields themselves
+	foreach (array_keys(_fetchit7_installed_fields()) as $field) {
+		field_delete_field($field);
+	}
+	
+	// loop over any remaining field instances attached to the content types (like the body field)
+	//   and delete them individually
+	$instances = field_info_instances('node','fetchit7_tbl_content');
+	foreach ($instances as $instance_name => $instance) {
+		field_delete_instance($instance);
+	}
+	
+	// delete the content types
+	node_type_delete('fetchit7_tbl_content');
+	
+	// purge all field information
+	field_purge_batch(1000);
+
 }
+
 
 /**
  * Implements hook_enable()

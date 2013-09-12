@@ -90,19 +90,69 @@ function fetchit7_menu() {
 	);
 
 	$items['admin/config/fetchit7/testform'] = array(
-		'title' => 'fetchit7 content test',
-		'description' => 'temporary menu item to allow testing fetchit7 forms content.',
-		'position' => 'right',
-		'weight' => 10,
-		'page callback' => 'drupal_get_form',
-		'page arguments' => array('fetchit7_tbl_form_13'),
-		'access arguments' => array('administer site configuration'),
-		'type' => MENU_NORMAL_ITEM,
-		'file' => 'fetchit7.forms.inc',
-		'file path' => drupal_get_path('module', 'fetchit7'),
+		'title'							=> 'fetchit7 content test',
+		'description'				=> 'temporary menu item to allow testing fetchit7 forms content.',
+		'position'					=> 'right',
+		'weight'						=> 10,
+		'page callback'			=> 'drupal_get_form',
+		'page arguments'		=> array('fetchit7_tbl_form_13'),
+		'access arguments'	=> array('administer site configuration'),
+		'type'							=> MENU_NORMAL_ITEM,
+		'file'							=> 'fetchit7.forms.inc',
+		'file path'					=> drupal_get_path('module', 'fetchit7'),
 	);
 	
 	return $items;
 }
 
+ /**
+  * Implementation of hook_node_info
+  * 
+  * returns a structured array of the new content types this module is creating 
+  */
+function fetchit7_node_info() {
+	
+	// the HTML table content type
+	$fetchit7_content_types = array(
+		'fetchit7_tbl_content' => array(
+			'name'				=> t('fetchit7 HTML table content type'),
+			'base'				=> 'node_content', // should this be fetchit7_tbl_content?
+			'description'	=> t('Use this fetchit7 content to create an HTML table connected to a database view/table, optionally with selectable rows'),
+			'help'				=> t('Enter all the information necessary to create an HTML table connected to a database server'),
+			'custom'			=> FALSE,
+			'modified'		=> FALSE,
+			'locked'			=> TRUE,
+			'disabled'		=> FALSE,
+			'has_title'		=> TRUE,
+			'title_label'	=> 'Content Title',
+			'module'			=> 'fetchit7',
+			'orig_type'		=> 'fetchit7_tbl_content',
+		),
+	);
+	
+	return $fetchit7_content_types;
+}
 
+
+/**
+ * Implements hook_forms().
+ * 
+ * Allows the fetchit7 form to be repeated multiple times on a page.
+ * See http://drupal.org/node/1970846.
+ */
+
+ function fetchit7_forms($form_id, $args) {
+
+  $forms = array();
+	watchdog('fetchit7','fetchit7_forms: '.$form_id);
+	// this is just a test form
+  if (substr($form_id, 0, 18) == 'fetchit7_xxx_form_') {
+    $forms[$form_id] = array('callback' => 'fetchit7_xxx_form');
+  }
+	// this is the html table form
+  if (substr($form_id, 0, 18) == 'fetchit7_tbl_form_') {
+    $forms[$form_id] = array('callback' => 'fetchit7_tbl_form');
+  }
+
+  return $forms;
+}
