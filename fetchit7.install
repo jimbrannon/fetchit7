@@ -25,6 +25,7 @@
 	$record->title = 'HTML Table';
 	$record->description = 'these are either plain HTML tables or the new Drupal 7 tableselect elements with selections (radio buttons or checkboxes) in column 1.  Can be used to display a table, select a single record, select multiple records, or delete multiple records.';
 	$record->location = 2; // block
+	$record->enabled = 1; // true
 	$record->db_host = 'localhost';
 	$record->db_type = 0; // pgsql
 	$record->db_port = 5432;
@@ -38,6 +39,7 @@
 	$record->title = 'Google Data Visualization';
 	$record->description = 'Google Data Visualization';
 	$record->location = 2; // block
+	$record->enabled = 0; // false
 	$record->db_host = 'localhost';
 	$record->db_type = 0; // pgsql
 	$record->db_port = 5432;
@@ -51,6 +53,7 @@
 	$record->title = 'Parameter Input';
 	$record->description = 'Parameter Input';
 	$record->location = 2; // block
+	$record->enabled = 1; // true
 	$record->db_host = 'localhost';
 	$record->db_type = 0; // pgsql
 	$record->db_port = 5432;
@@ -64,6 +67,7 @@
 	$record->title = 'Append Record Form';
 	$record->description = 'Append Record Form';
 	$record->location = 2; // block
+	$record->enabled = 0; // false
 	$record->db_host = 'localhost';
 	$record->db_type = 0; // pgsql
 	$record->db_port = 5432;
@@ -77,6 +81,7 @@
 	$record->title = 'Editable HTML Table';
 	$record->description = 'Editable HTML Table';
 	$record->location = 2; // block
+	$record->enabled = 0; // false
 	$record->db_host = 'localhost';
 	$record->db_type = 0; // pgsql
 	$record->db_port = 5432;
@@ -90,6 +95,7 @@
 	$record->title = 'Open Layers Map';
 	$record->description = 'Open Layers Map';
 	$record->location = 2; // block
+	$record->enabled = 0; // false
 	$record->db_host = 'localhost';
 	$record->db_type = 0; // pgsql
 	$record->db_port = 5432;
@@ -426,6 +432,12 @@ function fetchit7_schema () {
 	      'type' => 'int',
 	      'not null' => TRUE,
 	      'default' => 2,
+	    ),
+	    'enabled' => array(
+	      'description' => 'the default enabled flag to use when creating content of this type; 0 disabled, 1 enabled (essentially a boolean)',
+	      'type' => 'int',
+	      'not null' => TRUE,
+	      'default' => 1,
 	    ),
 	    'db_host' => array(
 	      'description' => 'the default db server hostname to use when creating content of this type; localhost, etc.',
