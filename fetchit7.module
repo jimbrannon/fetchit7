@@ -95,7 +95,7 @@ function fetchit7_menu() {
 		'position'					=> 'right',
 		'weight'						=> 10,
 		'page callback'			=> 'drupal_get_form',
-		'page arguments'		=> array('fetchit7_tbl_form_13'),
+		'page arguments'		=> array('fetchit7_table_form_13'),
 		'access arguments'	=> array('administer site configuration'),
 		'type'							=> MENU_NORMAL_ITEM,
 		'file'							=> 'fetchit7.forms.inc',
@@ -108,25 +108,42 @@ function fetchit7_menu() {
  /**
   * Implementation of hook_node_info
   * 
-  * returns a structured array of the new content types this module is creating 
+  * returns a structured array of the new content types this module is creating
+  * created automatically when node_types_rebuild() is called
+  * these are just basic node types until additional fields are added (instances) 
   */
 function fetchit7_node_info() {
-	
-	// the HTML table content type
+	// the fetchit7 content types
+	//   there needs to be code in the fetchit7.install file to create the fields and instances for each of these types
 	$fetchit7_content_types = array(
-		'fetchit7_tbl_content' => array(
+		// the HTML table content type
+		'fetchit7_content_table' => array(
 			'name'				=> t('fetchit7 HTML table content type'),
-			'base'				=> 'node_content', // should this be fetchit7_tbl_content?
+			'base'				=> 'node_content', // should this be fetchit7_content_table?
 			'description'	=> t('Use this fetchit7 content to create an HTML table connected to a database view/table, optionally with selectable rows'),
 			'help'				=> t('Enter all the information necessary to create an HTML table connected to a database server'),
 			'custom'			=> FALSE,
 			'modified'		=> FALSE,
-			'locked'			=> TRUE,
+			'locked'			=> FALSE,
 			'disabled'		=> FALSE,
 			'has_title'		=> TRUE,
 			'title_label'	=> 'Content Title',
 			'module'			=> 'fetchit7',
-			'orig_type'		=> 'fetchit7_tbl_content',
+			'orig_type'		=> 'fetchit7_content_table',
+		),
+		'fetchit7_content_param' => array(
+			'name'				=> t('fetchit7 parameter input content type'),
+			'base'				=> 'node_content', // should this be fetchit7_content_param?
+			'description'	=> t('Use this fetchit7 content to create parameter input/selection forms connected to database views/tables'),
+			'help'				=> t('Enter all the information necessary to create a parameter input/selection form connected to a database server'),
+			'custom'			=> FALSE,
+			'modified'		=> FALSE,
+			'locked'			=> FALSE,
+			'disabled'		=> FALSE,
+			'has_title'		=> TRUE,
+			'title_label'	=> 'Content Title',
+			'module'			=> 'fetchit7',
+			'orig_type'		=> 'fetchit7_content_param',
 		),
 	);
 	
@@ -150,8 +167,12 @@ function fetchit7_node_info() {
     $forms[$form_id] = array('callback' => 'fetchit7_xxx_form');
   }
 	// this is the html table form
-  if (substr($form_id, 0, 18) == 'fetchit7_tbl_form_') {
-    $forms[$form_id] = array('callback' => 'fetchit7_tbl_form');
+  if (substr($form_id, 0, 20) == 'fetchit7_table_form_') {
+    $forms[$form_id] = array('callback' => 'fetchit7_table_form');
+  }
+	// this is the parameter input form
+  if (substr($form_id, 0, 20) == 'fetchit7_param_form_') {
+    $forms[$form_id] = array('callback' => 'fetchit7_param_form');
   }
 
   return $forms;

@@ -207,6 +207,76 @@ function fetchit7_admin_dbsettings_submit ($form, $form_state) {
 		->execute();
 }
 
+ /**
+  * Form builder.  Configure fetchit7.
+  * 
+  * @ingroup forms
+  * @see system_settings_form().
+  */
+function fetchit7_admin_reset() {
+	$form['fetchit7_admin_reset_blurb'] = array(
+		'#type' => 'item',
+		'#markup' => t('here is where a reset button might exist.  not sure this is going to be needed, though.'),
+	);
+
+	$form['#submit'][] = 'fetchit7_admin_reset_submit';
+	return system_settings_form($form);
+	
+}
+
+/**
+ * Process fetchit7 settings form submission
+ */
+function fetchit7_admin_reset_submit ($form, $form_state) {
+}
+
+ /**
+  * Form builder.  Configure fetchit7.
+  * 
+  * @ingroup forms
+  * @see system_settings_form().
+  */
+function fetchit7_admin_backupcontent() {
+	$form['fetchit7_admin_backupcontent_blurb'] = array(
+		'#type' => 'item',
+		'#markup' => t('here is where a backup content button might exist.  not sure this is going to be needed, though.'),
+	);
+
+	$form['#submit'][] = 'fetchit7_admin_backupcontent_submit';
+	return system_settings_form($form);
+	
+}
+
+/**
+ * Process fetchit7 settings form submission
+ */
+function fetchit7_admin_backupcontent_submit ($form, $form_state) {
+}
+
+
+ /**
+  * Form builder.  Configure fetchit7.
+  * 
+  * @ingroup forms
+  * @see system_settings_form().
+  */
+function fetchit7_admin_restorecontent() {
+	$form['fetchit7_admin_restorecontent_blurb'] = array(
+		'#type' => 'item',
+		'#markup' => t('here is where a restore content button might exist.  not sure this is going to be needed, though.'),
+	);
+
+	$form['#submit'][] = 'fetchit7_admin_restorecontent_submit';
+	return system_settings_form($form);
+	
+}
+
+/**
+ * Process fetchit7 settings form submission
+ */
+function fetchit7_admin_restorecontent_submit ($form, $form_state) {
+}
+
 
 /**
  * functions I might need...

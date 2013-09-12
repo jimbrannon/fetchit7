@@ -21,9 +21,8 @@
 	$record = new stdClass();
 	// HTML table
 	$record->ndx = 0;
-	$record->name = 'fetchit7_html_table';
+	$record->name = 'fetchit7_content_table';
 	$record->title = 'HTML Table';
-	$record->enabled = TRUE;
 	$record->description = 'these are either plain HTML tables or the new Drupal 7 tableselect elements with selections (radio buttons or checkboxes) in column 1.  Can be used to display a table, select a single record, select multiple records, or delete multiple records.';
 	$record->location = 2; // block
 	$record->db_host = 'localhost';
@@ -35,9 +34,8 @@
 	drupal_write_record($table,$record);
 	// Google data visualization record
 	$record->ndx = 2;
-	$record->name = 'fetchit7_gviz';
+	$record->name = 'fetchit7_content_gviz';
 	$record->title = 'Google Data Visualization';
-	$record->enabled = FALSE;
 	$record->description = 'Google Data Visualization';
 	$record->location = 2; // block
 	$record->db_host = 'localhost';
@@ -49,9 +47,8 @@
 	drupal_write_record($table,$record);
 	// parameter input
 	$record->ndx = 4;
-	$record->name = 'fetchit7_parameter';
+	$record->name = 'fetchit7_content_param';
 	$record->title = 'Parameter Input';
-	$record->enabled = FALSE;
 	$record->description = 'Parameter Input';
 	$record->location = 2; // block
 	$record->db_host = 'localhost';
@@ -63,9 +60,8 @@
 	drupal_write_record($table,$record);
 	// append record
 	$record->ndx = 7;
-	$record->name = 'fetchit7_append';
+	$record->name = 'fetchit7_content_append';
 	$record->title = 'Append Record Form';
-	$record->enabled = FALSE;
 	$record->description = 'Append Record Form';
 	$record->location = 2; // block
 	$record->db_host = 'localhost';
@@ -77,9 +73,8 @@
 	drupal_write_record($table,$record);
 	// editable grid
 	$record->ndx = 8;
-	$record->name = 'fetchit7_editable_grid';
+	$record->name = 'fetchit7_content_editgrid';
 	$record->title = 'Editable HTML Table';
-	$record->enabled = FALSE;
 	$record->description = 'Editable HTML Table';
 	$record->location = 2; // block
 	$record->db_host = 'localhost';
@@ -91,9 +86,8 @@
 	drupal_write_record($table,$record);
 	// Open layers map
 	$record->ndx = 10;
-	$record->name = 'fetchit7_ol_map';
+	$record->name = 'fetchit7_content_olmap';
 	$record->title = 'Open Layers Map';
-	$record->enabled = FALSE;
 	$record->description = 'Open Layers Map';
 	$record->location = 2; // block
 	$record->db_host = 'localhost';
@@ -163,12 +157,9 @@
 	$types = node_type_get_types();
 	// add the body field to the various fetchit7 content types
 	// TODO: ask Kelly if they really want a body in these types since there is an above/below field (only reason would be to get better HTML WYSIWYG editor in GUI)
-	$body_instance = node_add_body_field($types['fetchit7_tbl_content']);
-	//$body_instance = node_add_body_field($types['fetchit7_par_content']);
-	//$body_instance = node_add_body_field($types['fetchit7_app_content']);
-	//$body_instance = node_add_body_field($types['fetchit7_edt_content']);
-	//$body_instance = node_add_body_field($types['fetchit7_gvz_content']);
-	//$body_instance = node_add_body_field($types['fetchit7_olm_content']);
+	$body_instance = node_add_body_field($types['fetchit7_content_table']);
+	$body_instance = node_add_body_field($types['fetchit7_content_param']);
+	//$body_instance = node_add_body_field($types['fetchit7_content_xxxxxx']);
 	// ...
 	//
 	// here you could modify the body field if you wanted to, such as
@@ -179,12 +170,12 @@
 	foreach (_fetchit7_installed_fields() as $field) {
 		field_create_field($field);
 	}	
-	// link the fields to the appropriate content types via "instances"
-	foreach (_fetchit7_installed_instances() as $instance) {
-		// add two more parameters to the instance array
-		$instance['entity_type'] = 'node';
-		$instance['bundle'] = 'fetchit7_tbl_content';
-		// then create the instance - i.e. relate the field to a content type (called a bundle)
+	// link the fields to the fetchit7_content_table content type via "instances"
+	foreach (_fetchit7_content_table_installed_instances() as $instance) {
+		field_create_instance($instance);
+	}	
+	// link the fields to the fetchit7_content_param content type via "instances"
+	foreach (_fetchit7_content_param_installed_instances() as $instance) {
 		field_create_instance($instance);
 	}	
 		
@@ -192,23 +183,83 @@
 
 
 /**
- * function that returns an array of all the fields created by this module 
- */
+ * function that returns an array of all the fields created by this module
+ * 
+ * the best way I have found to figure this out is using drush and the devel module:
+ * drush ev 'print var_export(field_info_field("field_name"));'
+ * e.g. drush ev 'print var_export(field_info_field("fetchit7_field_location"));'
+ *  */
 function _fetchit7_installed_fields () {
 	$t = get_t();
 	$fetchit7_fields = array(
-		'fetchit7_content_enabled' => array(
-			'field_name'			=> 'fetchit7_content_enabled',
-			'label'						=> $t('content output location'),
-			'type'						=> 'list_integer',
+		// =====================================================
+		// these are fields that apply to multiple content types
+		// =====================================================
+		// on this first one I am including many of the instance definition parameters in the array
+		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
+		'fetchit7_field_location' => array(
+			'label'						=> $t('form output location'),
 			'settings'				=> array (
-					'allowed_values'	=> array(
-							0	=> 'not displayed',
-							1 => 'page',
-							2 => 'block',
+					'allowed_values'	=> array (
+							0		=> 'not displayed',
+							1		=> 'page',
+							2		=> 'block',
 					),
+					//'allowed_values_function' => '',
 			),
+			//'entity_types'		=> array (),
+			//'translatable'		=> '0',
+			//'storage'					=> array (
+			//		'type'						=> 'field_sql_storage',
+			//		'settings'				=> array (),
+			//		'module'					=> 'field_sql_storage',
+			//		'active'					=> '1',
+			//		'details'					=> array (
+			//				'sql' => array (
+			//						'FIELD_LOAD_CURRENT' => array (
+			//								'field_data_fetchit7_field_location' => array (
+			//										'value' => 'ffetchit7_field_location_value',
+			//								),
+			//						),
+			//						'FIELD_LOAD_REVISION' => array (
+			//								'field_revision_fetchit7_field_location' => array (
+			//										'value' => 'fetchit7_field_location_value',
+			//								),
+			//						),
+			//				),
+			//		),
+			//),
+			//'foreign keys'		=> array (),
+			//'indexes'					=> array (
+			//		'value'						=> array (
+			//				0 => 'value',
+			//		),
+			//),
+			//'id'							=> '10',
+			'field_name'			=> 'fetchit7_field_location',
+			'type'						=> 'list_integer',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+			//'deleted'					=> '0',
+			//'columns'					=> array (
+			//		'value'						=> array (
+			//				'type' => 'int',
+			//				'not null' => false,
+			//		),
+			//),
+			//'bundles'					=> array (
+			//		'node'						=> array (
+			//				0 => 'fetchit7_content_table',
+			//		),
+			//),
 		),
+		// the rest will be defined in a more compressed fashion
+		//
+		// =====================================================
+		// these are fields that apply to specific content types
+		// =====================================================
 	);
 	
 	return $fetchit7_fields;
@@ -216,27 +267,123 @@ function _fetchit7_installed_fields () {
 
 
 /**
- * function that returns an array of all the field instances created by this module 
- */
-function _fetchit7_installed_instances () {
+ * function that returns an array of all the field instances created by this module for the fetchit7_content_table content type
+ * 
+ * the best way to figure this out is using drush and the devel module:
+ * drush ev 'print var_export(field_info_instance("entity_type","field_name","bundle_name"));'
+ * e.g. drush ev 'print var_export(field_info_instance("node","fetchit7_field_location","fetchit7_content_table"));'
+ **/
+function _fetchit7_content_table_installed_instances () {
+	$content_name = 'fetchit7_content_table';
 	$t = get_t();
 	$fetchit7_instances = array(
-		'fetchit2_content_enabled' => array(
-			'field_name'		=> 'fetchit7_content_enabled',
-			'label'					=> $t('content output location'),
+		// on this first one I am including many of the instance definition parameters in the array
+		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
+		'fetchit7_field_location' => array(
+			'label'					=> $t('form output location'),
 			'type'					=> 'list_integer',
 			'widget'				=> array(
-				'type'					=> 'options_select',
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
 				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('This parameter tells fetchit7 where to display the content: 0 - not displayed, 1 - page content, 2 - block content'),
+			'description'		=> $t('This parameter tells fetchit7 where to display the form: 0 - not displayed, 1 - page, 2 - block'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '2',
 				),
 			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_location',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
 		),
+		// the rest will be defined in a more compressed fashion
+	);
+	
+	return $fetchit7_instances;
+}
+
+
+/**
+ * function that returns an array of all the field instances created by this module for the fetchit7_content_param content type
+ * 
+ * the best way to figure this out is using drush and the devel module:
+ * drush ev 'print var_export(field_info_instance("entity_type","field_name","bundle_name"));'
+ * e.g. drush ev 'print var_export(field_info_instance("node","fetchit7_field_location","fetchit7_content_param"));'
+ **/
+function _fetchit7_content_param_installed_instances () {
+	$content_name = 'fetchit7_content_param';
+	$t = get_t();
+	$fetchit7_instances = array(
+		// on this first one I am including many of the instance definition parameters in the array
+		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
+		'fetchit7_field_location' => array(
+			'label'					=> $t('form output location'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where to display the form: 0 - not displayed, 1 - page, 2 - block'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '2',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_location',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
+		// the rest will be defined in a more compressed fashion
 	);
 	
 	return $fetchit7_instances;
@@ -247,7 +394,7 @@ function _fetchit7_installed_instances () {
  * Implements hook_schema
  */
 function fetchit7_schema () {	
-	// create the fetchit7_contents_type table
+	// create the fetchit7_content_types table
 	watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_content_types");
 	$schema['fetchit7_content_types'] = array(
 	  'description' => 'This static table defines the custom content types that will be available to the fetchit7 module',
@@ -268,13 +415,6 @@ function fetchit7_schema () {
 	      'type' => 'varchar',
 	      'length' => '60',
 	      'not null' => TRUE,
-	    ),
-	    'enabled' => array(
-	      'description' => 'whether this type is enabled to display',
-	      'type' => 'int',
-	      'size' => 'tiny',
-	      'not null' => TRUE,
-	      'default' => 1,
 	    ),
 	    'description' => array(
 	      'description' => 'description of this content type',
@@ -473,12 +613,19 @@ function fetchit7_uninstall () {
 
 	// get all the created content for the fetchit7 content types
 	$sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
-	$result = db_query($sql, array(':type' => 'fetchit7_tbl_content'));
+	$result = db_query($sql, array(':type' => 'fetchit7_content_table'));
 	$nids = array();
 	foreach ($result as $row) {
 		$nids[] = $row->nid;
 	}
-	
+	// delete these nodes
+	node_delete_multiple($nids);
+
+	$result = db_query($sql, array(':type' => 'fetchit7_content_param'));
+	$nids = array();
+	foreach ($result as $row) {
+		$nids[] = $row->nid;
+	}
 	// delete these nodes
 	node_delete_multiple($nids);
 	
@@ -489,13 +636,18 @@ function fetchit7_uninstall () {
 	
 	// loop over any remaining field instances attached to the content types (like the body field)
 	//   and delete them individually
-	$instances = field_info_instances('node','fetchit7_tbl_content');
+	$instances = field_info_instances('node','fetchit7_content_table');
+	foreach ($instances as $instance_name => $instance) {
+		field_delete_instance($instance);
+	}
+	$instances = field_info_instances('node','fetchit7_content_param');
 	foreach ($instances as $instance_name => $instance) {
 		field_delete_instance($instance);
 	}
 	
 	// delete the content types
-	node_type_delete('fetchit7_tbl_content');
+	node_type_delete('fetchit7_content_table');
+	node_type_delete('fetchit7_content_param');
 	
 	// purge all field information
 	field_purge_batch(1000);
