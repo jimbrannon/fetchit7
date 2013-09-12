@@ -262,6 +262,34 @@ function _fetchit7_installed_fields () {
 			//),
 		),
 		// the rest will be defined in a more compressed fashion
+		'fetchit7_field_enabled' => array(
+			'label'						=> $t('form output enabled'),
+			'settings'				=> array (
+					'allowed_values'	=> array (
+							0		=> '',
+							1		=> '',
+					),
+					//'allowed_values_function' => '',
+			),
+			'field_name'			=> 'fetchit7_field_enabled',
+			'type'						=> 'list_boolean',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		'fetchit7_field_db_host' => array(
+			'label'						=> $t('Database server host name'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_db_host',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
 		//
 		// =====================================================
 		// these are fields that apply to specific content types
@@ -328,6 +356,54 @@ function _fetchit7_content_table_installed_instances () {
 			//'deleted'				=> '0',
 		),
 		// the rest will be defined in a more compressed fashion
+		'fetchit7_field_enabled' => array(
+			'label'					=> $t('Form output enabled'),
+			'widget'				=> array(
+				'type'					=> 'options_onoff',
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'display_label'	=> TRUE,
+				),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter defines whether the form is enabled for output or not.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '1',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_enabled',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_db_host' => array(
+			'label'					=> $t('Database server host name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The host name of the database server.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'localhost',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_host',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
 	);
 	
 	return $fetchit7_instances;
@@ -390,6 +466,53 @@ function _fetchit7_content_param_installed_instances () {
 			//'deleted'				=> '0',
 		),
 		// the rest will be defined in a more compressed fashion
+		'fetchit7_field_enabled' => array(
+			'label'					=> $t('Form output enabled'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter defines whether the form is enabled for output or not.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '1',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_enabled',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_db_host' => array(
+			'label'					=> $t('Database server host name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The host name of the database server.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'localhost',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_host',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
 	);
 	
 	return $fetchit7_instances;
