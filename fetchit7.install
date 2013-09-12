@@ -160,26 +160,9 @@
 	
 	// create base fetchit7 content types
 	node_types_rebuild();
-	/*
-	$object = new stdClass();
-	$object->type = 'fetchit7_tbl_content';
-	$object->name = 'fetchit7 HTML table content type';
-	$object->base = 'node_content';
-	$object->description = 'fetchit7 HTML table content type';
-	$object->help = 'Use this fetchit7 content type to create database-connected tables, including ones that allow selecting one or more records.';
-	$object->custom = FALSE;
-	$object->modified = FALSE;
-	$object->locked = TRUE;
-	$object->disabled = FALSE;
-	$object->has_title = TRUE;
-	$object->title_label = 'label title fetchit7 HTML table content type';
-	$object->module = 'fetchit7';
-	$object->orig_type = 'fetchit7_tbl_type';
-	$returned = node_type_save($object);
-	watchdog("fetchit7 module","fetchit7_install: created fetchit7_tbl_content content type, $returned");
-	*/
 	$types = node_type_get_types();
 	// add the body field to the various fetchit7 content types
+	// TODO: ask Kelly if they really want a body in these types since there is an above/below field (only reason would be to get better HTML WYSIWYG editor in GUI)
 	$body_instance = node_add_body_field($types['fetchit7_tbl_content']);
 	//$body_instance = node_add_body_field($types['fetchit7_par_content']);
 	//$body_instance = node_add_body_field($types['fetchit7_app_content']);
@@ -196,7 +179,7 @@
 	foreach (_fetchit7_installed_fields() as $field) {
 		field_create_field($field);
 	}	
-	// link the fields to the appropariate content types via "instances"
+	// link the fields to the appropriate content types via "instances"
 	foreach (_fetchit7_installed_instances() as $instance) {
 		// add two more parameters to the instance array
 		$instance['entity_type'] = 'node';
@@ -267,7 +250,7 @@ function fetchit7_schema () {
 	// create the fetchit7_contents_type table
 	watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_content_types");
 	$schema['fetchit7_content_types'] = array(
-	  'description' => 'This table defines the custom content types that will be available to the fetchit7 module',
+	  'description' => 'This static table defines the custom content types that will be available to the fetchit7 module',
 	  'fields' => array(
 	    'ndx' => array(
 	      'description' => 'integer index',
