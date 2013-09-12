@@ -1,7 +1,17 @@
 <?
 
 /**
+ * @file
+ * 
+ * Schema, install, update, enable and uninstall functions for the fetchit7 module.
+ */
+
+/**
  * Implements hook_install()
+ * 
+ * called after hook_schema 
+ * a good place to populate the tables that were created in the hook schema
+ * 
  */
  
  function fetchit7_install () {
@@ -143,10 +153,10 @@
 	// now that the fetchit7 content types table is created and populated
 	// create the fetchit7 content types and extend them via fields (fields API)
 	//    [note: eventually the fetchit7 content types table will be a custom content type (node type) too and extended via fields like this!!]
-	// note that the node_types_rebuild() function causes Drupal 7 to rebuild it's internal node types list - it calls all the hook_node_info functions
-	//   including fetchit7_node_info and creates the content types (node types) described there
-	//   and then adds them to the site's global content type (node type) list
-	//   in other words I don't need to use node_type_save() here to create content types
+	// note that the node_types_rebuild() function causes Drupal 7 to rebuild it's internal node types list
+	//   by calling all the hook_node_info functions (including fetchit7_node_info)
+	//   and it creates the content types (node types) it finds described there
+	//   so the content types (node types) described in fetchit7_node_info will be created by this next line of code
 	
 	// create base fetchit7 content types
 	node_types_rebuild();
@@ -188,8 +198,10 @@
 	}	
 	// link the fields to the appropariate content types via "instances"
 	foreach (_fetchit7_installed_instances() as $instance) {
+		// add two more parameters to the instance array
 		$instance['entity_type'] = 'node';
 		$instance['bundle'] = 'fetchit7_tbl_content';
+		// then create the instance - i.e. relate the field to a content type (called a bundle)
 		field_create_instance($instance);
 	}	
 		
@@ -203,9 +215,16 @@ function _fetchit7_installed_fields () {
 	$t = get_t();
 	$fetchit7_fields = array(
 		'fetchit7_content_enabled' => array(
-			'field_name'	=> 'enabled',
-			'label'				=> $t('output location enabled'),
-			'type'				=> 'text',
+			'field_name'			=> 'fetchit7_content_enabled',
+			'label'						=> $t('content output location'),
+			'type'						=> 'list_integer',
+			'settings'				=> array (
+					'allowed_values'	=> array(
+							0	=> 'not displayed',
+							1 => 'page',
+							2 => 'block',
+					),
+			),
 		),
 	);
 	
@@ -220,16 +239,18 @@ function _fetchit7_installed_instances () {
 	$t = get_t();
 	$fetchit7_instances = array(
 		'fetchit2_content_enabled' => array(
-			'field_name'	=> 'enabled',
-			'label'				=> $t('is this content enabled?'),
-			'type'				=> 'text',
-			'widget'			=> array(
-				'type'							=> 'text_textfield',
+			'field_name'		=> 'fetchit7_content_enabled',
+			'label'					=> $t('content output location'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select',
+				'module'				=> 'options',
 			),
-			'display'			=> array(
-				'example_node_list'	=> array(
-					'label'								=> $t('Output location: 0=none 1=page 2=block'),
-					'type'								=> 'text',
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where to display the content: 0 - not displayed, 1 - page content, 2 - block content'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '2',
 				),
 			),
 		),
@@ -401,6 +422,63 @@ function fetchit7_schema () {
 	
 	return $schema;
 }
+
+/**
+ * Implements hook_field_schema().
+ *
+ * Defines the database schema of the field, using the format used by the
+ * Schema API.
+ *
+ * The data we will store here is just one 7-character element, even
+ * though the widget presents the three portions separately.
+ *
+ * All implementations of hook_field_schema() must be in the module's
+ * .install file.
+ *
+ * @see http://drupal.org/node/146939
+ * @see schemaapi
+ * @see hook_field_schema()
+ * @ingroup field_example
+ */
+//function fetchit7_field_schema($field) {
+	// here is an example, the schema is just a structured array defining the columns and any indices of the new "field" - treats it like a table
+	//
+  // $columns = array(
+  //   'rgb' => array('type' => 'varchar', 'length' => 7, 'not null' => FALSE),
+  // );
+  // $indexes = array(
+  //   'rgb' => array('rgb'),
+  // );
+  // return array(
+  //   'columns' => $columns,
+  //   'indexes' => $indexes,
+  // );
+	//
+	// so usually the field is just going to be a single column
+	//	
+//	switch ($field['type']) {
+//		case 'enabled': // one of the fields i use
+//			$schema = array(
+//				'columns' => array(
+//						'value'		=> array(
+//								'type'			=> 'int',
+//								'size'			=> 'medium',
+//								'not null'	=> TRUE,
+//						),
+//				),
+//				'indexes' => array(
+//						'value'		=> array('value'),
+//				),
+//			);
+//			break;
+//		default:
+//			
+//			break;
+//	}
+//	
+//	return $schema;
+//	
+//}
 
 
 /**
