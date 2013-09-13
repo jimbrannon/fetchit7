@@ -333,14 +333,14 @@ function fetchit7_block_info() {
  * so just pass delta to drupal_get_form
  * (the user should know to be parsimonious with content in the body fields of forms sent to blocks)
  *
- * we are not theming this yet, so return the rendered content 
+ * do not render the content - it will break the submit button (why? this took me hours to figure out)
  */
 function fetchit7_block_view($delta = '') {
 	include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.forms.inc');
 	$form = drupal_get_form($delta);
 	$output = array(
 		'subject' => NULL,
-		'content' => drupal_render_children($form),
+		'content' => $form,
 	);
 	return $output;
 }

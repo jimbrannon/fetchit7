@@ -19,10 +19,13 @@
   * @see system_settings_form().
   */
 function fetchit7_table_form($form, &$form_state) {
+//function fetchit7_table_form() {
 	// form builder function
-
+	//print_r($form);
+	$unique_id = $form_state['build_info']['form_id'];
+	print_r($unique_id);
 	// text element
-	$myform['fetchit7_table_text'] = array(
+	$form['fetchit7_table_text'] = array(
 		'#type' => 'textfield',
 		'#default_value' => variable_get('fetchit7_table_text','fetchit7_table_text_default_value'),
 		'#title' => t('Enter some text'),
@@ -31,8 +34,16 @@ function fetchit7_table_form($form, &$form_state) {
 		'#required' => TRUE,
 	);
 	
-	$myform['#submit'][] = 'fetchit7_table_form_submit';
-	return system_settings_form($myform);
+	$form['submit'] = array(
+		'#type' => 'submit',
+		'#value' => 'submit',
+		'#id' => $unique_id,
+	);
+
+	$form['#id'] = $unique_id;
+	$form['#submit'][] = 'fetchit7_table_form_submit';
+
+	return $form;
 	
 }
 
@@ -53,6 +64,7 @@ function fetchit7_table_form_submit ($form, &$form_state) {
 	// reset the text
 	if(!strlen(trim($string = $form_state['values']['fetchit7_table_text']))) $string = 'fetchit7_table_text_default_value';
 	variable_set('fetchit7_table_text',$string);
+	drupal_set_message(t('Successfully submitted changes.'),'status');
 }
 
 
