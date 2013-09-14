@@ -149,7 +149,7 @@ function fetchit7_menu() {
 		//->propertyCondition('status', 1)
 		//->propertyOrderBy('created', 'DESC');
 	$query->fieldCondition('fetchit7_field_enabled', 'value', TRUE);
-	$query->fieldCondition('fetchit7_field_location', 'value', 1);
+	$query->fieldCondition('fetchit7_field_location', 'value', 'page');
 	//$query->range(0,10);
 	$result = $query->execute();
 	if (isset($result['node'])) {
@@ -198,7 +198,7 @@ function fetchit7_menu() {
 		//->propertyCondition('status', 1)
 		//->propertyOrderBy('created', 'DESC');
 	$query->fieldCondition('fetchit7_field_enabled', 'value', TRUE);
-	$query->fieldCondition('fetchit7_field_location', 'value', 2);
+	$query->fieldCondition('fetchit7_field_location', 'value', 'block');
 	//$query->range(0,10);
 	$result = $query->execute();
 	if (isset($result['node'])) {
@@ -250,7 +250,7 @@ function fetchit7_menu() {
  * note to self: this is a LOT like the "list" section of the old d6 hook_block function
  * 
  * so, get all the nids of content of each fetchit7 content type that are specifiied to
- * output to blocks (location = 2).  create a unique delta for each one using the
+ * output to blocks (location = 'block').  create a unique delta for each one using the
  * nid of each one (which is guaranteed to be unique itself) to use as the key,
  * create an associative info array info array containing the info for each one,
  * and return it
@@ -276,7 +276,7 @@ function fetchit7_block_info() {
 		//->propertyCondition('status', 1)
 		//->propertyOrderBy('created', 'DESC');
 	$query->fieldCondition('fetchit7_field_enabled', 'value', TRUE);
-	$query->fieldCondition('fetchit7_field_location', 'value', 2);
+	$query->fieldCondition('fetchit7_field_location', 'value', 'block');
 	//$query->range(0,10);
 	$result = $query->execute();
 	$blocks = array();
@@ -315,6 +315,12 @@ function fetchit7_block_info() {
 	return $blocks;
 }
 
+/**
+ * Implement hook_node_insert
+ * 
+ * to call menu_rebuild?
+ * we want to update the admin/config/fetchit7 menu if a new fetchit node is created :-)
+ */
 
 /**
  * Implement hook_block_view
@@ -325,7 +331,7 @@ function fetchit7_block_info() {
  * there is no form builder with this name, but thanks to hook_forms,
  * a generic form builder can take over the work
  * 
- *  a FOUR line block rendering function,
+ *  a FOUR line block rendering function?
  *  do you KNOW how many lines this used to be in fetchit2?!
  *  what genius THINKS of this stuff?!
  *  (ouch, I just hurt my arm)

@@ -14,7 +14,7 @@
  * 
  */
  
- function fetchit7_install () {
+function fetchit7_install () {
 	watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_content_types");
 	// add the fetchit7_content_type records
 	$table = 'fetchit7_content_types';
@@ -24,10 +24,10 @@
 	$record->name = 'fetchit7_content_table';
 	$record->title = 'HTML Table';
 	$record->description = 'these are either plain HTML tables or the new Drupal 7 tableselect elements with selections (radio buttons or checkboxes) in column 1.  Can be used to display a table, select a single record, select multiple records, or delete multiple records.';
-	$record->location = 2; // block
+	$record->location = 'block'; // block
 	$record->enabled = 1; // true
 	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
+	$record->db_type = 'postgresql'; // pgsql
 	$record->db_port = 5432;
 	$record->db_name = '';
 	$record->db_login = '';
@@ -38,10 +38,10 @@
 	$record->name = 'fetchit7_content_gviz';
 	$record->title = 'Google Data Visualization';
 	$record->description = 'Google Data Visualization';
-	$record->location = 2; // block
+	$record->location = 'block'; // block
 	$record->enabled = 0; // false
 	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
+	$record->db_type = 'postgresql'; // pgsql
 	$record->db_port = 5432;
 	$record->db_name = '';
 	$record->db_login = '';
@@ -52,10 +52,10 @@
 	$record->name = 'fetchit7_content_param';
 	$record->title = 'Parameter Input';
 	$record->description = 'Parameter Input';
-	$record->location = 2; // block
-	$record->enabled = 1; // true
+	$record->location = 'block'; // block
+	$record->enabled = 0; // false
 	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
+	$record->db_type = 'postgresql'; // pgsql
 	$record->db_port = 5432;
 	$record->db_name = '';
 	$record->db_login = '';
@@ -66,10 +66,10 @@
 	$record->name = 'fetchit7_content_append';
 	$record->title = 'Append Record Form';
 	$record->description = 'Append Record Form';
-	$record->location = 2; // block
+	$record->location = 'block'; // block
 	$record->enabled = 0; // false
 	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
+	$record->db_type = 'postgresql'; // pgsql
 	$record->db_port = 5432;
 	$record->db_name = '';
 	$record->db_login = '';
@@ -80,10 +80,10 @@
 	$record->name = 'fetchit7_content_editgrid';
 	$record->title = 'Editable HTML Table';
 	$record->description = 'Editable HTML Table';
-	$record->location = 2; // block
+	$record->location = 'block'; // block
 	$record->enabled = 0; // false
 	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
+	$record->db_type = 'postgresql'; // pgsql
 	$record->db_port = 5432;
 	$record->db_name = '';
 	$record->db_login = '';
@@ -94,10 +94,10 @@
 	$record->name = 'fetchit7_content_olmap';
 	$record->title = 'Open Layers Map';
 	$record->description = 'Open Layers Map';
-	$record->location = 2; // block
+	$record->location = 'block'; // block
 	$record->enabled = 0; // false
 	$record->db_host = 'localhost';
-	$record->db_type = 0; // pgsql
+	$record->db_type = 'postgresql'; // pgsql
 	$record->db_port = 5432;
 	$record->db_name = '';
 	$record->db_login = '';
@@ -132,7 +132,7 @@
 	$table = 'fetchit7_location_types';
 	$record = new stdClass();
 	$record->ndx = 0;
-	$record->name = 'notdisplayed';
+	$record->name = 'none';
 	$record->label = 'Not displayed';
 	$record->description = 'the fetchit7 output is not displayed';
 	$record->enabled = TRUE;
@@ -198,21 +198,18 @@
 function _fetchit7_installed_fields () {
 	$t = get_t();
 	$fetchit7_fields = array(
-		// =====================================================
-		// these are fields that apply to multiple content types
-		// =====================================================
-		// on this first one I am including many of the instance definition parameters in the array
+		// on this example one I am including many of the instance definition parameters in the array
 		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
-		'fetchit7_field_location' => array(
-			'label'						=> $t('form output location'),
-			'settings'				=> array (
-					'allowed_values'	=> array (
-							0		=> 'not displayed',
-							1		=> 'page',
-							2		=> 'block',
-					),
-					//'allowed_values_function' => '',
-			),
+		//'fetchit7_field_location' => array(
+			//'label'						=> $t('form output location'),
+			//'settings'				=> array (
+			//		'allowed_values'	=> array (
+			//				0		=> 'not displayed',
+			//				1		=> 'page',
+			//				2		=> 'block',
+			//		),
+			//		//'allowed_values_function' => '',
+			//),
 			//'entity_types'		=> array (),
 			//'translatable'		=> '0',
 			//'storage'					=> array (
@@ -242,12 +239,12 @@ function _fetchit7_installed_fields () {
 			//		),
 			//),
 			//'id'							=> '10',
-			'field_name'			=> 'fetchit7_field_location',
-			'type'						=> 'list_integer',
-			'module'					=> 'list',
-			'active'					=> '1',
-			'locked'					=> '0',
-			'cardinality'			=> '1',
+			//'field_name'			=> 'fetchit7_field_location',
+			//'type'						=> 'list_integer',
+			//'module'					=> 'list',
+			//'active'					=> '1',
+			//'locked'					=> '0',
+			//'cardinality'			=> '1',
 			//'deleted'					=> '0',
 			//'columns'					=> array (
 			//		'value'						=> array (
@@ -260,8 +257,30 @@ function _fetchit7_installed_fields () {
 			//				0 => 'fetchit7_content_table',
 			//		),
 			//),
+		//),
+		// the rest will be defined in a more compressed fashion :-p
+
+		// =====================================================
+		// these are fields that apply to multiple content types
+		// =====================================================
+		// form location
+		'fetchit7_field_location' => array(
+			'label'						=> $t('form output location'),
+			'settings'				=> array (
+					'allowed_values'	=> array (
+							'none'		=> 'Not displayed',
+							'page'		=> 'Page',
+							'block'		=> 'Block',
+					),
+			),
+			'field_name'			=> 'fetchit7_field_location',
+			'type'						=> 'list_text',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
 		),
-		// the rest will be defined in a more compressed fashion
+		// form enabled
 		'fetchit7_field_enabled' => array(
 			'label'						=> $t('form output enabled'),
 			'settings'				=> array (
@@ -278,6 +297,7 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '1',
 		),
+		// database server host name
 		'fetchit7_field_db_host' => array(
 			'label'						=> $t('Database server host name'),
 			'settings'				=> array (
@@ -290,10 +310,114 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '1',
 		),
-		//
+		// database server type
+		'fetchit7_field_db_type' => array(
+			'label'						=> $t('Database server type'),
+			'settings'				=> array (
+					'allowed_values'	=> array (
+							'postgresql'			=> 'PostgreSQL',
+							'mysql'						=> 'MySQL',
+							'sqlserver'				=> 'SQL Server',
+					),
+			),
+			'field_name'			=> 'fetchit7_field_db_type',
+			'type'						=> 'list_text',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// database server port
+		'fetchit7_field_db_port' => array(
+			'label'						=> $t('Database server host port'),
+			'field_name'			=> 'fetchit7_field_db_port',
+			'type'						=> 'number_integer',
+			'module'					=> 'number',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+			'columns'					=> array(
+					'value'						=> array(
+							'type'						=> 'int',
+							'not null'				=> FALSE,
+					),
+			),
+		),
+		// database name
+		'fetchit7_field_db_name' => array(
+			'label'						=> $t('Database name'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_db_name',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// database user login
+		'fetchit7_field_db_login' => array(
+			'label'						=> $t('Database server user login'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_db_login',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// database user password
+		'fetchit7_field_db_password' => array(
+			'label'						=> $t('Database server user password'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_db_password',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+
 		// =====================================================
-		// these are fields that apply to specific content types
+		// these are fields that apply to html tables
 		// =====================================================
+		// table record selection
+		'fetchit7_field_table_selection_type' => array(
+			'label'						=> $t('Table record selection type'),
+			'settings'				=> array (
+					'allowed_values'	=> array (
+							'copy_single'			=> 'Copy a single selected record key field to another table',
+							'copy_multiple'		=> 'Copy multiple selected records key fields to another table',
+							'delete_multiple'	=> 'Delete selected records from the original table',
+					),
+			),
+			'field_name'			=> 'fetchit7_field_table_selection_type',
+			'type'						=> 'list_text',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// table record selection output table
+		'fetchit7_field_table_selection_table' => array(
+			'label'						=> $t('Table record selection output table'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_table_selection_table',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		
+		
 	);
 	
 	return $fetchit7_fields;
@@ -311,25 +435,25 @@ function _fetchit7_content_table_installed_instances () {
 	$content_name = 'fetchit7_content_table';
 	$t = get_t();
 	$fetchit7_instances = array(
-		// on this first one I am including many of the instance definition parameters in the array
+		// on this example I am including many of the instance definition parameters in the array
 		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
-		'fetchit7_field_location' => array(
-			'label'					=> $t('form output location'),
-			'type'					=> 'list_integer',
-			'widget'				=> array(
-				//'type'					=> 'options_select', // dropdown list
-				'type'					=> 'options_buttons', // radio buttons or check boxes
-				'module'				=> 'options',
-				'settings'			=> array (),
-				//'weight'				=> -3,
-			),
-			'required'			=> TRUE,
-			'description'		=> $t('This parameter tells fetchit7 where to display the form: 0 - not displayed, 1 - page, 2 - block'),
-			'default_value'	=> array(
-				0								=> array(
-					'value'					=> '2',
-				),
-			),
+		//'fetchit7_field_location' => array(
+			//'label'					=> $t('form output location'),
+			//'type'					=> 'list_integer',
+			//'widget'				=> array(
+			//	//'type'					=> 'options_select', // dropdown list
+			//	'type'					=> 'options_buttons', // radio buttons or check boxes
+			//	'module'				=> 'options',
+			//	'settings'			=> array (),
+			//	//'weight'				=> -3,
+			//),
+			//'required'			=> TRUE,
+			//'description'		=> $t('This parameter tells fetchit7 where to display the form: 0 - not displayed, 1 - page, 2 - block'),
+			//'default_value'	=> array(
+			//	0								=> array(
+			//		'value'					=> '2',
+			//	),
+			//),
 			//'settings'			=> array (
 			//	'user_register_form' => FALSE,
 			//),
@@ -350,12 +474,354 @@ function _fetchit7_content_table_installed_instances () {
 			//),
 			//'id'						=> 28,
 			//'field_id'			=> 10,
+			//'field_name'		=> 'fetchit7_field_location',
+			//'entity_type'		=> 'node',
+			//'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		//),
+		// the rest will be defined in a more compressed fashion
+		// =====================================================
+		// these are fields that apply to multiple content types
+		// =====================================================
+		// form location
+		'fetchit7_field_location' => array(
+			'label'					=> $t('form output location'),
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where to display the form: none, page, block'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'block',
+				),
+			),
 			'field_name'		=> 'fetchit7_field_location',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
-			//'deleted'				=> '0',
 		),
+		// form enabled
+		'fetchit7_field_enabled' => array(
+			'label'					=> $t('Form output enabled'),
+			'widget'				=> array(
+				'type'					=> 'options_onoff',
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'display_label'	=> TRUE,
+				),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter defines whether the form is enabled for output or not.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '1',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_enabled',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database server host name
+		'fetchit7_field_db_host' => array(
+			'label'					=> $t('Database server host name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The host name of the database server.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'localhost',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_host',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database server type
+		'fetchit7_field_db_type' => array(
+			'label'					=> $t('Database server type'),
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('The database server software type: postgresql, mysql, sqlserver'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'postgresql',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_type',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database server port
+		'fetchit7_field_db_port' => array(
+			'label'					=> $t('Database server port number'),
+			'widget'				=> array(
+				'type'					=> 'number',
+				'module'				=> 'number',
+				'active'				=> FALSE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'min'	=> '0',
+				'max'	=> '65000',
+				'prefix'	=> 'prefix string',
+				'suffix'	=> 'suffix string',
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('The database server port number used for network connections.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '5432',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_port',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database name
+		'fetchit7_field_db_name' => array(
+			'label'					=> $t('Database name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the database to connect to.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_name',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database user login
+		'fetchit7_field_db_login' => array(
+			'label'					=> $t('Database user login'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database user login'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_login',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database user password
+		'fetchit7_field_db_password' => array(
+			'label'					=> $t('Database user password'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database user password'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_password',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// =====================================================
+		// these are fields that apply to html tables
+		// =====================================================
+		// table record selection type
+		'fetchit7_field_table_selection_type' => array(
+			'label'					=> $t('table selection type'),
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('Defines the selection type (single or multiple) and also what happens to the selected table records when the submit button is pressed.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'postgresql',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_table_selection_type',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// table record selection output table
+		'fetchit7_field_table_selection_table' => array(
+			'label'					=> $t('Table record selection output table'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database table into which the key fields from the selected records are inserted.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_table_selection_table',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		
+		
+	);
+	
+	return $fetchit7_instances;
+}
+
+
+/**
+ * function that returns an array of all the field instances created by this module for the fetchit7_content_param content type
+ * 
+ * the best way to figure this out is using drush and the devel module:
+ * drush ev 'print var_export(field_info_instance("entity_type","field_name","bundle_name"));'
+ * e.g. drush ev 'print var_export(field_info_instance("node","fetchit7_field_location","fetchit7_content_param"));'
+ **/
+function _fetchit7_content_param_installed_instances () {
+	$content_name = 'fetchit7_content_param';
+	$t = get_t();
+	$fetchit7_instances = array(
+		// on this first one I am including many of the instance definition parameters in the array
+		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
+		//'fetchit7_field_location' => array(
+			//'label'					=> $t('form output location'),
+			//'type'					=> 'list_integer',
+			//'widget'				=> array(
+			//	//'type'					=> 'options_select', // dropdown list
+			//	'type'					=> 'options_buttons', // radio buttons or check boxes
+			//	'module'				=> 'options',
+			//	'settings'			=> array (),
+			//	//'weight'				=> -3,
+			//),
+			//'required'			=> TRUE,
+			//'description'		=> $t('This parameter tells fetchit7 where to display the form: 0 - not displayed, 1 - page, 2 - block'),
+			//'default_value'	=> array(
+			//	0								=> array(
+			//		'value'					=> '2',
+			//	),
+			//),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			//'field_name'		=> 'fetchit7_field_location',
+			//'entity_type'		=> 'node',
+			//'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		//),
 		// the rest will be defined in a more compressed fashion
+		'fetchit7_field_location' => array(
+			'label'					=> $t('form output location'),
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where to display the form: none, page, block'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'block',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_location',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
 		'fetchit7_field_enabled' => array(
 			'label'					=> $t('Form output enabled'),
 			'widget'				=> array(
@@ -404,91 +870,55 @@ function _fetchit7_content_table_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
-	);
-	
-	return $fetchit7_instances;
-}
-
-
-/**
- * function that returns an array of all the field instances created by this module for the fetchit7_content_param content type
- * 
- * the best way to figure this out is using drush and the devel module:
- * drush ev 'print var_export(field_info_instance("entity_type","field_name","bundle_name"));'
- * e.g. drush ev 'print var_export(field_info_instance("node","fetchit7_field_location","fetchit7_content_param"));'
- **/
-function _fetchit7_content_param_installed_instances () {
-	$content_name = 'fetchit7_content_param';
-	$t = get_t();
-	$fetchit7_instances = array(
-		// on this first one I am including many of the instance definition parameters in the array
-		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
-		'fetchit7_field_location' => array(
-			'label'					=> $t('form output location'),
-			'type'					=> 'list_integer',
+		'fetchit7_field_db_type' => array(
+			'label'					=> $t('Database server type'),
 			'widget'				=> array(
 				//'type'					=> 'options_select', // dropdown list
 				'type'					=> 'options_buttons', // radio buttons or check boxes
 				'module'				=> 'options',
+				'active'				=> TRUE,
 				'settings'			=> array (),
 				//'weight'				=> -3,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('This parameter tells fetchit7 where to display the form: 0 - not displayed, 1 - page, 2 - block'),
+			'description'		=> $t('The database server software type: postgresql, mysql, sqlserver'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> '2',
+					'value'					=> 'postgresql',
 				),
 			),
-			//'settings'			=> array (
-			//	'user_register_form' => FALSE,
-			//),
-			//'display'				=> array (
-			//	'default'				=> array (
-			//		'label'					=> 'above',
-			//		'type'					=> 'list_default',
-			//		'settings'			=> array (),
-			//		'module'				=> 'list',
-			//		'weight'				=> 1,
-			//	),
-			//	'teaser'			=> array (
-			//		'label'					=> 'above',
-			//		'type'					=> 'hidden',
-			//		'settings'			=> array (),
-			//		'weight'				=> 0,
-			//	),
-			//),
-			//'id'						=> 28,
-			//'field_id'			=> 10,
-			'field_name'		=> 'fetchit7_field_location',
+			'field_name'		=> 'fetchit7_field_db_type',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
-			//'deleted'				=> '0',
 		),
-		// the rest will be defined in a more compressed fashion
-		'fetchit7_field_enabled' => array(
-			'label'					=> $t('Form output enabled'),
-			'type'					=> 'list_integer',
+		'fetchit7_field_db_port' => array(
+			'label'					=> $t('Database server port number'),
 			'widget'				=> array(
-				//'type'					=> 'options_select', // dropdown list
-				'type'					=> 'options_buttons', // radio buttons or check boxes
-				'module'				=> 'options',
+				'type'					=> 'number',
+				'module'				=> 'number',
+				'active'				=> FALSE,
 				'settings'			=> array (),
 				//'weight'				=> -3,
 			),
+			'settings'			=> array (
+				'min'	=> '0',
+				'max'	=> '65000',
+				'prefix'	=> 'prefix string',
+				'suffix'	=> 'suffix string',
+			),
 			'required'			=> TRUE,
-			'description'		=> $t('This parameter defines whether the form is enabled for output or not.'),
+			'description'		=> $t('The database server port number used for network connections.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> '1',
+					'value'					=> '5432',
 				),
 			),
-			'field_name'		=> 'fetchit7_field_enabled',
+			'field_name'		=> 'fetchit7_field_db_port',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
-		'fetchit7_field_db_host' => array(
-			'label'					=> $t('Database server host name'),
+		'fetchit7_field_db_name' => array(
+			'label'					=> $t('Database name'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -503,13 +933,65 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The host name of the database server.'),
+			'description'		=> $t('The name of the database to connect to.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'localhost',
+					'value'					=> '',
 				),
 			),
-			'field_name'		=> 'fetchit7_field_db_host',
+			'field_name'		=> 'fetchit7_field_db_name',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_db_login' => array(
+			'label'					=> $t('Database user login'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database user login'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_login',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_db_password' => array(
+			'label'					=> $t('Database user password'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database user password'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_password',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
@@ -551,10 +1033,11 @@ function fetchit7_schema () {
 	      'not null' => TRUE,
 	    ),
 	    'location' => array(
-	      'description' => 'the default content output location to use when creating content of this type; 0 not displayed, 1 page, 2 block; see table fetchit7_location_types',
-	      'type' => 'int',
+	      'description' => 'the default content output location to use when creating content of this type; none, page, block; see table fetchit7_location_types',
+	      'type' => 'varchar',
+	      'length' => '60',
 	      'not null' => TRUE,
-	      'default' => 2,
+	      'default' => 'block',
 	    ),
 	    'enabled' => array(
 	      'description' => 'the default enabled flag to use when creating content of this type; 0 disabled, 1 enabled (essentially a boolean)',
@@ -570,10 +1053,11 @@ function fetchit7_schema () {
 	      'default' => 'localhost',
 	    ),
 	    'db_type' => array(
-	      'description' => 'the default db type to use when creating content of this type; 0 PostgreSQL, 1 MySQL, 2 SQL Server; see table fetchit7_db_types',
-	      'type' => 'int',
+	      'description' => 'the default db type to use when creating content of this type; postgresql, mysql, sqlserver; see table fetchit7_db_types',
+	      'type' => 'varchar',
+	      'length' => '60',
 	      'not null' => TRUE,
-	      'default' => 0,
+	      'default' => 'postgresql',
 	    ),
 	    'db_port' => array(
 	      'description' => 'the default db server port number to use when creating content of this type; 5432 for pg, etc.',

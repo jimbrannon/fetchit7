@@ -57,16 +57,18 @@ function fetchit7_admin_settings() {
 	$result1 = $query1->execute();
 	$options = array();
 	$enabled = array();
+	// create the array of checkboxes to mark, enabled[]
 	foreach ($result1 as $row1) {
 		$options[$row1->ndx] = $row1->title;
 		if ($row1->enabled) $enabled[] = $row1->ndx;
 	}
+	//
 	$form['fetchit7_content_types'] = array(
 		'#type' => 'checkboxes',
 		'#title' => t('Available fetchit7 content types'),
 		'#options' => $options,
 		'#default_value' => $enabled,
-		'#description' => t('Content can exist or be created for all these types.  Check the types where content should be enabled by default.'),
+		'#description' => t('Check the content types where created forms should be enabled by default.'),
 	);
 	
 	$form['#submit'][] = 'fetchit7_admin_settings_submit';
@@ -86,7 +88,7 @@ function fetchit7_admin_settings_submit ($form, $form_state) {
 	variable_set('fetchit7_root_menu_title',$string);
 	// reset the fetchit7 root menu flag
 	variable_set('fetchit7_root_menu_displayed',$form_state['values']['fetchit7_root_menu_displayed']);
-	// update the fetchit7 content types location flags in the fetchit7_content_types table
+	// update the fetchit7 content types enabled flags in the fetchit7_content_types table
 	foreach ($form_state['values']['fetchit7_content_types'] as $key => $value) {
 		$num_updated = db_update('fetchit7_content_types')
 			->fields(array('enabled' => $value))
