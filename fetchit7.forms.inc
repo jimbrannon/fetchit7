@@ -21,12 +21,13 @@ function fetchit7_table_form($form, &$form_state) {
 	$form_id = $form_state['build_info']['form_id'];
 	$nid = (int) substr($form_id, 21);
 
-	// get database type so it can be stored (hidden) in the form to be be available to the form validate and submit functions
-	if($db_type = fetchit7_content_field_fetcher($nid,'db_type','value')) {
+	// get database type and store it (hidden) in the form so it is available to the form validate and submit functions
+	$db_type = trim(fetchit7_content_field_fetcher($nid,'db_type','value'));
+	if(strlen($db_type)) {
 		//convert it to a number so it can work with old fetchit2 code...
 		//TODO: convert fetchit2 based code to use a string db_type
 		if (!is_null($db_type_number = array_search($db_type, array(0 => 'postgresql', 1 => 'mysql', 2 => 'sqlserver')))) {
-			$form['db_type'] = array('#type' => 'value','#value' => $db_type);
+			$form['db_type'] = array('#type' => 'value','#value' => $db_type_number);
 		} else {
 			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the database type.",'error');
 			return $form;
@@ -44,11 +45,56 @@ function fetchit7_table_form($form, &$form_state) {
 		return $form;
 	}
 
-	//now get a bunch of meta data about the data to display
-	
+	// get database source data view/table name - this is required - can not be missing
+	$view_name = trim(fetchit7_content_field_fetcher($nid,'source_view','value'));
+	if(strlen($view_name)) {
+			$form['view_name'] = array('#type' => 'value','#value' => trim($view_name));
+	} else {
+		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the source data view/table name.",'error');
+		return $form;
+	}
 
+	// get table selection type - this is required - can not be missing
+	$record_select = trim(fetchit7_content_field_fetcher($nid,'table_selection_type','value'));
+	if(strlen($record_select)) {		//convert it to a number so it can work with old fetchit2 code...
+		//convert it to a number so it can work with old fetchit2 code...
+		//TODO: convert fetchit2 based code to use a string db_type
+		if (!is_null($record_select_number = array_search($record_select, array(0 => 'none', 1 => 'copy_single', 2 => 'copy_multiple', 3 => 'delete_multiple')))) {
+			$form['record_select'] = array('#type' => 'value','#value' => $record_select_number);
+		} else {
+			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the table selection type.",'error');
+			return $form;
+		}
+	} else {
+		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the table selection type.",'error');
+		return $form;
+	}
+
+	// get table selection table - this is required for the copy selection types
+	$record_select_table = trim(fetchit7_content_field_fetcher($nid,'table_selection_table','value'));
+	$form['record_select_table'] = array('#type' => 'value','#value' => $record_select_table);
+	if (in_array($record_select,array('copy_single','copy_multiple'))) {
+		if(!strlen($record_select_table)) {
+			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the required table selection table name. A selection table name is required when choosing the copy record selection types.",'error');
+			return $form;
+		}
+	}
+
+	// get drupal user id (uid) field name 
+	$user_uid_field = trim(fetchit7_content_field_fetcher($nid,'uid_field','value'));
+	$form['user_uid_field'] = array('#type' => 'value','#value' => $user_uid_field);
+
+	// get key field name 
+	$key_field = trim(fetchit7_content_field_fetcher($nid,'key_field','value'));
+	$form['key_field'] = array('#type' => 'value','#value' => $key_field);
+
+	// get submit button label 
+	$submit_label = trim(fetchit7_content_field_fetcher($nid,'submit_label','value'));
+	$form['submit_label'] = array('#type' => 'value','#value' => $submit_label);
+	if (!strlen($submit_label)) $submit_label = 'Submit';
+	
 	// test - see if we can get the tmp table and output it
-	$query = "SELECT * FROM tmp";
+	$query = "SELECT * FROM $view_name";
 	$data_object = pg_query($db_handle,$query);
 	$field_count = pg_num_fields($data_object);
 	$row_count = pg_num_rows($data_object);
@@ -94,11 +140,10 @@ function fetchit7_table_form($form, &$form_state) {
 	
 	$form['submit'] = array(
 		'#type' => 'submit',
-		'#value' => 'submit',
-		//'#id' => $unique_id,
+		'#value' => $submit_label,
 	);
 
-	//$form['#id'] = $unique_id;
+	//$form['#validate'][] = 'fetchit7_table_form_validate';
 	//$form['#submit'][] = 'fetchit7_table_form_submit';
 
 	return $form;
@@ -336,13 +381,13 @@ function fetchit7_content_field_mapper ($field_id) {
 		// fetchit7 custom fields used by html table content type
 		case 'record_select':
 		case 'table_selection_type':
-		case 'fetchit7_field_table_selection_type':
-			$field_name = 'fetchit7_field_table_selection_type';
+		case 'fetchit7_field_tbl_sel_typ':
+			$field_name = 'fetchit7_field_tbl_sel_typ';
 			break;
 		case 'record_select_table':
 		case 'table_selection_table':
-		case 'fetchit7_field_table_selection_table':
-			$field_name = 'fetchit7_field_table_selection_table';
+		case 'fetchit7_field_tbl_sel_tbl':
+			$field_name = 'fetchit7_field_tbl_sel_tbl';
 			break;
 		default:
 			break;

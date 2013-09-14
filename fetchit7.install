@@ -382,21 +382,74 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '1',
 		),
+		// database source data table/view name
+		'fetchit7_field_source_view' => array(
+			'label'						=> $t('Database name'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_source_view',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// user uid field name
+		'fetchit7_field_uid_field' => array(
+			'label'						=> $t('User id (uid) field name'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_uid_field',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// table key field name
+		'fetchit7_field_key_field' => array(
+			'label'						=> $t('Key field name'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_key_field',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// submit button label
+		'fetchit7_field_submit_label' => array(
+			'label'						=> $t('Submit button label'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_submit_label',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
 
 		// =====================================================
 		// these are fields that apply to html tables
 		// =====================================================
 		// table record selection
-		'fetchit7_field_table_selection_type' => array(
+		'fetchit7_field_tbl_sel_typ' => array(
 			'label'						=> $t('Table record selection type'),
 			'settings'				=> array (
 					'allowed_values'	=> array (
+							'none'						=> 'No record selection.',
 							'copy_single'			=> 'Copy a single selected record key field to another table',
 							'copy_multiple'		=> 'Copy multiple selected records key fields to another table',
 							'delete_multiple'	=> 'Delete selected records from the original table',
 					),
 			),
-			'field_name'			=> 'fetchit7_field_table_selection_type',
+			'field_name'			=> 'fetchit7_field_tbl_sel_typ',
 			'type'						=> 'list_text',
 			'module'					=> 'list',
 			'active'					=> '1',
@@ -404,12 +457,12 @@ function _fetchit7_installed_fields () {
 			'cardinality'			=> '1',
 		),
 		// table record selection output table
-		'fetchit7_field_table_selection_table' => array(
+		'fetchit7_field_tbl_sel_tbl' => array(
 			'label'						=> $t('Table record selection output table'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
-			'field_name'			=> 'fetchit7_field_table_selection_table',
+			'field_name'			=> 'fetchit7_field_tbl_sel_tbl',
 			'type'						=> 'text',
 			'module'					=> 'text',
 			'active'					=> '1',
@@ -685,11 +738,120 @@ function _fetchit7_content_table_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// database source data table/view name
+		'fetchit7_field_source_view' => array(
+			'label'					=> $t('Source data view'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Database source data table/view name'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_source_view',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// drupal user id (uid) field name
+		'fetchit7_field_uid_field' => array(
+			'label'					=> $t('User id (uid) field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Drupal user ID (uid) field name.  Used in where clauses of queries and helps the drupal site developer keep each users data separate.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_uid_field',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// key field name
+		'fetchit7_field_key_field' => array(
+			'label'					=> $t('Key field name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The source table/view and selection table key field name.  This field (and uid field) is copied to the selection table when copy is selection type.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_key_field',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// submit button label
+		'fetchit7_field_submit_label' => array(
+			'label'					=> $t('Submit button label'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A label to put on the submit button on this form.  Note that the button label changes automatically to DELETE when this is the selection type.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_submit_label',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+				
 		// =====================================================
 		// these are fields that apply to html tables
 		// =====================================================
 		// table record selection type
-		'fetchit7_field_table_selection_type' => array(
+		'fetchit7_field_tbl_sel_typ' => array(
 			'label'					=> $t('table selection type'),
 			'widget'				=> array(
 				//'type'					=> 'options_select', // dropdown list
@@ -700,19 +862,19 @@ function _fetchit7_content_table_installed_instances () {
 				//'weight'				=> -3,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('Defines the selection type (single or multiple) and also what happens to the selected table records when the submit button is pressed.'),
+			'description'		=> $t('Defines the selection type (single or multiple) and also what happens to the selected table records when the submit button is pressed (copy or delete).'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'postgresql',
+					'value'					=> 'none',
 				),
 			),
-			'field_name'		=> 'fetchit7_field_table_selection_type',
+			'field_name'		=> 'fetchit7_field_tbl_sel_typ',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
 		// table record selection output table
-		'fetchit7_field_table_selection_table' => array(
-			'label'					=> $t('Table record selection output table'),
+		'fetchit7_field_tbl_sel_tbl' => array(
+			'label'					=> $t('Record selection output table'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -733,7 +895,7 @@ function _fetchit7_content_table_installed_instances () {
 					'value'					=> '',
 				),
 			),
-			'field_name'		=> 'fetchit7_field_table_selection_table',
+			'field_name'		=> 'fetchit7_field_tbl_sel_tbl',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
