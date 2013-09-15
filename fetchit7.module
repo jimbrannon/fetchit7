@@ -133,7 +133,7 @@ function fetchit7_menu() {
 	// last create all the automated menu items
 	// this is the "work" that keeps the site functional
 	// these are based on fetchit7 content created
-	//   by the site builder
+	//   by the site developer
 	// note I am creating page and block content
 	//   menu items on the admin/config/fetchit7 menu
 	//   with an ID prefix (before the nid) of X (for eXample)
@@ -221,7 +221,8 @@ function fetchit7_menu() {
 				'file path'					=> drupal_get_path('module', 'fetchit7'),
 			);
 			//
-			//setting up the implemented block content is handled by hook_block (fetchit7_block)
+			//setting up the implemented block content is now handled in D7 by callbacks like
+			//  hook_block_info() and hook_block_view() (not the hook_block of D6)
 			//
 			//$formid = 'fetchit7_table_form_I' . $nid;
 			//$menu_url = $menu_urlbase_implemented . $formid;
@@ -320,6 +321,9 @@ function fetchit7_block_info() {
  * 
  * to call menu_rebuild?
  * we want to update the admin/config/fetchit7 menu if a new fetchit node is created :-)
+ * 
+ * no - actually a cache clear causes drupal 7 to fire hook_menu, which takes care of it, so...
+ * TODO: tell site developers to clear cache after adding new fetchit7 content
  */
 
 /**
