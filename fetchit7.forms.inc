@@ -44,6 +44,21 @@ function fetchit7_table_form($form, &$form_state) {
 		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when creating the database connection handle.",'error');
 		return $form;
 	}
+	
+	// run the pre query before doing anything else 
+	$mytable = F_DR_PREQRY_TBL;
+	$myfield = F_DR_PREQRY_FLD;
+	$preqry = fetchit_get_cck_val($mytable,$myfield,F_DR_NID_FLD,$nid);
+	if (strlen(trim($preqry))) {
+		if (strtolower(substr($preqry,0,4)) == 'php.') {
+			$thefunction = substr($preqry,4); 
+			global $user;
+    		$user_uid = (int) $user->uid;
+			$result = $thefunction($user_uid);
+		} else {
+			$result = fetchit_run_query($err,$db_type,$db_handle,$preqry);
+		}
+	}
 
 	// get database source data view/table name - this is required - can not be missing
 	$view_name = trim(fetchit7_content_field_fetcher($nid,'source_view','value'));
@@ -359,6 +374,14 @@ function fetchit7_content_field_mapper ($field_id) {
 		case 'db_password':
 		case 'fetchit7_field_db_password':
 			$field_name = 'fetchit7_field_db_password';
+			break;
+		case 'pre_function':
+		case 'fetchit7_field_pre_function':
+			$field_name = 'fetchit7_field_pre_function';
+			break;
+		case 'post_function':
+		case 'fetchit7_field_post_function':
+			$field_name = 'fetchit7_field_post_function';
 			break;
 		case 'view_name':
 		case 'source_view':

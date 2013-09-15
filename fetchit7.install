@@ -382,6 +382,32 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '1',
 		),
+		// pre-(form query) function name (either database function or php function)
+		'fetchit7_field_pre_function' => array(
+			'label'						=> $t('Pre-(form query) function name'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_pre_function',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// post-(form submit) function name (either database function or php function)
+		'fetchit7_field_post_function' => array(
+			'label'						=> $t('Post-(form submit) function name'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_post_function',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
 		// database source data table/view name
 		'fetchit7_field_source_view' => array(
 			'label'						=> $t('Database name'),
