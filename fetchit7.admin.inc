@@ -237,22 +237,70 @@ function fetchit7_admin_reset_submit ($form, $form_state) {
   * 
   * @ingroup forms
   * @see system_settings_form().
+  * 
+ * Backup/restore page callbacks for the fetchit7 admin
+ * 
+ * the objective is to create a backup and restore mechanism for fetchit7 content - the node content types and associated fields -
+ * so that it can be moved from site to site, or recovered after a fetchit uninstall/install cycle
+ * 
+ * the idea on the backup side is to simply convert the existing drupal 7 schema to flat tables in the host database, one per content type
+ * 
+ * on the backup side, should be doable using the instance info functions to get the fields, and the field info functions to get the field types
+ * 
+ * on the restore side, more care has to be taken, because the schema might be different - as in a uninstall/install cycle on a fetchit upgrade
+ * therefore new records for each type will be created with the default values, then those fields which still exist will be replaced with the saved values.
+ * 
+ * basic and straight-forward, but should work for most circumstances site developers will encounter
   */
+  
 function fetchit7_admin_backupcontent() {
+	
 	$form['fetchit7_admin_backupcontent_blurb'] = array(
 		'#type' => 'item',
-		'#markup' => t('here is where a backup content button might exist.  not sure this is going to be needed, though.'),
+		'#markup' => t('here is where a backup content button might exist.'),
 	);
-
-	$form['#submit'][] = 'fetchit7_admin_backupcontent_submit';
-	return system_settings_form($form);
 	
+	// text element
+	$form['fetchit7_admin_backupcontent_name'] = array(
+		'#type' => 'textfield',
+		'#default_value' => 'default',
+		'#title' => t('Enter a name for this backup.  Warning: any previous backup with this same name will be overwritten.'),
+		'#size' => 30,
+		'#maxlength' => 60,
+		'#required' => TRUE,
+	);
+	
+	$form['fetchit7_admin_backupcontent_submit'] = array(
+		'#type' => 'submit',
+		'#value' => 'Backup All Fetchit7 Content',
+	);
+	
+
+	//$form['#submit'][] = 'fetchit7_admin_backupcontent_submit';
+	//return system_settings_form($form);
+	
+	return $form;
 }
 
 /**
  * Process fetchit7 settings form submission
  */
 function fetchit7_admin_backupcontent_submit ($form, $form_state) {
+	// pop a log message
+	//watchdog("fetchit7 module","entered fetchit7_admin_backupcontent_submit");
+	// get the user entered string containing the backup name
+	if(!strlen(trim($string = $form_state['values']['fetchit7_admin_backupcontent_name']))) $string = 'default';
+	// fetchit7 HTML table content
+	$tablename = 'fetchit7_content_table_backup_'.$string;
+	$field1 = 'nid int PRIMARY KEY'; // of course
+	$field2 = 'type varchar (255)'; // just cause it's there
+	$field3 = 'title varchar (255)'; // just cause it's there
+	$query = "CREATE TABLE IF NOT EXISTS $tablename ($field1,$field2,$field3);";
+	$result = db_query($query);
+	$query = "DROP TABLE $tablename;";
+	$result = db_query($query);
+	$query = "CREATE TABLE IF NOT EXISTS $tablename ($field1,$field2,$field3);";
+	$result = db_query($query);
 }
 
 
@@ -300,3 +348,5 @@ function entity_load_by_type($entity_type, $bundle, $limit = 100, $offset = 0) {
   $results = $query->execute();
   return entity_load($entity_type, array_keys($results[$bundle]));
 }
+
+

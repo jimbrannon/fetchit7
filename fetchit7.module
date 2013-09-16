@@ -405,8 +405,11 @@ function fetchit7_node_info() {
 /**
  * Implements hook_forms().
  * 
- * Allows the fetchit7 form to be repeated multiple times on a page.
- * See http://drupal.org/node/1970846.
+ * This function maps form_id's to the form builder function to use to generate it
+ * This allows reusing code on different forms,
+ * and more importantly for fetchit7, the dynamic generation of form_ids
+ * Enables having multiple instances of the same fetchit7 form type on a page.  Yea!
+ * See http://drupal.org/node/1970846 for discussion of a similar idea
  */
 
  function fetchit7_forms($form_id, $args) {

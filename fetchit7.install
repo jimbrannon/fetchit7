@@ -386,7 +386,7 @@ function _fetchit7_installed_fields () {
 		'fetchit7_field_pre_function' => array(
 			'label'						=> $t('Pre-(form query) function name'),
 			'settings'				=> array (
-					'max_length'	=> '60',
+					'max_length'	=> '255',
 			),
 			'field_name'			=> 'fetchit7_field_pre_function',
 			'type'						=> 'text',
@@ -399,7 +399,7 @@ function _fetchit7_installed_fields () {
 		'fetchit7_field_post_function' => array(
 			'label'						=> $t('Post-(form submit) function name'),
 			'settings'				=> array (
-					'max_length'	=> '60',
+					'max_length'	=> '255',
 			),
 			'field_name'			=> 'fetchit7_field_post_function',
 			'type'						=> 'text',
@@ -699,7 +699,7 @@ function _fetchit7_content_table_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> FALSE,
+			'required'			=> TRUE,
 			'description'		=> $t('The name of the database to connect to.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -761,6 +761,60 @@ function _fetchit7_content_table_installed_instances () {
 				),
 			),
 			'field_name'		=> 'fetchit7_field_db_password',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// pre-(form display) query (SQL) or function name (php function)
+		'fetchit7_field_pre_function' => array(
+			'label'					=> $t('Pre-(form display) SQL query or php.function'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A query (SQL) or the name of a php function (prepend with php.) to execute before displaying this form.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_pre_function',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// post-(form submit) SQL query or PHP.function
+		'fetchit7_field_post_function' => array(
+			'label'					=> $t('Post-(form submit) SQL query or php.function'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A query (SQL) or the name of a php function (prepend with php.) to execute after the form data has been submitted.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_post_function',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),

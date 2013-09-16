@@ -45,19 +45,18 @@ function fetchit7_table_form($form, &$form_state) {
 		return $form;
 	}
 	
-	// run the pre query before doing anything else 
-	$mytable = F_DR_PREQRY_TBL;
-	$myfield = F_DR_PREQRY_FLD;
-	$preqry = fetchit_get_cck_val($mytable,$myfield,F_DR_NID_FLD,$nid);
-	if (strlen(trim($preqry))) {
+	// run the pre query before doing anything else
+	$preqry = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_pre_function','value'));
+	if (strlen($preqry)) {
 		if (strtolower(substr($preqry,0,4)) == 'php.') {
 			$thefunction = substr($preqry,4); 
 			global $user;
     		$user_uid = (int) $user->uid;
 			$result = $thefunction($user_uid);
 		} else {
-			$result = fetchit_run_query($err,$db_type,$db_handle,$preqry);
+			$result = fetchit_run_query($db_type,$db_handle,$preqry);
 		}
+		//TODO: check pre function result?
 	}
 
 	// get database source data view/table name - this is required - can not be missing
@@ -500,4 +499,16 @@ function fetchit_get_db_handle($nid) {
 	}
 	return $db_handle;
 }
- 
+
+function fetchit_run_query($db_type,&$db_handle,$query) {
+	switch ($db_type) {
+		case 'postgresql':
+			$result = pg_query($db_handle,$query);
+		case 'mysql':
+			break;
+		case 'sqlserver':
+			break;
+		default:
+	}
+	return $result;
+}
