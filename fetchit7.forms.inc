@@ -18,10 +18,15 @@ include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.constants.inc');
   * @see system_settings_form().
   */
 function fetchit7_table_form($form, &$form_state) {
-
+	$append_record_flag = FALSE;
+	$parameter_select_flag = FALSE;
+	$text_input_flag = FALSE;
+	$table_weight = 0;
+	
 	// get nid embedded into original form_id; format fetchit7_table_form_X### - nid starts at 21
 	$form_id = $form_state['build_info']['form_id'];
 	$nid = (int) substr($form_id, 21);
+	$form['nid'] = array('#type' => 'value','#value' => $nid);
 
 	// get database type and store it (hidden) in the form so it is available to the form validate and submit functions
 	$db_type = trim(fetchit7_content_field_fetcher($nid,'db_type','value'));
@@ -67,7 +72,7 @@ function fetchit7_table_form($form, &$form_state) {
 	if(strlen($view_name)) {
 			$form['view_name'] = array('#type' => 'value','#value' => trim($view_name));
 	} else {
-		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the source data view/table name.",'error');
+			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the source data view/table name.",'error');
 		return $form;
 	}
 
@@ -108,8 +113,42 @@ function fetchit7_table_form($form, &$form_state) {
 	// get submit button label 
 	$submit_label = trim(fetchit7_content_field_fetcher($nid,'submit_label','value'));
 	$form['submit_label'] = array('#type' => 'value','#value' => $submit_label);
-	if (!strlen($submit_label)) $submit_label = 'Submit';
-	
+	if (strlen($submit_label)) {
+		$submit_button_flag = TRUE;
+	} else {
+		switch ($table_selection_type) {
+			case 'none':
+				if ($text_input_flag) {
+					$submit_button_flag = TRUE;
+					$submit_label = 'Submit';
+				} elseif ($parameter_select_flag) {
+					$submit_button_flag = TRUE;
+					$submit_label = 'Submit';
+				} else {
+					$submit_button_flag = FALSE;
+				}
+				break;
+			case 'copy_single':
+			case 'copy_multiple':
+				$submit_button_flag = TRUE;
+				$submit_label = 'Copy Records';
+				break;
+			case 'delete_multiple':
+				$submit_button_flag = TRUE;
+				$submit_label = 'Delete Records';
+				break;
+			default:
+				$submit_button_flag = TRUE;
+				$submit_label = 'Submit';
+		}
+	}
+
+	// get the source data into a data object
+	if (!($db_data_object = fetchit_get_data_object($db_type,$db_handle,$view_name,$user_uid_field))) {
+			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when querying the source data table.",'error');
+			return $form;
+	}
+			
 	// get the source table meta data
 	$field_count = fetchit_get_field_count($db_type,$db_data_object);
 	$form['field_count'] = array('#type' => 'value','#value' => $field_count);
@@ -129,6 +168,7 @@ function fetchit7_table_form($form, &$form_state) {
 	// existing record selections use the key field and a separate table containing selected key(s)
 	// could be a single value or an array of values
 	// skip implementing this for now ... until after testing is done
+	//$existing_selections = fetchit_get_existing_selection_nid($db_handle,$db_type,$nid);
 	//$existing_selections = fetchit_get_existing_selection_nid($db_handle,$db_type,$nid);
 	
 	// loop through the fields and determine if they are either a source data key field or a drupal user id field
@@ -153,63 +193,129 @@ function fetchit7_table_form($form, &$form_state) {
 	// create the render arrays for each case
 	switch ($table_selection_type) {
 		case 'copy_single': // single row selection and key field copy via radio buttons
-			break;
 		case 'copy_multiple': // multiple row selection and key field copy via check boxes
-			break;
 		case 'delete_multiple': // multiple row selection and record deletion via check boxes
+			// create the HTML tableselect header and options
+			$header = array();
+			$options = array();
+			for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
+				$row = array();
+				$options_key = null;
+				$column_count = 0;
+				for ($field_ndx = 0; $field_ndx < $field_count; $field_ndx++) {
+					$db_value = fetchit_get_data($db_type,$db_data_object,$row_ndx,$field_ndx);
+					if ($field_ndx == ($uid_field_ndx-1) ) {
+						// don't do anything with this value
+					} else {
+						if ($field_ndx == ($key_field_ndx-1)) {
+							// use this as the key for the options array
+							$options_key = $db_value;
+						} else {
+							if ($row_ndx == 0) {
+								$header['column'.$column_count] = $field_names[$field_ndx];
+							}
+							$row['column'.$column_count] = $db_value;
+							++$column_count;
+						}
+					}
+				}
+				if (is_null($options_key)) { // selection enabled but no key field given - shame on you, user!!
+					$options_key = $row_ndx;
+				}
+				$options[$options_key] = $row;
+			}
+			if ($table_selection_type == 'copy_single') {
+				$multiple_flag = FALSE;
+				$selectall_flag = FALSE;
+			} else {
+				$multiple_flag = TRUE;
+				$selectall_flag = TRUE;
+			}
+			// create the HTML tableselect render array with a single select option
+			$form['table'] = array(
+					'#type' => 'tableselect',
+					'#header' => $header,
+					'#options' => $options,
+					//'#default_value' => $existing_selections,
+					'#multiple' => $multiple_flag,
+					'#js_select' => $selectall_flag,
+					'#empty' => ' Nothing to see here.  Move along, please.',
+					'#weight' => $table_weight,
+			);
 			break;
+
 		case 'none': // simple html table display
 		default:
-					
-			// test - see if we can get the source data table and output it
-			$query = "SELECT * FROM $view_name";
-			$data_object = pg_query($db_handle,$query);
-			$field_count = pg_num_fields($data_object);
-			$row_count = pg_num_rows($data_object);
-			if ($field_count) {
-				$field_names = array();
-				for ($j = 0; $j < $field_count; $j++) {
-					$field_names[] = pg_field_name($data_object, $j);
-				}
-			}
-	
 			// create the simple HTML table header and rows
 			$header = array();
 			$rows = array();
 			for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
 				$row = array();
 				for ($field_ndx = 0; $field_ndx < $field_count; $field_ndx++) {
-					if ($row_ndx == 0) {
-						$header[] = $field_names[$field_ndx];
+					if ($field_ndx != ($uid_field_ndx-1) ) {
+						if ($field_ndx != ($key_field_ndx-1)) {
+							if ($row_ndx == 0) {
+								$header[] = $field_names[$field_ndx];
+							}
+							$db_value = fetchit_get_data($db_type,$db_data_object,$row_ndx,$field_ndx);
+							$row[] = $db_value;
+						}
 					}
-					$db_value = pg_fetch_result($data_object,$row_ndx,$field_ndx);
-					$row[] = $db_value;
 				}
 				$rows[] = $row;
 			}
-	
+
 			// create the HTML table render array
-			$form['mytable'] = array(
+			$form['table'] = array(
 				'#theme' => 'table',
 				'#header' => $header,
 				'#rows' => $rows,
 				'#empty' => 'empty',
 			);
 	}
-	// text element
-	$form['fetchit7_table_text'] = array(
-		'#type' => 'textfield',
-		'#default_value' => variable_get('fetchit7_table_text','fetchit7_table_text_default_value'),
-		'#title' => t('Enter some text'),
-		'#size' => 30,
-		'#maxlength' => 60,
-		'#required' => TRUE,
-	);
+
+	// append record elements
+	if ($append_record_flag) {
+		$form['fetchit7_table_text'] = array(
+			'#type' => 'textfield',
+			'#default_value' => variable_get('fetchit7_table_text','fetchit7_table_text_default_value'),
+			'#title' => t('Enter some text'),
+			'#size' => 30,
+			'#maxlength' => 60,
+			'#required' => TRUE,
+		);
+	}
+
+	// parameter select element
+	if ($parameter_select_flag) {
+		$form['fetchit7_table_text'] = array(
+			'#type' => 'textfield',
+			'#default_value' => variable_get('fetchit7_table_text','fetchit7_table_text_default_value'),
+			'#title' => t('Enter some text'),
+			'#size' => 30,
+			'#maxlength' => 60,
+			'#required' => TRUE,
+		);
+	}
+
+	// text input element
+	if ($text_input_flag) {
+		$form['fetchit7_table_text'] = array(
+			'#type' => 'textfield',
+			'#default_value' => variable_get('fetchit7_table_text','fetchit7_table_text_default_value'),
+			'#title' => t('Enter some text'),
+			'#size' => 30,
+			'#maxlength' => 60,
+			'#required' => TRUE,
+		);
+	}
 	
-	$form['submit'] = array(
-		'#type' => 'submit',
-		'#value' => $submit_label,
-	);
+	if ($submit_button_flag) {
+		$form['submit'] = array(
+			'#type' => 'submit',
+			'#value' => $submit_label,
+		);
+	}
 
 	//$form['#validate'][] = 'fetchit7_table_form_validate';
 	//$form['#submit'][] = 'fetchit7_table_form_submit';
@@ -224,6 +330,53 @@ function fetchit7_table_form($form, &$form_state) {
 function fetchit7_table_form_validate ($form, &$form_state) {
 	// pop a log message
 	watchdog("fetchit7 module","entered fetchit7_table_form_validate");
+	// get the form nid 
+	$nid = $form['nid']['#value'];
+	// get the table type
+	$record_select = $form['record_select']['#value'];
+	// check out the table for errors
+	switch ($record_select) {
+		case 0:
+			// nothing really to check on a plain html table
+			break;
+		case 1: //radio buttons
+			$selected = array_filter($form_state['values']['table']);
+			if(!$selected) {
+				form_set_error('submit',t("Invalid selection: A selection is required before pressing the submit button."));
+				return;
+			}
+			$key_field = $form['key_field']['#value'];
+			if (!strlen($key_field)) {
+				form_set_error('submit',t('fetchit7 setup error: missing key field name.  A key field name is required.'));
+				return;
+			}
+			$record_select_table = $form['record_select_table']['#value'];
+			if (!strlen($record_select_table)) {
+				form_set_error('submit',t('fetchit7 setup error: missing selection table name.  A selection table name is required.'));
+				return;
+			}
+			break;
+		case 2: //checkboxes for record selection
+			$key_field = $form['key_field']['#value'];
+			if (!strlen($key_field)) {
+				form_set_error('submit',t('fetchit7 setup error: missing key field name.  A key field name is required.'));
+				return;
+			}
+			$record_select_table = $form['record_select_table']['#value'];
+			if (!strlen($record_select_table)) {
+				form_set_error('submit',t('fetchit setup error: missing selection table name.  please contact the site administrator.'));
+				return;
+			}
+			break;
+		case 3: //checkboxes for record deletion
+			$key_field = $form['key_field']['#value'];
+			if (!strlen($key_field)) {
+				form_set_error('submit',t('fetchit7 setup error: missing key field name.  A key field name is required.'));
+				return;
+			}
+			break;
+		default:
+	}
 }
 
 /**
@@ -554,7 +707,7 @@ function fetchit_get_db_handle($nid) {
 	return $db_handle;
 }
 
-function fetchit_run_query($db_type,&$db_handle,$query) {
+function fetchit_run_query($db_type,$db_handle,$query) {
 	switch ($db_type) {
 		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
 			$result = pg_query($db_handle,$query);
@@ -653,3 +806,42 @@ function fetchit_get_field_types($db_type,&$data_object) {
 	return $field_types;
 }
 
+function fetchit_get_data_object($db_type,&$db_handle,$view_name,$user_uid_field) {
+	switch ($db_type) {
+		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
+			$query = "SELECT * FROM $view_name";
+			if (strlen($user_uid_field)) {
+				global $user;
+				$user_uid = $user->uid;
+				$query .= " WHERE $user_uid_field = ".$user_uid;
+			}
+			$data_object = pg_query($db_handle,$query);
+			break;
+		case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
+			return FALSE;
+			break;
+		case FETCHIT7_DBTYPE_NAME_MSSQL: //'sqlserver':
+			return FALSE;
+			break;
+		default:
+			return FALSE;
+	}
+	return $data_object;
+}
+
+function fetchit_get_data($db_type,&$data_object,$row,$field) {
+	switch ($db_type) {
+		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
+			$data = pg_fetch_result($data_object,$row,$field);
+			break;
+		case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
+			return FALSE;
+			break;
+		case FETCHIT7_DBTYPE_NAME_MSSQL: //'sqlserver':
+			return FALSE;
+			break;
+		default:
+			return FALSE;
+	}
+	return $data;
+}

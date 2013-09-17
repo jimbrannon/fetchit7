@@ -316,9 +316,9 @@ function _fetchit7_installed_fields () {
 			'label'						=> $t('Database server type'),
 			'settings'				=> array (
 					'allowed_values'	=> array (
-							'postgresql'			=> 'PostgreSQL',
-							'mysql'						=> 'MySQL',
-							'sqlserver'				=> 'SQL Server',
+							FETCHIT7_DBTYPE_NAME_PGSQL			=> FETCHIT7_DBTYPE_LABEL_PGSQL, //'postgresql'	=> 'PostgreSQL',
+							FETCHIT7_DBTYPE_NAME_MYSQL			=> FETCHIT7_DBTYPE_LABEL_MYSQL, //'mysql'	=> 'MySQL',
+							FETCHIT7_DBTYPE_NAME_MSSQL			=> FETCHIT7_DBTYPE_LABEL_MSSQL, //'sqlserver'	=> 'SQL Server',
 					),
 			),
 			'field_name'			=> 'fetchit7_field_db_type',
@@ -411,7 +411,7 @@ function _fetchit7_installed_fields () {
 		),
 		// database source data table/view name
 		'fetchit7_field_source_view' => array(
-			'label'						=> $t('Database name'),
+			'label'						=> $t('Table data source view/table name'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
