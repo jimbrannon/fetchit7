@@ -5,6 +5,8 @@
  * Forms page callbacks for the fetchit7 module
  */
 
+include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.constants.inc'); 
+
 //===================================
 // fetchit7 html table form content
 //===================================
@@ -70,27 +72,27 @@ function fetchit7_table_form($form, &$form_state) {
 	}
 
 	// get table selection type - this is required - can not be missing
-	$record_select = trim(fetchit7_content_field_fetcher($nid,'table_selection_type','value'));
-	if(strlen($record_select)) {		//convert it to a number so it can work with old fetchit2 code...
+	$table_selection_type = trim(fetchit7_content_field_fetcher($nid,'table_selection_type','value'));
+	if(strlen($table_selection_type)) {		//convert it to a number so it can work with old fetchit2 code...
 		//convert it to a number so it can work with old fetchit2 code...
 		//TODO: convert fetchit2 based code to use a string db_type
-		if (!is_null($record_select_number = array_search($record_select, array(0 => 'none', 1 => 'copy_single', 2 => 'copy_multiple', 3 => 'delete_multiple')))) {
-			$form['record_select'] = array('#type' => 'value','#value' => $record_select_number);
+		if (!is_null($table_selection_type_number = array_search($table_selection_type, array(0 => 'none', 1 => 'copy_single', 2 => 'copy_multiple', 3 => 'delete_multiple')))) {
+			$form['record_select'] = array('#type' => 'value','#value' => $table_selection_type_number);
 		} else {
-			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the table selection type.",'error');
+			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the record selection type.",'error');
 			return $form;
 		}
 	} else {
-		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the table selection type.",'error');
+		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the record selection type.",'error');
 		return $form;
 	}
 
 	// get table selection table - this is required for the copy selection types
-	$record_select_table = trim(fetchit7_content_field_fetcher($nid,'table_selection_table','value'));
-	$form['record_select_table'] = array('#type' => 'value','#value' => $record_select_table);
-	if (in_array($record_select,array('copy_single','copy_multiple'))) {
-		if(!strlen($record_select_table)) {
-			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the required table selection table name. A selection table name is required when choosing the copy record selection types.",'error');
+	$table_selection_table = trim(fetchit7_content_field_fetcher($nid,'table_selection_table','value'));
+	$form['record_select_table'] = array('#type' => 'value','#value' => $table_selection_table);
+	if (in_array($table_selection_type,array('copy_single','copy_multiple'))) {
+		if(!strlen($table_selection_table)) {
+			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the required record selection table name. A record selection table name is required when selecting copy single or copy multiple record selection types.",'error');
 			return $form;
 		}
 	}
@@ -108,41 +110,92 @@ function fetchit7_table_form($form, &$form_state) {
 	$form['submit_label'] = array('#type' => 'value','#value' => $submit_label);
 	if (!strlen($submit_label)) $submit_label = 'Submit';
 	
-	// test - see if we can get the tmp table and output it
-	$query = "SELECT * FROM $view_name";
-	$data_object = pg_query($db_handle,$query);
-	$field_count = pg_num_fields($data_object);
-	$row_count = pg_num_rows($data_object);
-	if ($field_count) {
-		$field_names = array();
-		for ($j = 0; $j < $field_count; $j++) {
-			$field_names[] = pg_field_name($data_object, $j);
+	// get the source table meta data
+	$field_count = fetchit_get_field_count($db_type,$db_data_object);
+	$form['field_count'] = array('#type' => 'value','#value' => $field_count);
+	$row_count = fetchit_get_row_count($db_type,$db_data_object);
+	$form['row_count'] = array('#type' => 'value','#value' => $row_count);
+	$field_names = array();
+	if (!($field_names = fetchit_get_field_names($db_type,$db_data_object))) {
+		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the source data table field names.",'error');
+		return $form;
+	}
+	$field_types = array();
+	if (!($field_types = fetchit_get_field_types($db_type,$db_data_object))) {
+		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the source data table field types.",'error');
+		return $form;
+	}
+	
+	// existing record selections use the key field and a separate table containing selected key(s)
+	// could be a single value or an array of values
+	// skip implementing this for now ... until after testing is done
+	//$existing_selections = fetchit_get_existing_selection_nid($db_handle,$db_type,$nid);
+	
+	// loop through the fields and determine if they are either a source data key field or a drupal user id field
+	// these are not displayed in the table or tableselect element
+	// the key field values will become the options[] array keys used in record selection,
+	//   and the drupal user id field is used in queries.
+	$uid_field_ndx = 0;
+	$key_field_ndx = 0;
+	for ($field_ndx = 0; $field_ndx < $field_count; $field_ndx++) { // loop over the source table fields
+		if ( $field_names[$field_ndx] == $user_uid_field ) {
+			// save it as a 1-based field index but do not create an output table column
+			$uid_field_ndx = $field_ndx + 1;
+			$form['uid_field_ndx'] = array('#type' => 'value','#value' => $uid_field_ndx);
+		}
+		if ( $field_names[$field_ndx] == $key_field ) {
+			// save it as a 1-based field index but do not create an output table column
+			$key_field_ndx = $field_ndx + 1;
+			$form['key_field_ndx'] = array('#type' => 'value','#value' => $key_field_ndx);
 		}
 	}
 	
-	// create the simple HTML table header and rows
-	$header = array();
-	$rows = array();
-	for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
-		$row = array();
-		for ($field_ndx = 0; $field_ndx < $field_count; $field_ndx++) {
-			if ($row_ndx == 0) {
-				$header[] = $field_names[$field_ndx];
+	// create the render arrays for each case
+	switch ($table_selection_type) {
+		case 'copy_single': // single row selection and key field copy via radio buttons
+			break;
+		case 'copy_multiple': // multiple row selection and key field copy via check boxes
+			break;
+		case 'delete_multiple': // multiple row selection and record deletion via check boxes
+			break;
+		case 'none': // simple html table display
+		default:
+					
+			// test - see if we can get the source data table and output it
+			$query = "SELECT * FROM $view_name";
+			$data_object = pg_query($db_handle,$query);
+			$field_count = pg_num_fields($data_object);
+			$row_count = pg_num_rows($data_object);
+			if ($field_count) {
+				$field_names = array();
+				for ($j = 0; $j < $field_count; $j++) {
+					$field_names[] = pg_field_name($data_object, $j);
+				}
 			}
-			$db_value = pg_fetch_result($data_object,$row_ndx,$field_ndx);
-			$row[] = $db_value;
-		}
-		$rows[] = $row;
-	}
 	
-	// create the HTML table render array
-	$form['mytable'] = array(
-		'#theme' => 'table',
-		'#header' => $header,
-		'#rows' => $rows,
-		'#empty' => 'empty',
-	);
-
+			// create the simple HTML table header and rows
+			$header = array();
+			$rows = array();
+			for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
+				$row = array();
+				for ($field_ndx = 0; $field_ndx < $field_count; $field_ndx++) {
+					if ($row_ndx == 0) {
+						$header[] = $field_names[$field_ndx];
+					}
+					$db_value = pg_fetch_result($data_object,$row_ndx,$field_ndx);
+					$row[] = $db_value;
+				}
+				$rows[] = $row;
+			}
+	
+			// create the HTML table render array
+			$form['mytable'] = array(
+				'#theme' => 'table',
+				'#header' => $header,
+				'#rows' => $rows,
+				'#empty' => 'empty',
+			);
+	}
 	// text element
 	$form['fetchit7_table_text'] = array(
 		'#type' => 'textfield',
@@ -467,7 +520,7 @@ function fetchit_get_db_handle($nid) {
 	$db_handle = null;
 	if($db_type = fetchit7_content_field_fetcher($nid,'db_type','value')) {
 		switch ($db_type) {
-			case 'postgresql':
+			case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
 				// these are required for remote pg db connections
 				if(!strlen(trim($db_host = fetchit7_content_field_fetcher($nid,'db_host','value')))) {
 					return $db_handle;
@@ -491,9 +544,9 @@ function fetchit_get_db_handle($nid) {
 					return $db_handle;
 				}
 				break;
-			case 'mysql':
+			case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
 				break;
-			case 'sqlserver':
+			case FETCHIT7_DBTYPE_NAME_MSSQL: //'sqlserver':
 				break;
 			default:
 		}
@@ -503,13 +556,100 @@ function fetchit_get_db_handle($nid) {
 
 function fetchit_run_query($db_type,&$db_handle,$query) {
 	switch ($db_type) {
-		case 'postgresql':
+		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
 			$result = pg_query($db_handle,$query);
-		case 'mysql':
+		case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
 			break;
-		case 'sqlserver':
+		case FETCHIT7_DBTYPE_NAME_MSSQL: //'sqlserver':
 			break;
 		default:
 	}
 	return $result;
 }
+
+function fetchit_get_field_count($db_type,&$data_object) {
+	switch ($db_type) {
+		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
+			if(!$field_count = pg_num_fields($data_object)) {
+				return FALSE;
+			}
+			break;
+		case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
+			return FALSE;
+			break;
+		case FETCHIT7_DBTYPE_NAME_MSSQL: //'sqlserver':
+			return FALSE;
+			break;
+		default:
+			return FALSE;
+	}
+	return $field_count;
+}
+
+function fetchit_get_row_count($db_type,&$data_object) {
+	switch ($db_type) {
+		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
+			if(!$row_count = pg_num_rows($data_object)) {
+				return FALSE;
+			}
+			break;
+		case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
+			return FALSE;
+			break;
+		case FETCHIT7_DBTYPE_NAME_MSSQL: //'sqlserver':
+			return FALSE;
+			break;
+		default:
+			return FALSE;
+	}
+	return $row_count;
+}
+
+function fetchit_get_field_names($db_type,&$data_object) {
+	switch ($db_type) {
+		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
+			if($field_count = pg_num_fields($data_object)) {
+				$field_names = array();
+				for ($j = 0; $j < $field_count; $j++) {
+					$field_names[] = pg_field_name($data_object, $j);
+				}
+			} else {
+				return FALSE;
+			}
+			break;
+		case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
+			return FALSE;
+			break;
+		case FETCHIT7_DBTYPE_NAME_MSSQL: //'sqlserver':
+			return FALSE;
+			break;
+		default:
+			return FALSE;
+	}
+	return $field_names;
+}
+
+function fetchit_get_field_types($db_type,&$data_object) {
+	switch ($db_type) {
+		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
+			if($field_count = pg_num_fields($data_object)) {
+				$field_types = array();
+				for ($j = 0; $j < $field_count; $j++) {
+					$field_types[] = pg_field_type($data_object, $j);
+				}
+			} else {
+				return FALSE;
+			}
+			break;
+		case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
+			return FALSE;
+			break;
+		case FETCHIT7_DBTYPE_NAME_MSSQL: //'sqlserver':
+			return FALSE;
+			break;
+		default:
+			return FALSE;
+	}
+	return $field_types;
+}
+

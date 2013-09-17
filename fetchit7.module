@@ -9,6 +9,8 @@
  * 
  */
  
+include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.constants.inc');
+ 
  /**
   * Implementation of hook_menu
   */

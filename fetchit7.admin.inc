@@ -5,6 +5,8 @@
  * Adminisitration page callbacks for the fetchit7 module
  */
  
+include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.constants.inc'); 
+ 
  /**
   * Form builder.  Configure fetchit7.
   * 
