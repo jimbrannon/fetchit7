@@ -278,7 +278,7 @@ function fetchit7_admin_backupcontent_submit ($form, $form_state) {
 	$contenttypecount = 0;
 	$contentcount = 0;
 	foreach ($content_types as $content_type) {
-		$tablename = 'fetchit7_content_table_backup_'.$content_type;
+		$tablename = 'fetchit7_content_table_backup_'.$string;
 		if($newrecords = fetchit7_content_backuptable_create($content_type,$tablename)) {
 			++$contenttypecount;
 			$contentcount = $contentcount + $newrecords;
@@ -359,7 +359,7 @@ function fetchit7_content_backuptable_create($type,$tablename) {
 			foreach ($entityfields as $entityfield) {
 				$mynode = $entityfieldnodes[$row->nid];
 				$myfield = $mynode->$entityfield;
-				$data[$entityfield] = $myfield['und'][0]['value'];;
+				$data[$entityfield] = $myfield['und'][0]['value'];
 			}
 			//now do the insert
 			$insertednid = db_insert($tablename) // Table name no longer needs {}
@@ -433,46 +433,86 @@ function fetchit7_admin_restorecontent_submit ($form, $form_state) {
 	$contenttypecount = 0;
 	$contentcount = 0;
 	foreach ($content_types as $content_type) {
-		$tablename = 'fetchit7_content_table_backup_'.$content_type;
+		$tablename = 'fetchit7_content_table_backup_'.$string;
 		if($newrecords = fetchit7_content_backuptable_restore($content_type,$tablename)) {
 			++$contenttypecount;
 			$contentcount = $contentcount + $newrecords;
 		}
 	}
 	drupal_set_message(t("Successfully restored $contenttypecount content types, $contentcount records total."),'status');
-	
-	$newNode = new stdClass();
-	$newNode->type = 'fetchit7_content_table'; // this is the new node type
-	node_object_prepare($newNode);
+}
 
-	$newNode->title = 'Test thing';
-	// ...more node properties...
-  $newNode->uid = 0;
-  $newNode->created = strtotime("now");
-  $newNode->changed = strtotime("now");
-  $newNode->status = 1;
-  $newNode->comment = 0;
-  $newNode->promote = 0;
-  $newNode->moderate = 0;
-  $newNode->sticky = 0;
-  $newNode->language = 'und';
+function fetchit7_content_backuptable_restore($type,$tablename) {
+	// 1. open the source table and get the field names
+	// 2. get the content type schema field names and find the ones that are in teh backup table
+	// 3. loop through the source table records
+	// 3.5 create a content type node object
+	// 4. loop through the content type schema field names
+	// 5. if the field name matches a field from the source table
+	//    then add the source table value to the object 
+	// 6. save the object to the new entity schema
+	// this skips fields in teh backup talbe that are not in the 
+	// new schema definition
+	// it also allows the missing fiields to get defaults defined in the content schema
+	// it likely will get a new nid, to the site developer might have to
+	// reconnect content to blocks, etc.
+
+	// 1
+	$query = "SHOW COLUMNS FROM $tablename;";
+	if(!($result = db_query($query))) return FALSE;
+	$count = 0;
+	foreach ($result as $row) {
+		$backuptablecolumns[] = $row->Field;
+		++$count;
+	}
+	if (!$count) return FALSE;
 	
-	// the extra fields for our new type
-	for ($i = 0; $i < 5; $i++) {
-		$j = $i + 1;
-		$file_path = drupal_get_path('module', 'node_example') . '/image' . $j . '.jpg';
-		$file = (object)array(
-			"uid" => 1,
-			"uri" => $file_path,
-			"filemime" => file_get_mimetype($file_path),
-			"status" => 1
-		);
-    $file = file_copy($file, 'public://');
-    $newNode->node_example_image['und'][$i] = (array)$file;
-  }
+	// 2A
+	// these are definitely in the node table
+	// but ignore nid because it will be assigned a new one when saved
+	// and ignore type because we assume it is there and will be handled specifically
+	$nodetablefields = array('title');
+	$nodetablefieldsinbackuptable = array();
+	foreach ($nodetablefields as $field_name) {
+		if(in_array($field_name, $backuptablecolumns)) $nodetablefieldsinbackuptable[] = $field_name;
+	}
+	// 2B
+	//$entityfields = array();
+	$entityfieldsinbackuptable = array();
+	$instances = field_info_instances('node',$type);
+	foreach ($instances as $instance_name => $instance) {
+		$field_name = $instance['field_name'];
+		if(in_array($field_name, $backuptablecolumns)) $entityfieldsinbackuptable[] = $field_name;
+		//$entityfields[] = $field_name;
+	}
 	
-	$new = node_save($node);
+	// 3
+	$query = db_select($tablename,'t')->fields('t',$backuptablecolumns);
+	$result = $query->execute();
+	$inserted_count = 0;
+	foreach ($result as $row) {
+		// 3.5
+		$newNode = new stdClass();
+		$newNode->type = $type;
+		node_object_prepare($newNode);
+		// 4
+		foreach ($nodetablefieldsinbackuptable as $field_name) {
+			// 5
+			$newNode->$field_name = $row->$field_name;
+		}
+		// 4
+		foreach ($entityfieldsinbackuptable as $field_name) {
+			// 5
+			$myarray = array();
+			$myarray['und'][0]['value'] = $row->$field_name;
+			$newNode->$field_name = $myarray;
+		}
+		// 6
+		$new = node_save($newNode);
+		++$inserted_count;
+	}
 	
+	return $inserted_count;
 }
 
 
