@@ -239,7 +239,6 @@ function fetchit7_admin_reset_submit ($form, $form_state) {
   
 function fetchit7_admin_backupcontent() {
 	
-	//	show the html page content
 	$form = array();
 	
 	// text element
@@ -272,7 +271,7 @@ function fetchit7_admin_backupcontent_submit ($form, $form_state) {
 	//watchdog("fetchit7 module","entered fetchit7_admin_backupcontent_submit");
 	// get the user entered string containing the backup name
 	if(!strlen(trim($string = $form_state['values']['fetchit7_admin_backupcontent_name']))) $string = 'default';
-	// fetchit7 HTML table content
+	// fetchit7 content types
 	// TODO: should loop through all fetchit7 content types - search by name? - rather than have them hardcoded here
 	$content_types = array();
 	$content_types[] = 'fetchit7_content_table';
@@ -397,20 +396,83 @@ function fetchit7_maketablequery_create($tablename,$fieldstrings) {
   * @see system_settings_form().
   */
 function fetchit7_admin_restorecontent() {
-	$form['fetchit7_admin_restorecontent_blurb'] = array(
-		'#type' => 'item',
-		'#markup' => t('here is where a restore content button might exist.  not sure this is going to be needed, though.'),
+
+	$form = array();
+	
+	// text element
+	$form['fetchit7_admin_restorecontent_name'] = array(
+		'#type' => 'textfield',
+		'#default_value' => 'default',
+		'#title' => t('Enter a backup name to restore.'),
+		'#size' => 30,
+		'#maxlength' => 60,
+		'#required' => TRUE,
+	);
+	
+	$form['fetchit7_admin_restorecontent_submit'] = array(
+		'#type' => 'submit',
+		'#value' => 'Restore fetchit7 content',
 	);
 
-	$form['#submit'][] = 'fetchit7_admin_restorecontent_submit';
-	return system_settings_form($form);
-	
+	//$form['#submit'][] = 'fetchit7_admin_restorecontent_submit';
+	//return system_settings_form($form);
+		
+	return $form;
 }
 
 /**
  * Process fetchit7 settings form submission
  */
 function fetchit7_admin_restorecontent_submit ($form, $form_state) {
+	// get the user entered string containing the backup name
+	if(!strlen(trim($string = $form_state['values']['fetchit7_admin_restorecontent_name']))) $string = 'default';
+	// fetchit7 content types
+	// TODO: should loop through all fetchit7 content types - search by name? - rather than have them hardcoded here
+	$content_types = array();
+	$content_types[] = 'fetchit7_content_table';
+	$contenttypecount = 0;
+	$contentcount = 0;
+	foreach ($content_types as $content_type) {
+		$tablename = 'fetchit7_content_table_backup_'.$content_type;
+		if($newrecords = fetchit7_content_backuptable_restore($content_type,$tablename)) {
+			++$contenttypecount;
+			$contentcount = $contentcount + $newrecords;
+		}
+	}
+	drupal_set_message(t("Successfully restored $contenttypecount content types, $contentcount records total."),'status');
+	
+	$newNode = new stdClass();
+	$newNode->type = 'fetchit7_content_table'; // this is the new node type
+	node_object_prepare($newNode);
+
+	$newNode->title = 'Test thing';
+	// ...more node properties...
+  $newNode->uid = 0;
+  $newNode->created = strtotime("now");
+  $newNode->changed = strtotime("now");
+  $newNode->status = 1;
+  $newNode->comment = 0;
+  $newNode->promote = 0;
+  $newNode->moderate = 0;
+  $newNode->sticky = 0;
+  $newNode->language = 'und';
+	
+	// the extra fields for our new type
+	for ($i = 0; $i < 5; $i++) {
+		$j = $i + 1;
+		$file_path = drupal_get_path('module', 'node_example') . '/image' . $j . '.jpg';
+		$file = (object)array(
+			"uid" => 1,
+			"uri" => $file_path,
+			"filemime" => file_get_mimetype($file_path),
+			"status" => 1
+		);
+    $file = file_copy($file, 'public://');
+    $newNode->node_example_image['und'][$i] = (array)$file;
+  }
+	
+	$new = node_save($node);
+	
 }
 
 
