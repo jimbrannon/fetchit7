@@ -46,6 +46,7 @@ function fetchit7_table_form($form, &$form_state) {
 	}
 	
 	// run the pre query before doing anything else
+	// TODO: figure out why pre-fn is getting hit twice prior to the form drawing!!!
 	$preqry = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_pre_function','value'));
 	if (strlen($preqry)) {
 		if (strtolower(substr($preqry,0,4)) == 'php.') {

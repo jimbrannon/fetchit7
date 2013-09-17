@@ -209,22 +209,6 @@ function fetchit7_admin_dbsettings_submit ($form, $form_state) {
 		->execute();
 }
 
- /**
-  * Form builder.  Configure fetchit7.
-  * 
-  * @ingroup forms
-  * @see system_settings_form().
-  */
-function fetchit7_admin_reset() {
-	$form['fetchit7_admin_reset_blurb'] = array(
-		'#type' => 'item',
-		'#markup' => t('here is where a reset button might exist.  not sure this is going to be needed, though.'),
-	);
-
-	$form['#submit'][] = 'fetchit7_admin_reset_submit';
-	return system_settings_form($form);
-	
-}
 
 /**
  * Process fetchit7 settings form submission
@@ -255,10 +239,8 @@ function fetchit7_admin_reset_submit ($form, $form_state) {
   
 function fetchit7_admin_backupcontent() {
 	
-	$form['fetchit7_admin_backupcontent_blurb'] = array(
-		'#type' => 'item',
-		'#markup' => t('here is where a backup content button might exist.'),
-	);
+	//	show the html page content
+	$form = array();
 	
 	// text element
 	$form['fetchit7_admin_backupcontent_name'] = array(
@@ -291,18 +273,122 @@ function fetchit7_admin_backupcontent_submit ($form, $form_state) {
 	// get the user entered string containing the backup name
 	if(!strlen(trim($string = $form_state['values']['fetchit7_admin_backupcontent_name']))) $string = 'default';
 	// fetchit7 HTML table content
-	$tablename = 'fetchit7_content_table_backup_'.$string;
-	$field1 = 'nid int PRIMARY KEY'; // of course
-	$field2 = 'type varchar (255)'; // just cause it's there
-	$field3 = 'title varchar (255)'; // just cause it's there
-	$query = "CREATE TABLE IF NOT EXISTS $tablename ($field1,$field2,$field3);";
-	$result = db_query($query);
-	$query = "DROP TABLE $tablename;";
-	$result = db_query($query);
-	$query = "CREATE TABLE IF NOT EXISTS $tablename ($field1,$field2,$field3);";
-	$result = db_query($query);
+	// TODO: should loop through all fetchit7 content types - search by name? - rather than have them hardcoded here
+	$content_types = array();
+	$content_types[] = 'fetchit7_content_table';
+	$contenttypecount = 0;
+	$contentcount = 0;
+	foreach ($content_types as $content_type) {
+		$tablename = 'fetchit7_content_table_backup_'.$content_type;
+		if($newrecords = fetchit7_content_backuptable_create($content_type,$tablename)) {
+			++$contenttypecount;
+			$contentcount = $contentcount + $newrecords;
+		}
+	}
+	drupal_set_message(t("Successfully saved $contenttypecount content types, $contentcount records total."),'status');
+
 }
 
+function fetchit7_content_backuptable_create($type,$tablename) {
+	//=============================================================
+	// create the table, deleting any existing table with that name
+	//=============================================================
+	$nodetablefields = array();
+	$entityfields = array();
+	$fieldstrings = array();
+	$fieldstrings[] = 'ndx int PRIMARY KEY';
+	$query  = fetchit7_maketablequery_create($tablename,$fieldstrings);
+	if(!($result = db_query($query))) return FALSE;
+	
+	$query = "DROP TABLE $tablename;";
+	if(!($result = db_query($query))) return FALSE;
+	// the node table fields
+	$fieldstrings = array();
+	$fieldstrings[] = 'nid int PRIMARY KEY';
+	$nodetablefields[] = 'nid';
+	$fieldstrings[] = 'type varchar (255)';
+	$nodetablefields[] = 'type';
+	$fieldstrings[] = 'title varchar (255)';
+	$nodetablefields[] = 'title';
+	// get the fetchit7 installed fields for this type (i.e. instances)
+	$instances = field_info_instances('node',$type);
+	foreach ($instances as $instance_name => $instance) {
+		$field_name = $instance['field_name'];
+		$entityfields[] = $field_name;
+		$field = field_info_field($field_name);
+		$field_type = $field['columns']['value']['type'];
+		if ($field_type == 'varchar') {
+			$field_type .= ' ('.$field['columns']['value']['length'].')';
+		}
+		$fieldstrings[] = $field_name.' '.$field_type;
+	}
+	$query  = fetchit7_maketablequery_create($tablename,$fieldstrings);
+	if(!($result = db_query($query))) return FALSE;
+
+	//=============================================================
+	// populate the new table based on the output of EntityFieldQuery
+	// and the node table
+	//=============================================================
+	$query = new EntityFieldQuery();
+	$query
+		->entityCondition('entity_type', 'node')
+		->entityCondition('bundle', $type)
+		->propertyCondition('status', 1)
+		->propertyOrderBy('created', 'DESC')
+		//->fieldCondition('field_us_state', 'value', array('CT', 'NJ', 'NY'))
+		//->range(0,10)
+		;
+	$result = $query->execute();
+	$inserted_count = 0;
+	if (!empty($result['node'])) {
+		// get the nids
+		$entityfieldnids = array_keys($result['node']);
+		$entityfieldnodes = node_load_multiple($entityfieldnids);
+		//$entityfieldnodes_form = node_view_multiple($entityfieldnodes, 'full');
+		//now get the nids in the node table for this type
+		$sql = 'SELECT * FROM {node} n WHERE n.type = :type';
+		$result = db_query($sql, array(':type' => $type));
+		// loop through the records and get the field values from both object arrays
+		// to create an insert query
+		// loop over the node table list - this should be the same as the entityfield list (right?)
+		// the $entityfieldnodes object array is keyed by the nid, so it will be easy to get the object we need
+		foreach ($result as $row) {
+			$data = array();
+			foreach ($nodetablefields as $nodetablefield) {
+				$data[$nodetablefield] = $row->$nodetablefield;
+			}
+			foreach ($entityfields as $entityfield) {
+				$mynode = $entityfieldnodes[$row->nid];
+				$myfield = $mynode->$entityfield;
+				$data[$entityfield] = $myfield['und'][0]['value'];;
+			}
+			//now do the insert
+			$insertednid = db_insert($tablename) // Table name no longer needs {}
+				->fields($data)
+				->execute();
+			if ($insertednid) ++$inserted_count;
+		}
+	}
+	
+	return $inserted_count;
+}
+
+
+/**
+ * function to create a MAKE TABLE query
+ */
+function fetchit7_maketablequery_create($tablename,$fieldstrings) {
+	$query  = 'CREATE TABLE IF NOT EXISTS ';
+	$query .= $tablename;
+	$query .= ' (';
+	foreach ($fieldstrings as $key=>$fieldstring) {
+		if ($key) $query .= ',';
+		$query .= $fieldstring;
+	}
+	$query .= ');';
+	
+	return $query; 
+}
 
  /**
   * Form builder.  Configure fetchit7.
@@ -337,16 +423,27 @@ function node_load_by_type($type, $limit = 100, $offset = 0) {
   $query->entityCondition('entity_type', 'node')
     ->entityCondition('bundle', $type)
     ->range($offset, $limit);
-  $results = $query->execute();
-  return node_load_multiple(array_keys($results['node']));
+  $result = $query->execute();
+  $nodes = array();
+  if (isset($result['node'])) {
+  	$nodes = node_load_multiple(array_keys($result['node']));
+	}
+	
+	return $nodes;
 }
+
 function entity_load_by_type($entity_type, $bundle, $limit = 100, $offset = 0) {
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', $entity_type)
     ->entityCondition('bundle', $bundle)
     ->range($offset, $limit);
-  $results = $query->execute();
-  return entity_load($entity_type, array_keys($results[$bundle]));
+  $result = $query->execute();
+  $entities = array();
+  if (isset($result[$bundle])) {
+  	$entities = entity_load($entity_type, array_keys($result[$bundle]));
+	}
+	
+  return $entities;
 }
 
 

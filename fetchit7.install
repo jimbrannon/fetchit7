@@ -198,7 +198,7 @@ function fetchit7_install () {
 function _fetchit7_installed_fields () {
 	$t = get_t();
 	$fetchit7_fields = array(
-		// on this example one I am including many of the instance definition parameters in the array
+		// on this example one I am including many of the field definition parameters in the array
 		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
 		//'fetchit7_field_location' => array(
 			//'label'						=> $t('form output location'),
@@ -272,6 +272,7 @@ function _fetchit7_installed_fields () {
 							'page'		=> 'Page',
 							'block'		=> 'Block',
 					),
+					//'max_length'	=> '60',
 			),
 			'field_name'			=> 'fetchit7_field_location',
 			'type'						=> 'list_text',
@@ -318,6 +319,7 @@ function _fetchit7_installed_fields () {
 							'postgresql'			=> 'PostgreSQL',
 							'mysql'						=> 'MySQL',
 							'sqlserver'				=> 'SQL Server',
+					//'max_length'	=> '60',
 					),
 			),
 			'field_name'			=> 'fetchit7_field_db_type',
@@ -474,6 +476,7 @@ function _fetchit7_installed_fields () {
 							'copy_multiple'		=> 'Copy multiple selected records key fields to another table',
 							'delete_multiple'	=> 'Delete selected records from the original table',
 					),
+					//'max_length'	=> '60',
 			),
 			'field_name'			=> 'fetchit7_field_tbl_sel_typ',
 			'type'						=> 'list_text',
