@@ -361,7 +361,9 @@ function fetchit7_content_backuptable_create($type,$tablename) {
 			foreach ($entityfields as $entityfield) {
 				$mynode = $entityfieldnodes[$row->nid];
 				$myfield = $mynode->$entityfield;
-				$data[$entityfield] = $myfield['und'][0]['value'];
+				if (!(is_null($myfield['und'][0]['value']))) {
+					$data[$entityfield] = $myfield['und'][0]['value'];
+				}
 			}
 			//now do the insert
 			$insertednid = db_insert($tablename) // Table name no longer needs {}
