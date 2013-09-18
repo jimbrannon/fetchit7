@@ -10,7 +10,8 @@
  */
  
 include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.constants.inc');
- 
+//include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.forms.inc');
+
  /**
   * Implementation of hook_menu
   */
@@ -147,11 +148,13 @@ function fetchit7_menu() {
 		// TODO: get the base URL for fetchit7_content_table page content
 		$menu_urlbase_implemented = 'admin/config/fetchit7/pagecontent/'; //temporary
 		foreach ($nids as $nid) {
+			$mynode = node_load($nid);
+			$title = $mynode->title;
 			$formid = 'fetchit7_table_form_X' . $nid;
 			$menu_url = $menu_urlbase_example . $formid;
 			$items[$menu_url] = array(
-				'title'							=> $formid,
-				'description'				=> 'the content of fetchit7 form '.$formid,
+				'title'							=> $title,
+				'description'				=> $title.' - fetchit7 form '.$formid,
 				'position'					=> 'right',
 				'weight'						=> 10 + $nid,
 				'page callback'			=> 'drupal_get_form',
@@ -164,8 +167,8 @@ function fetchit7_menu() {
 			$formid = 'fetchit7_table_form_I' . $nid;
 			$menu_url = $menu_urlbase_implemented . $formid;
 			$items[$menu_url] = array(
-				'title'							=> $formid,
-				'description'				=> 'the content of fetchit7 form '.$formid,
+				'title'							=> $title,
+				'description'				=> $title.' = fetchit7 form '.$formid,
 				'position'					=> 'right',
 				'weight'						=> 10 + $nid,
 				'page callback'			=> 'drupal_get_form',
@@ -195,11 +198,13 @@ function fetchit7_menu() {
 		$menu_urlbase_example = 'admin/config/fetchit7/blockcontent/';
 		$menu_urlbase_implemented = 'admin/config/fetchit7/blockcontent/'; //temporary
 		foreach ($nids as $nid) {
+			$mynode = node_load($nid);
+			$title = $mynode->title;
 			$formid = 'fetchit7_table_form_X' . $nid;
 			$menu_url = $menu_urlbase_example . $formid;
 			$items[$menu_url] = array(
-				'title'							=> $formid,
-				'description'				=> 'the content of fetchit7 form '.$formid,
+				'title'							=> $title,
+				'description'				=> $title.' = fetchit7 form '.$formid,
 				'position'					=> 'right',
 				'weight'						=> 10 + $nid,
 				'page callback'			=> 'drupal_get_form',
@@ -216,8 +221,8 @@ function fetchit7_menu() {
 			//$formid = 'fetchit7_table_form_I' . $nid;
 			//$menu_url = $menu_urlbase_implemented . $formid;
 			//$items[$menu_url] = array(
-			//	'title'							=> $formid,
-			//	'description'				=> 'the content of fetchit7 form '.$formid,
+			//	'title'							=> $title,
+			//	'description'				=> $title.' = fetchit7 form '.$formid,
 			//	'position'					=> 'right',
 			//	'weight'						=> 10 + $nid,
 			//	'page callback'			=> 'drupal_get_form',

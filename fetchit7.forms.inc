@@ -474,7 +474,7 @@ function fetchit7_table_form_submit ($form, &$form_state) {
 	}
 
 	// redirect to the next page
-	$redirect = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_redirect','value'));
+	$redirect = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_redirect','value'));
 	if (strlen($redirect)) {
 		$form_state['redirect'] = $redirect; 
 	}
@@ -706,6 +706,11 @@ function fetchit7_content_field_mapper ($field_id) {
 		case 'submit_weight':
 		case 'fetchit7_field_submit_weight':
 			$field_name = 'fetchit7_field_submit_weight';
+			break;
+		case 'redirect':
+		case 'submit_redirect':
+		case 'fetchit7_field_submit_redirect':
+			$field_name = 'fetchit7_field_submit_redirect';
 			break;
 		// fetchit7 custom fields used by html table content type
 		case 'tbl_sel_typ':

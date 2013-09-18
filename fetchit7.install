@@ -627,6 +627,19 @@ function _fetchit7_installed_fields () {
 			//		),
 			//),
 		),
+		// submit button redirect
+		'fetchit7_field_submit_redirect' => array(
+			'label'						=> $t('Submit button redirect'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_submit_redirect',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
 
 		// =====================================================
 		// these are fields that apply to html tables only
@@ -1177,6 +1190,33 @@ function _fetchit7_content_table_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 			//'deleted'				=> '0',
+		),
+		// submit button redirect
+		'fetchit7_field_submit_redirect' => array(
+			'label'					=> $t('Submit button redirect'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A page URL (e.g. node/10) for Drupal to redirect the user to after a successful form submission caused by pressing this submit button.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_submit_redirect',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
 		),
 				
 		// =====================================================
