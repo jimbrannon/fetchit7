@@ -32,14 +32,7 @@ function fetchit7_table_form($form, &$form_state) {
 	// get database type and store it (hidden) in the form so it is available to the form validate and submit functions
 	$db_type = trim(fetchit7_content_field_fetcher($nid,'db_type','value'));
 	if(strlen($db_type)) {
-		//convert it to a number so it can work with old fetchit2 code...
-		//TODO: convert fetchit2 based code to use a string db_type
-		if (!is_null($db_type_number = array_search($db_type, array(0 => 'postgresql', 1 => 'mysql', 2 => 'sqlserver')))) {
-			$form['db_type'] = array('#type' => 'value','#value' => $db_type_number);
-		} else {
-			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the database type.",'error');
-			return $form;
-		}
+		$form['db_type'] = array('#type' => 'value','#value' => $db_type);
 	} else {
 		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the database type.",'error');
 		return $form;
@@ -79,15 +72,8 @@ function fetchit7_table_form($form, &$form_state) {
 
 	// get table selection type - this is required - can not be missing
 	$table_selection_type = trim(fetchit7_content_field_fetcher($nid,'table_selection_type','value'));
-	if(strlen($table_selection_type)) {		//convert it to a number so it can work with old fetchit2 code...
-		//convert it to a number so it can work with old fetchit2 code...
-		//TODO: convert fetchit2 based code to use a string db_type
-		if (!is_null($table_selection_type_number = array_search($table_selection_type, array(0 => 'none', 1 => 'copy_single', 2 => 'copy_multiple', 3 => 'delete_multiple')))) {
-			$form['record_select'] = array('#type' => 'value','#value' => $table_selection_type_number);
-		} else {
-			drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the record selection type.",'error');
-			return $form;
-		}
+	if(strlen($table_selection_type)) {
+		$form['record_select'] = array('#type' => 'value','#value' => $table_selection_type);
 	} else {
 		drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the record selection type.",'error');
 		return $form;
@@ -397,8 +383,104 @@ function fetchit7_table_form_validate ($form, &$form_state) {
 function fetchit7_table_form_submit ($form, &$form_state) {
 	// pop a log message
 	watchdog("fetchit7 module","entered fetchit7_table_form_submit");
+	
+	$nid = $form['nid']['#value'];
+	$record_select = $form['record_select']['#value'];
+	$db_type = $form['db_type']['#value'];
+	$db_handle = $form['db_handle']['#value'];
+	switch ($record_select) {
+		case 'none': // static html - no selection - do nothing
+			break;
+		case 'copy_single':  // there is always one value when it is working correctly
+			$key_field_ndx = $form['key_field_ndx']['#value'];
+			if ($key_field_ndx) {
+				$db_type = $form['db_type']['#value'];
+				$db_handle = $form['db_handle']['#value'];
+				$selected_radio_option = $form_state['values']['table'];
+				if (is_null($selected_radio_option)) {
+					drupal_set_message(t("Selection not saved because no records were selected."),'warning');
+				} else {
+					// now the D7 tableselect actually returns the key field value
+					$key_field_val = $selected_radio_option;
+					if ($result = fetchit_set_existing_selection_nid ($db_handle,$db_type,$nid,$key_field_val)) {
+						drupal_set_message(t("Selection saved."),'status');
+					} else {
+						drupal_set_message(t("The selected record was NOT saved. Please contact the site administrator."),'warning');
+					}
+				}
+			} else {
+				drupal_set_message(t("The selected record was NOT saved because a table key field was not detected.  Please contact the site administrator."),'warning');
+			}
+			break;
+		case 'copy_multiple':
+			$key_field_ndx = $form['key_field_ndx']['#value'];
+			if ($key_field_ndx) {
+				$db_type = $form['db_type']['#value'];
+				$db_handle = $form['db_handle']['#value'];
+				$selected_checkbox_options = array_filter($form_state['values']['table']);
+				// now the D7 tableselect returns the key field value
+				$key_field_vals = $selected_checkbox_options;
+				if (array_count_values($key_field_vals)) {
+					$result = fetchit_set_existing_selection_nid ($db_handle,$db_type,$nid,$key_field_vals);
+					if ($result) {
+						drupal_set_message(t("Selections ($result records) saved."),'status');
+					} else {
+						drupal_set_message(t("The selected records were NOT saved. Please contact the site administrator."),'warning');
+					}
+				} else {
+					$result = fetchit_set_existing_selection_nid ($db_handle,$db_type,$nid,$key_field_vals);
+					drupal_set_message(t("Selections ($result records) saved."),'status');
+				}
+			} else {
+				drupal_set_message(t("The selected records were NOT saved because a table key field was not detected.  Please contact the site administrator."),'warning');
+			}
+			break;
+		case 'delete_multiple':
+			$key_field_ndx = $form['key_field_ndx']['#value'];
+			if ($key_field_ndx) {
+				$db_type = $form['db_type']['#value'];
+				$db_handle = $form['db_handle']['#value'];
+				$selected_checkbox_options = array_filter($form_state['values']['table']);
+				$key_field_vals = $selected_checkbox_options;
+				if (array_count_values($key_field_vals)) {
+					$result = fetchit_set_existing_selection_nid ($db_handle,$db_type,$nid,$key_field_vals);
+					if ($result) {
+						drupal_set_message(t("Selections ($result records) deleted."),'status');
+					} else {
+						drupal_set_message(t("The selected records were NOT deleted. Please contact the site administrator."),'warning');
+					}
+				} else {
+					$result = fetchit_set_existing_selection_nid ($db_handle,$db_type,$nid,$key_field_vals);
+					drupal_set_message(t("Selections ($result records) deleted."),'status');
+				}
+			} else {
+				drupal_set_message(t("The selected records were NOT deleted because a table key field was not detected.  Please contact the site administrator."),'warning');
+			}
+			break;
+		default:
+	}
+
+	//run the post query
+	$postqry = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_post_function','value'));
+	if (strlen($postqry)) {
+		if (strtolower(substr($postqry,0,4)) == 'php.') {
+			$thefunction = substr($postqry,4); 
+			global $user;
+    		$user_uid = (int) $user->uid;
+			$result = $thefunction($user_uid);
+		} else {
+			$result = fetchit_run_query($db_type,$db_handle,$postqry);
+		}
+	}
+
+	// redirect to the next page
+	$redirect = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_redirect','value'));
+	if (strlen($redirect)) {
+		$form_state['redirect'] = $redirect; 
+	}
+	
 	// reset the text
-	drupal_set_message(t('Successfully submitted changes.'),'status');
+	//drupal_set_message(t('Successfully submitted changes.'),'status');
 }
 
 
@@ -655,7 +737,8 @@ function fetchit7_content_field_mapper ($field_id) {
  * includes the basic node fields in case those are useful
  */
 function fetchit7_content_field_fetcher ($nid, $field_id = 'title', $format = 'value') {
-	$output = array();
+	//$output = array();
+	$output = '';
 	if ($node = node_load($nid)) {
 		if ($field_name = fetchit7_node_field_mapper ($field_id)) {
 			// it is a recognized node field so get the value from $node object
@@ -865,3 +948,255 @@ function fetchit_get_data($db_type,&$data_object,$row,$field) {
 	}
 	return $data;
 }
+
+function fetchit_get_existing_selection_nid ($db_handle,$db_type,$nid) {
+	if ($db_handle) {
+		if ($db_type) {
+			if ($nid) {
+				$table_selection_type = trim(fetchit7_content_field_fetcher($nid,'table_selection_type','value'));
+				switch ($table_selection_type) {
+					case 'none': // static html - no selection - do nothing
+						break;
+
+					case 'copy_single': // radio button record selection
+						$table_selection_table = trim(fetchit7_content_field_fetcher($nid,'table_selection_table','value'));
+						$user_uid_field = trim(fetchit7_content_field_fetcher($nid,'uid_field','value'));
+						$key_field = trim(fetchit7_content_field_fetcher($nid,'key_field','value'));
+						$result = fetchit_get_existing_selection_single($db_handle,$db_type,$table_selection_table,$key_field,$user_uid_field); 
+						return $result;
+						break;
+
+					case 'copy_multiple': // check boxes button record selection
+						$table_selection_table = trim(fetchit7_content_field_fetcher($nid,'table_selection_table','value'));
+						$user_uid_field = trim(fetchit7_content_field_fetcher($nid,'uid_field','value'));
+						$key_field = trim(fetchit7_content_field_fetcher($nid,'key_field','value'));
+						$result = fetchit_get_existing_selection_multiple($db_handle,$db_type,$table_selection_table,$key_field,$user_uid_field); 
+						return $result;
+						break;
+
+					case 'delete_multiple':
+					default:
+				}
+			}
+		}
+	}
+}
+
+function fetchit_set_existing_selection_nid ($db_handle,$db_type,$nid,$val) {
+	if ($db_handle) {
+		if ($db_type) {
+			if ($nid) {
+				$table_selection_type = trim(fetchit7_content_field_fetcher($nid,'table_selection_type','value'));
+				switch ($table_selection_type) {
+					case 'none': // static html - no selection - do nothing
+						break;
+
+					case 'copy_single': // radio button record selection
+						$table_selection_table = trim(fetchit7_content_field_fetcher($nid,'table_selection_table','value'));
+						$user_uid_field = trim(fetchit7_content_field_fetcher($nid,'uid_field','value'));
+						$key_field = trim(fetchit7_content_field_fetcher($nid,'key_field','value'));
+						$result = fetchit_set_existing_selection_single($db_handle,$db_type,$table_selection_table,$key_field,$user_uid_field,$val); 
+						return $result;
+						break;
+
+					case 'copy_multiple': // check boxes button record selection
+						$table_selection_table = trim(fetchit7_content_field_fetcher($nid,'table_selection_table','value'));
+						$user_uid_field = trim(fetchit7_content_field_fetcher($nid,'uid_field','value'));
+						$key_field = trim(fetchit7_content_field_fetcher($nid,'key_field','value'));
+						$result = fetchit_set_existing_selection_multiple($db_handle,$db_type,$table_selection_table,$key_field,$user_uid_field,$val); 
+						return $result;
+						break;
+
+					case 'delete_multiple':
+						$deletion_table_name = trim(fetchit7_content_field_fetcher($nid,'source_view','value'));
+						$user_uid_field = trim(fetchit7_content_field_fetcher($nid,'uid_field','value'));
+						$key_field = trim(fetchit7_content_field_fetcher($nid,'key_field','value'));
+						$result = fetchit_del_existing_selection_multiple($db_handle,$db_type,$deletion_table_name,$key_field,$user_uid_field,$val); 
+						return $result;
+						break;
+
+					default:
+				}
+			}
+		}
+	}
+}
+
+function fetchit_get_existing_selection_single($db_handle,$db_type,$record_select_table,$key_field,$user_uid_field) {
+	if($db_handle) {
+		if($db_type) {
+			switch ($db_type) {
+				case FETCHIT7_DBTYPE_NAME_PGSQL:
+					if(strlen(trim($record_select_table))) {
+						if(strlen(trim($key_field))) {
+							$qry = "SELECT $key_field FROM $record_select_table";
+							if (strlen(trim($user_uid_field))) {
+								global $user;
+								$user_uid = $user->uid;
+								$qry .= " WHERE $user_uid_field = $user_uid";
+							}
+							$qry .= " LIMIT 1";
+							$db_object = pg_query($db_handle,$qry);
+							$row = pg_fetch_object($db_object);
+							$selection = $row->$key_field;
+							return $selection;
+						}
+					}
+					break;
+
+				case FETCHIT7_DBTYPE_NAME_MYSQL:
+				case FETCHIT7_DBTYPE_NAME_MSSQL:
+				default:
+			}
+		}
+	}
+}
+
+function fetchit_set_existing_selection_single($db_handle,$db_type,$record_select_table,$key_field,$user_uid_field,$val) {
+	$insertedrecordcount = 0;
+	if($db_handle) {
+		if($db_type) {
+			switch ($db_type) {
+				case FETCHIT7_DBTYPE_NAME_PGSQL:
+					if(strlen(trim($record_select_table))) {
+						if(strlen(trim($key_field))) {
+							$qry = "DELETE FROM $record_select_table";
+							if (strlen(trim($user_uid_field))) {
+								global $user;
+								$qry .= " WHERE $user_uid_field = ".$user->uid;
+							}
+							$db_result = pg_query($db_handle,$qry);
+							$fldstr = $key_field;
+							if (strlen(trim($user_uid_field))) {
+								$fldstr .= ",$user_uid_field";
+							}
+							
+							$qry = "INSERT INTO $record_select_table($fldstr) VALUES(".pg_escape_string($val);
+							if (strlen(trim($user_uid_field))) {
+								global $user;
+								$user_uid = $user->uid;
+								$qry .= ",$user_uid";
+							}
+							$qry .= ")";
+							if ($db_result = pg_query($db_handle,$qry)) {
+								++$insertedrecordcount;
+							}
+						}
+					}
+					break;
+
+				case FETCHIT7_DBTYPE_NAME_MYSQL:
+				case FETCHIT7_DBTYPE_NAME_MSSQL:
+				default:
+			}
+		}
+	}
+	return $insertedrecordcount;
+}
+
+function fetchit_get_existing_selection_multiple($db_handle,$db_type,$record_select_table,$key_field,$user_uid_field) {
+	if($db_handle) {
+		if($db_type) {
+			switch ($db_type) {
+				case FETCHIT7_DBTYPE_NAME_PGSQL:
+					if(strlen(trim($record_select_table))) {
+						if(strlen(trim($key_field))) {
+							$qry = "SELECT $key_field FROM $record_select_table";
+							if (strlen(trim($user_uid_field))) {
+								global $user;
+								$user_uid = $user->uid;
+								$qry .= " WHERE $user_uid_field = $user_uid";
+							}
+							$selection = array();
+							$db_object = pg_query($db_handle,$qry);
+							while($row = pg_fetch_object($db_object)) {
+								$selection[] = $row->$key_field;  
+							};
+							return $selection;
+						}
+					}
+					break;
+
+				case FETCHIT7_DBTYPE_NAME_MYSQL:
+				case FETCHIT7_DBTYPE_NAME_MSSQL:
+				default:
+			}
+		}
+	}	
+}
+
+function fetchit_set_existing_selection_multiple($db_handle,$db_type,$record_select_table,$key_field,$user_uid_field,$vals) {
+	$insertedrecordcount = 0;
+	if($db_handle) {
+		if($db_type) {
+			switch ($db_type) {
+				case FETCHIT7_DBTYPE_NAME_PGSQL:
+					if(strlen(trim($record_select_table))) {
+						if(strlen(trim($key_field))) {
+							$qry = "DELETE FROM $record_select_table";
+							if (strlen(trim($user_uid_field))) {
+								global $user;
+								$qry .= " WHERE $user_uid_field = ".$user->uid;
+							}
+							$db_object = pg_query($db_handle,$qry);
+							$fldstr = $key_field;
+							if (strlen(trim($user_uid_field))) {
+								$fldstr .= ",$user_uid_field";
+							}
+							foreach ($vals as $val) {
+								$qry = "INSERT INTO $record_select_table($fldstr) VALUES(".pg_escape_string($val);
+								if (strlen(trim($user_uid_field))) {
+									global $user;
+									$user_uid = $user->uid;
+									$qry .= ",$user_uid";
+								}
+								$qry .= ")";
+								if($db_result = pg_query($db_handle,$qry)){
+									++$insertedrecordcount;
+								}
+							}
+						}
+					}
+					break;
+
+				case FETCHIT7_DBTYPE_NAME_MYSQL:
+				case FETCHIT7_DBTYPE_NAME_MSSQL:
+				default:
+			}
+		}
+	}
+	return $insertedrecordcount;
+}
+
+function fetchit_del_existing_selection_multiple($db_handle,$db_type,$deletion_table,$key_field,$user_uid_field,$vals) {
+	$deletedrecordcount = 0;
+	if($db_handle) {
+		if($db_type) {
+			switch ($db_type) {
+				case FETCHIT7_DBTYPE_NAME_PGSQL:
+					if(strlen(trim($deletion_table))) {
+						if(strlen(trim($key_field))) {
+							foreach ($vals as $val) {
+								$qry = "DELETE FROM $deletion_table WHERE $key_field = $val";
+								if (strlen(trim($user_uid_field))) {
+									global $user;
+									$user_uid = $user->uid;
+									$qry .= " AND $user_uid_field = $user_uid";
+								}
+								if($db_result = pg_query($db_handle,$qry)){
+									++$deletedrecordcount;
+								}
+							}
+						}
+					}
+					break;
+
+				case FETCHIT7_DBTYPE_NAME_MYSQL:
+				case FETCHIT7_DBTYPE_NAME_MSSQL:
+				default:
+			}
+		}
+	}	
+	return $deletedrecordcount;
+}
+
