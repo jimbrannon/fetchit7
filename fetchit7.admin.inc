@@ -398,18 +398,27 @@ function fetchit7_maketablequery_create($tablename,$fieldstrings) {
   * @see system_settings_form().
   */
 function fetchit7_admin_restorecontent() {
-
+	global $databases;
 	$form = array();
-	
-	// text element
-	$form['fetchit7_admin_restorecontent_name'] = array(
-		'#type' => 'textfield',
-		'#default_value' => 'default',
-		'#title' => t('Enter a backup name to restore.'),
-		'#size' => 30,
-		'#maxlength' => 60,
-		'#required' => TRUE,
-	);
+	// get the fetchit7 content backup tables to choose from. 
+	// first get the database name
+  $db_name = $databases['default']['default']['database'];
+	// now query for table names that meet the pattern
+	$sql = 'SHOW TABLES LIKE \'fetchit7_content_%_backup_%\';';
+	$result = db_query($sql);
+	$fieldname = 'Tables_in_'.$db_name.' (fetchit7_content_%_backup_%)';
+	$options = array();
+	foreach ($result as $row) {
+		$options[] = $row->$fieldname;
+	}
+	# put up a select list
+	 $form['fetchit7_content_backup_table_select'] = array(
+       '#type' => 'select',
+       '#title' => t('fetchit7 content backup tables'),
+       '#options' => $options,
+       '#default_value' => 0,
+       '#description' => t('Choose a fetchit7 content backup table to restore.'),
+   );
 	
 	$form['fetchit7_admin_restorecontent_submit'] = array(
 		'#type' => 'submit',
@@ -426,22 +435,23 @@ function fetchit7_admin_restorecontent() {
  * Process fetchit7 settings form submission
  */
 function fetchit7_admin_restorecontent_submit ($form, $form_state) {
-	// get the user entered string containing the backup name
-	if(!strlen(trim($string = $form_state['values']['fetchit7_admin_restorecontent_name']))) $string = 'default';
-	// fetchit7 content types
-	// TODO: should loop through all fetchit7 content types - search by name? - rather than have them hardcoded here
-	$content_types = array();
-	$content_types[] = 'fetchit7_content_table';
-	$contenttypecount = 0;
-	$contentcount = 0;
-	foreach ($content_types as $content_type) {
-		$tablename = 'fetchit7_content_table_backup_'.$string;
-		if($newrecords = fetchit7_content_backuptable_restore($content_type,$tablename)) {
-			++$contenttypecount;
-			$contentcount = $contentcount + $newrecords;
-		}
+	// get the backup table name
+	$options = $form['fetchit7_content_backup_table_select']['#options'];
+	$tablename = $options[$form_state['values']['fetchit7_content_backup_table_select']];
+	// ugly
+	switch (substr($tablename,17,5)) {
+		case 'table':
+			$content_type = 'fetchit7_content_table';
+			break;
+		case 'param':
+			$content_type = 'fetchit7_content_param';
+			break;
+		default:
+			drupal_set_message(t("Error processing fetchit7 backup table $tablename"),'warning');
+			return FALSE;
 	}
-	drupal_set_message(t("Successfully restored $contenttypecount content types, $contentcount records total."),'status');
+	$newrecords = fetchit7_content_backuptable_restore($content_type,$tablename);
+	drupal_set_message(t("Successfully restored $newrecords records of type $content_type from table $tablename."),'status');
 }
 
 function fetchit7_content_backuptable_restore($type,$tablename) {

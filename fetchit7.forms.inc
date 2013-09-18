@@ -21,7 +21,8 @@ function fetchit7_table_form($form, &$form_state) {
 	$append_record_flag = FALSE;
 	$parameter_select_flag = FALSE;
 	$text_input_flag = FALSE;
-	$table_weight = 0;
+	$table_weight = -8; // it goes at the top of the form
+	$submit_weight = 8; // it goes at the bottom of the form
 	
 	// get nid embedded into original form_id; format fetchit7_table_form_X### - nid starts at 21
 	$form_id = $form_state['build_info']['form_id'];
@@ -110,6 +111,9 @@ function fetchit7_table_form($form, &$form_state) {
 	$key_field = trim(fetchit7_content_field_fetcher($nid,'key_field','value'));
 	$form['key_field'] = array('#type' => 'value','#value' => $key_field);
 
+	// get table weight value 
+	$table_weight = trim(fetchit7_content_field_fetcher($nid,'table_weight','value'));
+
 	// get submit button label 
 	$submit_label = trim(fetchit7_content_field_fetcher($nid,'submit_label','value'));
 	$form['submit_label'] = array('#type' => 'value','#value' => $submit_label);
@@ -142,6 +146,8 @@ function fetchit7_table_form($form, &$form_state) {
 				$submit_label = 'Submit';
 		}
 	}
+	// get table weight value 
+	$submit_weight = trim(fetchit7_content_field_fetcher($nid,'submit_weight','value'));
 
 	// get the source data into a data object
 	if (!($db_data_object = fetchit_get_data_object($db_type,$db_handle,$view_name,$user_uid_field))) {
@@ -239,7 +245,7 @@ function fetchit7_table_form($form, &$form_state) {
 					//'#default_value' => $existing_selections,
 					'#multiple' => $multiple_flag,
 					'#js_select' => $selectall_flag,
-					'#empty' => ' Nothing to see here.  Move along, please.',
+					'#empty' => 'Nothing to see here.  Move along, please.',
 					'#weight' => $table_weight,
 			);
 			break;
@@ -270,7 +276,8 @@ function fetchit7_table_form($form, &$form_state) {
 				'#theme' => 'table',
 				'#header' => $header,
 				'#rows' => $rows,
-				'#empty' => 'empty',
+				'#empty' => 'Nothing to see here.  Move along, please.',
+				'#weight' => $table_weight,
 			);
 	}
 
@@ -314,6 +321,7 @@ function fetchit7_table_form($form, &$form_state) {
 		$form['submit'] = array(
 			'#type' => 'submit',
 			'#value' => $submit_label,
+			'#weight' => $submit_weight,
 		);
 	}
 
@@ -386,8 +394,6 @@ function fetchit7_table_form_submit ($form, &$form_state) {
 	// pop a log message
 	watchdog("fetchit7 module","entered fetchit7_table_form_submit");
 	// reset the text
-	if(!strlen(trim($string = $form_state['values']['fetchit7_table_text']))) $string = 'fetchit7_table_text_default_value';
-	variable_set('fetchit7_table_text',$string);
 	drupal_set_message(t('Successfully submitted changes.'),'status');
 }
 
@@ -603,16 +609,26 @@ function fetchit7_content_field_mapper ($field_id) {
 		case 'fetchit7_field_key_field':
 			$field_name = 'fetchit7_field_key_field';
 			break;
+		case 'table_weight':
+		case 'fetchit7_field_table_weight':
+			$field_name = 'fetchit7_field_table_weight';
+			break;
 		case 'submit_label':
 		case 'fetchit7_field_submit_label':
 			$field_name = 'fetchit7_field_submit_label';
 			break;
+		case 'submit_weight':
+		case 'fetchit7_field_submit_weight':
+			$field_name = 'fetchit7_field_submit_weight';
+			break;
 		// fetchit7 custom fields used by html table content type
+		case 'tbl_sel_typ':
 		case 'record_select':
 		case 'table_selection_type':
 		case 'fetchit7_field_tbl_sel_typ':
 			$field_name = 'fetchit7_field_tbl_sel_typ';
 			break;
+		CASE 'tbl_sel_tbl':
 		case 'record_select_table':
 		case 'table_selection_table':
 		case 'fetchit7_field_tbl_sel_tbl':

@@ -25,7 +25,7 @@ function fetchit7_install () {
 	$record->ndx = 0;
 	$record->name = 'fetchit7_content_table';
 	$record->title = 'HTML Table';
-	$record->description = 'these are either plain HTML tables or the new Drupal 7 tableselect elements with selections (radio buttons or checkboxes) in column 1.  Can be used to display a table, select a single record, select multiple records, or delete multiple records.';
+	$record->description = 'These are either plain HTML tables or the new Drupal 7 tableselect elements with selections (radio buttons or checkboxes) in column 1.  Can be used to display a table, select a single record, select multiple records, or delete multiple records.';
 	$record->location = 'block'; // block
 	$record->enabled = 1; // true
 	$record->db_host = 'localhost';
@@ -34,6 +34,16 @@ function fetchit7_install () {
 	$record->db_name = '';
 	$record->db_login = '';
 	$record->db_password = '';
+	//$record->pre_function = '';
+	//$record->post_function = '';
+	//$record->source_view = '';
+	//$record->uid_field = '';
+	//$record->key_field = '';
+	//$record->table_weight = -8;
+	//$record->submit_label = '';
+	//$record->submit_weight = 8;
+	//$record->tbl_sel_typ = 'none';
+	//$record->tbl_sel_tbl = '';
 	drupal_write_record($table,$record);
 	// Google data visualization record
 	$record->ndx = 2;
@@ -48,6 +58,8 @@ function fetchit7_install () {
 	$record->db_name = '';
 	$record->db_login = '';
 	$record->db_password = '';
+	//$record->pre_function = '';
+	//$record->post_function = '';
 	drupal_write_record($table,$record);
 	// parameter input
 	$record->ndx = 4;
@@ -62,6 +74,8 @@ function fetchit7_install () {
 	$record->db_name = '';
 	$record->db_login = '';
 	$record->db_password = '';
+	//$record->pre_function = '';
+	//$record->post_function = '';
 	drupal_write_record($table,$record);
 	// append record
 	$record->ndx = 7;
@@ -76,6 +90,8 @@ function fetchit7_install () {
 	$record->db_name = '';
 	$record->db_login = '';
 	$record->db_password = '';
+	//$record->pre_function = '';
+	//$record->post_function = '';
 	drupal_write_record($table,$record);
 	// editable grid
 	$record->ndx = 8;
@@ -90,6 +106,8 @@ function fetchit7_install () {
 	$record->db_name = '';
 	$record->db_login = '';
 	$record->db_password = '';
+	//$record->pre_function = '';
+	//$record->post_function = '';
 	drupal_write_record($table,$record);
 	// Open layers map
 	$record->ndx = 10;
@@ -104,6 +122,8 @@ function fetchit7_install () {
 	$record->db_name = '';
 	$record->db_login = '';
 	$record->db_password = '';
+	//$record->pre_function = '';
+	//$record->post_function = '';
 	drupal_write_record($table,$record);
 
 	watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_db_types");
@@ -448,6 +468,79 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '1',
 		),
+		// table weight
+		'fetchit7_field_table_weight' => array(
+			'label'						=> $t('Table weight'),
+			'settings'				=> array (
+					'allowed_values'	=> array (
+							-8		=> '-8',
+							-7		=> '-7',
+							-6		=> '-6',
+							-5		=> '-5',
+							-4		=> '-4',
+							-3		=> '-3',
+							-2		=> '-2',
+							-1		=> '-1',
+							0		=> '0',
+							1		=> '1',
+							2		=> '2',
+							3		=> '3',
+							4		=> '4',
+							5		=> '5',
+							6		=> '6',
+							7		=> '7',
+							8		=> '8',
+					),
+					//'allowed_values_function' => '',
+			),
+			//'entity_types'		=> array (),
+			//'translatable'		=> '0',
+			//'storage'					=> array (
+			//		'type'						=> 'field_sql_storage',
+			//		'settings'				=> array (),
+			//		'module'					=> 'field_sql_storage',
+			//		'active'					=> '1',
+			//		'details'					=> array (
+			//				'sql' => array (
+			//						'FIELD_LOAD_CURRENT' => array (
+			//								'field_data_fetchit7_field_location' => array (
+			//										'value' => 'ffetchit7_field_location_value',
+			//								),
+			//						),
+			//						'FIELD_LOAD_REVISION' => array (
+			//								'field_revision_fetchit7_field_location' => array (
+			//										'value' => 'fetchit7_field_location_value',
+			//								),
+			//						),
+			//				),
+			//		),
+			//),
+			//'foreign keys'		=> array (),
+			//'indexes'					=> array (
+			//		'value'						=> array (
+			//				0 => 'value',
+			//		),
+			//),
+			//'id'							=> '10',
+			'field_name'			=> 'fetchit7_field_table_weight',
+			'type'						=> 'list_integer',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+			//'deleted'					=> '0',
+			//'columns'					=> array (
+			//		'value'						=> array (
+			//				'type' => 'int',
+			//				'not null' => false,
+			//		),
+			//),
+			//'bundles'					=> array (
+			//		'node'						=> array (
+			//				0 => 'fetchit7_content_table',
+			//		),
+			//),
+		),
 		// submit button label
 		'fetchit7_field_submit_label' => array(
 			'label'						=> $t('Submit button label'),
@@ -461,9 +554,82 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '1',
 		),
+		// submit button weight
+		'fetchit7_field_submit_weight' => array(
+			'label'						=> $t('Submit button weight'),
+			'settings'				=> array (
+					'allowed_values'	=> array (
+							-8		=> '-8',
+							-7		=> '-7',
+							-6		=> '-6',
+							-5		=> '-5',
+							-4		=> '-4',
+							-3		=> '-3',
+							-2		=> '-2',
+							-1		=> '-1',
+							0		=> '0',
+							1		=> '1',
+							2		=> '2',
+							3		=> '3',
+							4		=> '4',
+							5		=> '5',
+							6		=> '6',
+							7		=> '7',
+							8		=> '8',
+					),
+					//'allowed_values_function' => '',
+			),
+			//'entity_types'		=> array (),
+			//'translatable'		=> '0',
+			//'storage'					=> array (
+			//		'type'						=> 'field_sql_storage',
+			//		'settings'				=> array (),
+			//		'module'					=> 'field_sql_storage',
+			//		'active'					=> '1',
+			//		'details'					=> array (
+			//				'sql' => array (
+			//						'FIELD_LOAD_CURRENT' => array (
+			//								'field_data_fetchit7_field_location' => array (
+			//										'value' => 'ffetchit7_field_location_value',
+			//								),
+			//						),
+			//						'FIELD_LOAD_REVISION' => array (
+			//								'field_revision_fetchit7_field_location' => array (
+			//										'value' => 'fetchit7_field_location_value',
+			//								),
+			//						),
+			//				),
+			//		),
+			//),
+			//'foreign keys'		=> array (),
+			//'indexes'					=> array (
+			//		'value'						=> array (
+			//				0 => 'value',
+			//		),
+			//),
+			//'id'							=> '10',
+			'field_name'			=> 'fetchit7_field_submit_weight',
+			'type'						=> 'list_integer',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+			//'deleted'					=> '0',
+			//'columns'					=> array (
+			//		'value'						=> array (
+			//				'type' => 'int',
+			//				'not null' => false,
+			//		),
+			//),
+			//'bundles'					=> array (
+			//		'node'						=> array (
+			//				0 => 'fetchit7_content_table',
+			//		),
+			//),
+		),
 
 		// =====================================================
-		// these are fields that apply to html tables
+		// these are fields that apply to html tables only
 		// =====================================================
 		// table record selection
 		'fetchit7_field_tbl_sel_typ' => array(
@@ -901,6 +1067,48 @@ function _fetchit7_content_table_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		'fetchit7_field_table_weight' => array(
+			'label'					=> $t('Table weight'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where on the form to display the table (relative to other form elements).'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '-8',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_table_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
 		// submit button label
 		'fetchit7_field_submit_label' => array(
 			'label'					=> $t('Submit button label'),
@@ -927,6 +1135,48 @@ function _fetchit7_content_table_installed_instances () {
 			'field_name'		=> 'fetchit7_field_submit_label',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_submit_weight' => array(
+			'label'					=> $t('Submit button weight'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where on the form to display the submit button (relative to other form elements).'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '8',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_submit_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
 		),
 				
 		// =====================================================
