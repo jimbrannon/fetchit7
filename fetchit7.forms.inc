@@ -216,6 +216,9 @@ function fetchit7_table_form($form, &$form_state) {
 						if ($field_ndx == ($key_field_ndx-1)) {
 							// use this as the key for the options array
 							$options_key = $db_value;
+							if ($row_ndx == 0) {
+								$default_value = $db_value;
+							}
 						} else {
 							if ($row_ndx == 0) {
 								$header['column'.$column_count] = $field_names[$field_ndx];
@@ -236,13 +239,14 @@ function fetchit7_table_form($form, &$form_state) {
 			} else {
 				$multiple_flag = TRUE;
 				$selectall_flag = TRUE;
+				$default_value = array(); // reset to nothing selected
 			}
 			// create the HTML tableselect render array with a single select option
 			$form['table'] = array(
 					'#type' => 'tableselect',
 					'#header' => $header,
 					'#options' => $options,
-					//'#default_value' => $existing_selections,
+					'#default_value' => $default_value,
 					'#multiple' => $multiple_flag,
 					'#js_select' => $selectall_flag,
 					'#empty' => 'Nothing to see here.  Move along, please.',
@@ -348,9 +352,9 @@ function fetchit7_table_form_validate ($form, &$form_state) {
 			// nothing really to check on a plain html table
 			break;
 		case 1: //radio buttons
-			$selected = array_filter($form_state['values']['table']);
-			if(!$selected) {
-				form_set_error('submit',t("Invalid selection: A selection is required before pressing the submit button."));
+			$selected = $form_state['values']['table'];
+			if(is_null($selected)) {
+				form_set_error('submit',t("Invalid selection: $selected  A selection is required before pressing the submit button."));
 				return;
 			}
 			$key_field = $form['key_field']['#value'];
