@@ -6,6 +6,7 @@
  */
 
 include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.constants.inc'); 
+include_once(drupal_get_path('module', 'fetchit7').'/fetchit2.constants.inc'); 
 
 //===================================
 // fetchit7 html table form content
@@ -590,7 +591,6 @@ function fetchit7_param_form($form, &$form_state) {
 		++$count;
 	}
 	$user_field_data = array();
-	$param_count = array_count($param_names);
 	$field_index = 0; // the actually created parameter fields
 	$param_index = 0; // the list of parameter values created by the user - just in case the returned array does not have 0 based integer keys
 	// even though the fetchit2 does this too...do some data preprocessing 
@@ -599,21 +599,21 @@ function fetchit7_param_form($form, &$form_state) {
 			$user_field_data[$field_index][F_DR_FIELD_NAME_STR] = $param_name;
 
 			//title default of '' is OK
-			if ($param_index < array_count($param_titles)) {
+			if ($param_index < count($param_titles)) {
 				$user_field_data[$field_index][F_DR_FIELD_TITLE_STR] = trim($param_titles[$param_index]);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_TITLE_STR] = '';
 			}
 
 			//description default of '' is OK
-			if ($param_index < array_count($param_descriptions)) {
+			if ($param_index < count($param_descriptions)) {
 				$user_field_data[$field_index][F_DR_FIELD_DESC_STR] = trim($param_descriptions[$param_index]);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_DESC_STR] = '';
 			}
 
 			// types require some more checking since they are typed into a text box
-			if ($param_index < array_count($param_types)) {
+			if ($param_index < count($param_types)) {
 				// see if the control type matches something we know about
 				if ($key = array_search(strtolower(trim($param_types[$param_index])), $control_list)) {
 					$user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR] = $key - 1; // the fetchit2 code wants an index here, and we had incremented these by 1 above to make array_search() easier to use
@@ -629,7 +629,7 @@ function fetchit7_param_form($form, &$form_state) {
 
 			//$param_enabled
 			//fetchit2 uses disabled - so default of disabled = true is OK
-			if ($param_index < array_count($param_enabled)) {
+			if ($param_index < count($param_enabled)) {
 				$enabled = filter_var(trim($param_enabled[$param_index]), FILTER_VALIDATE_BOOLEAN);
 				$user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = !$enabled;
 			} else {
@@ -638,7 +638,7 @@ function fetchit7_param_form($form, &$form_state) {
 						
 			//$param_required
 			//default of required = true is OK
-			if ($param_index < array_count($param_required)) {
+			if ($param_index < count($param_required)) {
 				$user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = filter_var(trim($param_required[$param_index]), FILTER_VALIDATE_BOOLEAN);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = TRUE;
@@ -646,7 +646,7 @@ function fetchit7_param_form($form, &$form_state) {
 						
 			//$param_str parameter string ?what is this for?
 			//title default of '' is OK
-			if ($param_index < array_count($param_str)) {
+			if ($param_index < count($param_str)) {
 				$user_field_data[$field_index][F_DR_FIELD_PARAMETER_STR] = trim($param_str[$param_index]);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_PARAMETER_STR] = '';
@@ -654,7 +654,7 @@ function fetchit7_param_form($form, &$form_state) {
 			
 			//$param_list_tbl F_DR_FIELD_LIST_TBL_STR
 			//table name default of '' is OK
-			if ($param_index < array_count($param_list_tbl)) {
+			if ($param_index < count($param_list_tbl)) {
 				$user_field_data[$field_index][F_DR_FIELD_LIST_TBL_STR] = trim($param_list_tbl[$param_index]);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_LIST_TBL_STR] = '';
@@ -667,7 +667,7 @@ function fetchit7_param_form($form, &$form_state) {
 			//$param_list_uid F_DR_FIELD_LIST_UID_STR
 			// this is actually a boolean flag
 			// uid field name default of false is OK (usually the items in a parameter selection list are not user specific)
-			if ($param_index < array_count($param_list_uid)) {
+			if ($param_index < count($param_list_uid)) {
 				$user_field_data[$field_index][F_DR_FIELD_LIST_UID_STR] = filter_var(trim($param_list_uid[$param_index]), FILTER_VALIDATE_BOOLEAN);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_LIST_UID_STR] = FALSE;
@@ -675,7 +675,7 @@ function fetchit7_param_form($form, &$form_state) {
 						
 			//$param_list_def F_DR_FIELD_DEFAULT_STR
 			//default string of '' is OK
-			if ($param_index < array_count($param_list_def)) {
+			if ($param_index < count($param_list_def)) {
 				$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = trim($param_list_def[$param_index]);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
@@ -683,7 +683,7 @@ function fetchit7_param_form($form, &$form_state) {
 					
 			//$param_data_tbl F_DR_FIELD_DATA_TBL_STR
 			// this is required
-			if ($param_index < array_count($param_data_tbl)) {
+			if ($param_index < count($param_data_tbl)) {
 				if (strlen(trim($param_data_tbl[$param_index]))) {
 					$user_field_data[$field_index][F_DR_FIELD_DATA_TBL_STR] = trim($param_data_tbl[$param_index]);
 				} else {
@@ -691,7 +691,6 @@ function fetchit7_param_form($form, &$form_state) {
 					drupal_set_message("Parameter $param_index data selection table missing.  There must be as many data selection tables specified as there are parameter names. Please contact the site administrator.",'error');
 					return;
 				}
-				
 			} else {
 				// can't have a default here, too many complications
 				drupal_set_message("Parameter $param_index data selection table missing.  There must be as many data selection tables specified as there are parameter names. Please contact the site administrator.",'error');
@@ -703,7 +702,7 @@ function fetchit7_param_form($form, &$form_state) {
 			//$param_data_uid F_DR_FIELD_DATA_UID_STR
 			// can't find it used in fetchit2 code, but treat it like the LIST table UID field, as a boolean flag
 			// uid field name default of true is OK (usually the selections made by a user need to be user specific)
-			if ($param_index < array_count($param_data_uid)) {
+			if ($param_index < count($param_data_uid)) {
 				$user_field_data[$field_index][F_DR_FIELD_DATA_UID_STR] = filter_var(trim($param_data_uid[$param_index]), FILTER_VALIDATE_BOOLEAN);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_DATA_UID_STR] = TRUE;
@@ -713,9 +712,103 @@ function fetchit7_param_form($form, &$form_state) {
 		}
 		++$param_index;
 	}
-
-	// $user_field_data = fetchit_get_user_field_data($nid);
+	$field_count = $field_index;
 	
+	// loop through the user entered fields and make a table of parameter input control elements
+	// render each control element then put the rendered elements into an unrendered table
+	// critical to the operation of this form are the unique form ids of the rendered control elements
+	$param_count = 0;
+	//for ($i=0; $i<F_DR_PARAM_FIELD_LIST_COUNT; $i++) {
+	for ($i=0; $i<$field_count; $i++) {
+		// loop through the user entered field name info
+		// when there are blank (unused) user entered field names, skip them
+		if (strlen(trim($param_name = $user_field_data[$i][F_DR_FIELD_NAME_STR]))) {
+			// a field name was specified, so create a parameter element control
+			// first - save some values into the form for use later
+			$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
+			$form['param_indices'][$param_count] = array('#type' => 'value','#value' => $i);
+			$form['param_names'][$param_count] = array('#type' => 'value','#value' => $param_name);
+			// param types are the field types of the "stored" (F_DR_DATA_TBL_NDX_FLD) field in the data tables where the parameter values are saved
+			// and probably (hopefully? required?) the same type as the stored values in the list tables if they are used  
+			// regardless, the control will be set-up to handle the data table field type
+			// and whatever value is gotten from the control will be formatted to fit into the data table field
+			// also, we ASSUME there is also a Drupal user_id field "drupal_userid" (F_DR_DATA_TBL_UID_FLD) in EVERY parameter data table
+			$data_tbl = $user_field_data[$i][F_DR_FIELD_DATA_TBL_STR];
+			$data_ndx = F_DR_DATA_TBL_NDX_FLD;
+			$data_uid = F_DR_DATA_TBL_UID_FLD;
+			if (strlen(trim($data_tbl))) { // if a data table is specified then we can continue building the parameter input control
+				// save the data table name value into the form
+				$form['param_data_table'][$param_count] = array('#type' => 'value','#value' => $data_tbl);
+				$form['param_data_uid'][$param_count] = array('#type' => 'value','#value' => $data_uid);
+				//just need field names and types, does not really matter which record we get
+				$data_tbl_db_object = fetchit_get_data_object_1($db_type,$db_handle,$data_tbl,$data_uid);
+				$data_tbl_field_names = fetchit_get_field_names($db_type,$data_tbl_db_object);
+				$data_tbl_field_types = fetchit_get_field_types($db_type,$data_tbl_db_object);
+				$j=0;
+				//find the index field (named MUST BE F_DR_DATA_TBL_NDX_FLD) and get it's field type
+				foreach ($data_tbl_field_names as $data_tbl_field_name) {
+					if ($data_tbl_field_name == F_DR_DATA_TBL_NDX_FLD) {
+						$data_tbl_field_type = $data_tbl_field_types[$j];
+						break;
+					}
+					$j++;
+				}
+				if (strlen(trim($data_tbl_field_type))) {  // if we have a type, then an index field was found, and then we can continue building the parameter input control
+					// save the data table index field type into the form
+					$form['param_types'][$param_count] = array('#type' => 'value','#value' => $data_tbl_field_type);
+					$row_ndx = 0;
+					$fld_ndx = $param_count;
+					$element_name = fetchit_make_element_name($nid,$row_ndx,$fld_ndx);
+					// set a default value to pass into the element generator
+					// this value is used unless the user specified a default value in the configuration
+					// get the last entered value from the selection table
+					// depending on the control type, this is either a single value or an array of values...
+					switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
+						case F_DR_CONTROL_CHECKBOXES:
+						case F_DR_CONTROL_DROPDOWN_MULTI:
+							$db_value = fetchit_get_existing_selection_multiple($db_handle,$db_type,$data_tbl,$data_ndx,$data_uid);
+							break;
+						case F_DR_CONTROL_DROPDOWN_SINGLE:
+						case F_DR_CONTROL_RADIOBTN:
+						case F_DR_CONTROL_TEXTBOX:
+						case F_DR_CONTROL_CHECKBOX:
+						case F_DR_CONTROL_DATESEL:
+						case F_DR_CONTROL_DATETIMESEL:
+						case F_DR_CONTROL_POPUPDATE:
+							$db_value = fetchit_get_existing_selection_single($db_handle,$db_type,$data_tbl,$data_ndx,$data_uid);
+							break;
+						default:
+					}
+					// the following creates the "renderable array" of a drupal form element
+					/*
+					$form[$element_name] = fetchit_get_field_element_array(
+												$param_name,
+												$data_tbl_field_type,
+												$db_handle,
+												$i+1,
+												$user_field_data,
+												$nid,
+												$showtitles,
+												$db_value
+											);
+					*/
+					$form[$element_name] = array(
+						'#type' => 'textfield',
+						'#default_value' => $user_field_data[$i][F_DR_FIELD_DEFAULT_STR],
+						'#title' => $user_field_data[$i][F_DR_FIELD_TITLE_STR],
+						'#size' => 30,
+						'#maxlength' => 60,
+						'#required' => $user_field_data[$i][F_DR_FIELD_REQUIRED_STR],
+					);
+					$param_count++;
+				}
+			}
+		}
+	}
+	
+	return $form;
+	
+		
 	// this form will be a table of pre-rendered controls - hope it works!
 		
 }
@@ -1231,6 +1324,30 @@ function fetchit_get_data_object($db_type,&$db_handle,$view_name,$user_uid_field
 	return $data_object;
 }
 
+function fetchit_get_data_object_1($db_type,&$db_handle,$view_name,$user_uid_field) {
+	switch ($db_type) {
+		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
+			$query = "SELECT * FROM $view_name";
+			if (strlen($user_uid_field)) {
+				global $user;
+				$user_uid = $user->uid;
+				$query .= " WHERE $user_uid_field = ".$user_uid;
+			}
+			$query .= " LIMIT 1";
+			$data_object = pg_query($db_handle,$query);
+			break;
+		case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
+			return FALSE;
+			break;
+		case FETCHIT7_DBTYPE_NAME_MSSQL: //'sqlserver':
+			return FALSE;
+			break;
+		default:
+			return FALSE;
+	}
+	return $data_object;
+}
+
 function fetchit_get_data($db_type,&$data_object,$row,$field) {
 	switch ($db_type) {
 		case FETCHIT7_DBTYPE_NAME_PGSQL: //'postgresql':
@@ -1337,7 +1454,11 @@ function fetchit_get_existing_selection_single($db_handle,$db_type,$record_selec
 							$qry .= " LIMIT 1";
 							$db_object = pg_query($db_handle,$qry);
 							$row = pg_fetch_object($db_object);
-							$selection = $row->$key_field;
+							if (is_object($row)) {
+								$selection = $row->$key_field;
+							} else {
+								$selection = NULL;
+							}
 							return $selection;
 						}
 					}
@@ -1499,3 +1620,7 @@ function fetchit_del_existing_selection_multiple($db_handle,$db_type,$deletion_t
 	return $deletedrecordcount;
 }
 
+function fetchit_make_element_name($node_id,$row,$column) {
+	//return 'fetchit_element_'.$node_id.'_'.$row.'_'.$column;
+	return 'fetchit_element_'.$node_id.'_'.$row.'_'.$column;
+}
