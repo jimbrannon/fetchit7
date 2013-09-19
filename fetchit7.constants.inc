@@ -21,6 +21,14 @@ define("FETCHIT7_CONTROLTYPE_NAME_CHECKBOX","checkbox"); //define("F_DR_CONTROL_
 define("FETCHIT7_CONTROLTYPE_NAME_DATETIMESEL","datetime_select"); //define("F_DR_CONTROL_DATETIMESEL",7);
 define("FETCHIT7_CONTROLTYPE_NAME_POPUPDATE","date_popup"); //define("F_DR_CONTROL_POPUPDATE",8);
 
-define("F_DR_TEXTBOX_TEXT",0);
-define("F_DR_TEXTBOX_NUMBER",1);
-define("F_DR_TEXTBOX_DATE",2);
+define("FETCHIT7_CONTROLTYPE_TEXTBOXTYPE_NAME_TEXT","text"); //define("F_DR_TEXTBOX_TEXT",0);
+define("FETCHIT7_CONTROLTYPE_TEXTBOXTYPE_NAME_NUMBER","number"); //define("F_DR_TEXTBOX_NUMBER",1);
+define("FETCHIT7_CONTROLTYPE_TEXTBOXTYPE_NAME_DATE","date"); //define("F_DR_TEXTBOX_DATE",2);
+
+define("FETCHIT7_FIELD_LIST_NDX_STR","list_ndx"); //define("F_DR_LIST_TBL_NDX_FLD","stored");
+define("FETCHIT7_FIELD_LIST_DSP_STR","list_dsp"); //define("F_DR_LIST_TBL_DSP_FLD","displayed");
+define("FETCHIT7_FIELD_DATA_NDX_STR","data_ndx"); //define("F_DR_DATA_TBL_NDX_FLD","stored");
+
+
+
+

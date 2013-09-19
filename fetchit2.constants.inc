@@ -26,3 +26,12 @@ define("F_DR_CONTROL_POPUPDATE",8);
 define("F_DR_TEXTBOX_TEXT",0);
 define("F_DR_TEXTBOX_NUMBER",1);
 define("F_DR_TEXTBOX_DATE",2);
+
+define("F_DR_LIST_TBL_SPECIAL_CHAR","#");
+define("F_DR_LIST_TBL_NDX_FLD","stored");
+define("F_DR_LIST_TBL_DSP_FLD","displayed");
+define("F_DR_LIST_TBL_UID_FLD","drupal_userid");
+define("F_DR_DATA_TBL_NDX_FLD","stored");
+define("F_DR_DATA_TBL_UID_FLD","drupal_userid");
+define("F_DR_FORM_ELE_DEF","default");
+define("F_DR_FORM_ERROR_DEF","<br><b>Error: Form could not be created.</b><br>");

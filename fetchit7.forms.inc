@@ -594,26 +594,29 @@ function fetchit7_param_form($form, &$form_state) {
 	$field_index = 0; // the actually created parameter fields
 	$param_index = 0; // the list of parameter values created by the user - just in case the returned array does not have 0 based integer keys
 	// even though the fetchit2 does this too...do some data preprocessing 
-	foreach ($param_names as $key => $param_name) {
+	foreach ($param_names as $key => $param_name) { //ignore the key to be safe
 		if (strlen($param_name=trim($param_name))) { // skip it if blank
 			$user_field_data[$field_index][F_DR_FIELD_NAME_STR] = $param_name;
+
 			//title default of '' is OK
 			if ($param_index < array_count($param_titles)) {
 				$user_field_data[$field_index][F_DR_FIELD_TITLE_STR] = trim($param_titles[$param_index]);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_TITLE_STR] = '';
 			}
+
 			//description default of '' is OK
 			if ($param_index < array_count($param_descriptions)) {
 				$user_field_data[$field_index][F_DR_FIELD_DESC_STR] = trim($param_descriptions[$param_index]);
 			} else {
 				$user_field_data[$field_index][F_DR_FIELD_DESC_STR] = '';
 			}
+
 			// types require some more checking since they are typed into a text box
 			if ($param_index < array_count($param_types)) {
 				// see if the control type matches something we know about
 				if ($key = array_search(strtolower(trim($param_types[$param_index])), $control_list)) {
-					$user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR] = $key-1; // the fetchit2 code wants an index here, and we had incremented these by 1 above to make array_search() easier to use
+					$user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR] = $key - 1; // the fetchit2 code wants an index here, and we had incremented these by 1 above to make array_search() easier to use
 				} else {
 					drupal_set_message("Parameter $param_index control type (".trim($param_types[$param_index]).") unrecognized.  Valid control types are [$control_list_string]. Please contact the site administrator.",'error');
 					return;
@@ -623,6 +626,7 @@ function fetchit7_param_form($form, &$form_state) {
 				drupal_set_message("Parameter $param_index control type missing.  There must be as many control types specified as there are parameter names. Please contact the site administrator.",'error');
 				return;
 			}
+
 			//$param_enabled
 			//fetchit2 uses disabled - so default of disabled = true is OK
 			if ($param_index < array_count($param_enabled)) {
@@ -640,14 +644,77 @@ function fetchit7_param_form($form, &$form_state) {
 				$user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = TRUE;
 			}
 						
-			//parameter string ?what is this for?
+			//$param_str parameter string ?what is this for?
+			//title default of '' is OK
+			if ($param_index < array_count($param_str)) {
+				$user_field_data[$field_index][F_DR_FIELD_PARAMETER_STR] = trim($param_str[$param_index]);
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_PARAMETER_STR] = '';
+			}
 			
+			//$param_list_tbl F_DR_FIELD_LIST_TBL_STR
+			//table name default of '' is OK
+			if ($param_index < array_count($param_list_tbl)) {
+				$user_field_data[$field_index][F_DR_FIELD_LIST_TBL_STR] = trim($param_list_tbl[$param_index]);
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_LIST_TBL_STR] = '';
+			}
+
+			//$param_list_key skip for now
+						
+			//$param_list_dsp skip for now
+			
+			//$param_list_uid F_DR_FIELD_LIST_UID_STR
+			// this is actually a boolean flag
+			// uid field name default of false is OK (usually the items in a parameter selection list are not user specific)
+			if ($param_index < array_count($param_list_uid)) {
+				$user_field_data[$field_index][F_DR_FIELD_LIST_UID_STR] = filter_var(trim($param_list_uid[$param_index]), FILTER_VALIDATE_BOOLEAN);
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_LIST_UID_STR] = FALSE;
+			}
+						
+			//$param_list_def F_DR_FIELD_DEFAULT_STR
+			//default string of '' is OK
+			if ($param_index < array_count($param_list_def)) {
+				$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = trim($param_list_def[$param_index]);
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+			}
+					
+			//$param_data_tbl F_DR_FIELD_DATA_TBL_STR
+			// this is required
+			if ($param_index < array_count($param_data_tbl)) {
+				if (strlen(trim($param_data_tbl[$param_index]))) {
+					$user_field_data[$field_index][F_DR_FIELD_DATA_TBL_STR] = trim($param_data_tbl[$param_index]);
+				} else {
+					// can't have a default here, too many complications
+					drupal_set_message("Parameter $param_index data selection table missing.  There must be as many data selection tables specified as there are parameter names. Please contact the site administrator.",'error');
+					return;
+				}
+				
+			} else {
+				// can't have a default here, too many complications
+				drupal_set_message("Parameter $param_index data selection table missing.  There must be as many data selection tables specified as there are parameter names. Please contact the site administrator.",'error');
+				return;
+			}
+						
+			//$param_data_key skip for now
+			
+			//$param_data_uid F_DR_FIELD_DATA_UID_STR
+			// can't find it used in fetchit2 code, but treat it like the LIST table UID field, as a boolean flag
+			// uid field name default of true is OK (usually the selections made by a user need to be user specific)
+			if ($param_index < array_count($param_data_uid)) {
+				$user_field_data[$field_index][F_DR_FIELD_DATA_UID_STR] = filter_var(trim($param_data_uid[$param_index]), FILTER_VALIDATE_BOOLEAN);
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_DATA_UID_STR] = TRUE;
+			}
+						
 			++$field_index;
 		}
 		++$param_index;
 	}
 
-	//$user_field_data = fetchit_get_user_field_data($nid);
+	// $user_field_data = fetchit_get_user_field_data($nid);
 	
 	// this form will be a table of pre-rendered controls - hope it works!
 		
