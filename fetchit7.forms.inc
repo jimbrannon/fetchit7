@@ -550,41 +550,103 @@ function fetchit7_param_form($form, &$form_state) {
 	$table_rows = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_tbl_rows','value');
 	//these should all be the same sized arrays or something is whacked
 	$param_names = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_name','values'); //should return an array
-	debug($param_names,'$param_names');
 	$param_titles = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_title','values'); //should return an array
-	debug($param_titles,'$param_titles');
 	$param_descriptions = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_desc','values'); //should return an array
-	debug($param_descriptions,'$param_descriptions');
 	$param_types = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_type','values'); //should return an array
-	debug($param_types,'$param_types');
-
 	$param_enabled = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_enabled','values'); //should return an array
-	debug($param_enabled,'$param_enabled');
 	$param_required = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_required','values'); //should return an array
-	debug($param_required,'$param_required');
 	$param_str = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_parstr','values'); //should return an array
-	debug($param_str,'$param_str');
 
 	$param_list_tbl = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_tbl','values'); //should return an array
-	debug($param_list_tbl,'$param_list_tbl');
 	$param_list_key = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_key','values'); //should return an array
-	debug($param_list_key,'$param_list_key');
 	$param_list_dsp = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_dsp','values'); //should return an array
-	debug($param_list_dsp,'$param_list_dsp');
 	$param_list_uid = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_uid','values'); //should return an array
-	debug($param_list_uid,'$param_list_uid');
 	$param_list_def = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_def','values'); //should return an array
-	debug($param_list_def,'$param_list_def');
 
 	$param_data_tbl = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_tbl','values'); //should return an array
-	debug($param_data_tbl,'$param_data_tbl');
 	$param_data_key = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_key','values'); //should return an array
-	debug($param_data_key,'$param_data_key');
 	$param_data_uid = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_uid','values'); //should return an array
-	debug($param_data_uid,'$param_data_uid');
 
 	//use the above arrays to contruct the $user_field_data array allowing the use of the fetchit2 code AMAP
+	// note that param names DEFINES the count of the fields
+	// we will use defaults is possible where items are missing
+	// exit gracefully with error message otherwise
+	$control_list = array( // add 1 to make array_search() easier.  subtract 1 later...
+		F_DR_CONTROL_TEXTBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_TEXTBOX,
+		F_DR_CONTROL_DATESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATESEL,
+		F_DR_CONTROL_DROPDOWN_SINGLE + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_SINGLE,
+		F_DR_CONTROL_RADIOBTN + 1 => FETCHIT7_CONTROLTYPE_NAME_RADIOBTN,
+		F_DR_CONTROL_CHECKBOXES + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOXES,
+		F_DR_CONTROL_DROPDOWN_MULTI + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_MULTI,
+		F_DR_CONTROL_CHECKBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOX,
+		F_DR_CONTROL_DATETIMESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATETIMESEL,
+		F_DR_CONTROL_POPUPDATE + 1 => FETCHIT7_CONTROLTYPE_NAME_POPUPDATE,
+	);
+	$control_list_string = '';
+	$count = 0;
+	foreach ($control_list as $control_string) {
+		if ($count) $control_list_string .= ', ';
+		$control_list_string .= $control_string;
+		++$count;
+	}
 	$user_field_data = array();
+	$param_count = array_count($param_names);
+	$field_index = 0; // the actually created parameter fields
+	$param_index = 0; // the list of parameter values created by the user - just in case the returned array does not have 0 based integer keys
+	// even though the fetchit2 does this too...do some data preprocessing 
+	foreach ($param_names as $key => $param_name) {
+		if (strlen($param_name=trim($param_name))) { // skip it if blank
+			$user_field_data[$field_index][F_DR_FIELD_NAME_STR] = $param_name;
+			//title default of '' is OK
+			if ($param_index < array_count($param_titles)) {
+				$user_field_data[$field_index][F_DR_FIELD_TITLE_STR] = trim($param_titles[$param_index]);
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_TITLE_STR] = '';
+			}
+			//description default of '' is OK
+			if ($param_index < array_count($param_descriptions)) {
+				$user_field_data[$field_index][F_DR_FIELD_DESC_STR] = trim($param_descriptions[$param_index]);
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_DESC_STR] = '';
+			}
+			// types require some more checking since they are typed into a text box
+			if ($param_index < array_count($param_types)) {
+				// see if the control type matches something we know about
+				if ($key = array_search(strtolower(trim($param_types[$param_index])), $control_list)) {
+					$user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR] = $key-1; // the fetchit2 code wants an index here, and we had incremented these by 1 above to make array_search() easier to use
+				} else {
+					drupal_set_message("Parameter $param_index control type (".trim($param_types[$param_index]).") unrecognized.  Valid control types are [$control_list_string]. Please contact the site administrator.",'error');
+					return;
+				}
+			} else {
+				// can't have a default here, too many complications
+				drupal_set_message("Parameter $param_index control type missing.  There must be as many control types specified as there are parameter names. Please contact the site administrator.",'error');
+				return;
+			}
+			//$param_enabled
+			//fetchit2 uses disabled - so default of disabled = true is OK
+			if ($param_index < array_count($param_enabled)) {
+				$enabled = filter_var(trim($param_enabled[$param_index]), FILTER_VALIDATE_BOOLEAN);
+				$user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = !$enabled;
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = TRUE;
+			}
+						
+			//$param_required
+			//default of required = true is OK
+			if ($param_index < array_count($param_required)) {
+				$user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = filter_var(trim($param_required[$param_index]), FILTER_VALIDATE_BOOLEAN);
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = TRUE;
+			}
+						
+			//parameter string ?what is this for?
+			
+			++$field_index;
+		}
+		++$param_index;
+	}
+
 	//$user_field_data = fetchit_get_user_field_data($nid);
 	
 	// this form will be a table of pre-rendered controls - hope it works!
@@ -920,9 +982,11 @@ function fetchit7_content_field_fetcher ($nid, $field_id = 'title', $format = 'v
 					break;
 				case 'values':
 					$output = array();
-					$keys = array_keys($items);
-					foreach ($keys as $key) {
-						$output[] = $items[$key]['value'];
+					if (is_array($items)) {
+						$keys = array_keys($items);
+						foreach ($keys as $key) {
+							$output[] = $items[$key]['value'];
+						}
 					}
 					break;
 				case 'value':
