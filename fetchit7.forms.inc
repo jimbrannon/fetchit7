@@ -557,6 +557,32 @@ function fetchit7_param_form($form, &$form_state) {
 	debug($param_descriptions,'$param_descriptions');
 	$param_types = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_type','values'); //should return an array
 	debug($param_types,'$param_types');
+
+	$param_enabled = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_enabled','values'); //should return an array
+	debug($param_enabled,'$param_enabled');
+	$param_required = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_required','values'); //should return an array
+	debug($param_required,'$param_required');
+	$param_str = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_parstr','values'); //should return an array
+	debug($param_str,'$param_str');
+
+	$param_list_tbl = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_tbl','values'); //should return an array
+	debug($param_list_tbl,'$param_list_tbl');
+	$param_list_key = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_key','values'); //should return an array
+	debug($param_list_key,'$param_list_key');
+	$param_list_dsp = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_dsp','values'); //should return an array
+	debug($param_list_dsp,'$param_list_dsp');
+	$param_list_uid = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_uid','values'); //should return an array
+	debug($param_list_uid,'$param_list_uid');
+	$param_list_def = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_list_def','values'); //should return an array
+	debug($param_list_def,'$param_list_def');
+
+	$param_data_tbl = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_tbl','values'); //should return an array
+	debug($param_data_tbl,'$param_data_tbl');
+	$param_data_key = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_key','values'); //should return an array
+	debug($param_data_key,'$param_data_key');
+	$param_data_uid = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_uid','values'); //should return an array
+	debug($param_data_uid,'$param_data_uid');
+
 	//use the above arrays to contruct the $user_field_data array allowing the use of the fetchit2 code AMAP
 	$user_field_data = array();
 	//$user_field_data = fetchit_get_user_field_data($nid);
@@ -780,8 +806,6 @@ function fetchit7_content_field_mapper ($field_id) {
 			break;
 		// fetchit7 custom fields used by parameter input content type
 		case 'par_shw_ttl':
-		case 'showtitles':
-		case 'show_titles':
 		case 'fetchit7_field_par_shw_ttl':
 			$field_name = 'fetchit7_field_par_shw_ttl';
 			break;
@@ -793,27 +817,68 @@ function fetchit7_content_field_mapper ($field_id) {
 			break;
 		// fetchit7_field_par_fld_name title desc type
 		case 'par_fld_name':
-		case 'fieldname':
-		case 'field_name':
 		case 'fetchit7_field_par_fld_name':
 			$field_name = 'fetchit7_field_par_fld_name';
 			break;
 		case 'par_fld_title':
-		case 'fieldtitle':
-		case 'field_title':
 		case 'fetchit7_field_par_fld_title':
 			$field_name = 'fetchit7_field_par_fld_title';
 			break;
 		case 'par_fld_desc':
-		case 'field_description':
 		case 'fetchit7_field_par_fld_desc':
 			$field_name = 'fetchit7_field_par_fld_desc';
 			break;
 		case 'par_fld_type':
-		case 'fieldtype':
-		case 'field_type':
 		case 'fetchit7_field_par_fld_type':
 			$field_name = 'fetchit7_field_par_fld_type';
+			break;
+		case 'par_fld_enabled':
+		case 'fetchit7_field_par_fld_enabled':
+			$field_name = 'fetchit7_field_par_fld_enabled';
+			break;
+		case 'par_fld_required':
+		case 'fetchit7_field_par_fld_required':
+			$field_name = 'fetchit7_field_par_fld_required';
+			break;
+		case 'par_fld_parstr':
+		case 'fetchit7_field_par_fld_parstr':
+			$field_name = 'fetchit7_field_par_fld_parstr';
+			break;
+		case 'par_fld_list_tbl':
+		case 'fetchit7_field_par_fld_list_tbl':
+			$field_name = 'fetchit7_field_par_fld_list_tbl';
+			break;
+		case 'par_fld_list_key':
+		case 'fetchit7_field_par_fld_list_key':
+			$field_name = 'fetchit7_field_par_fld_list_key';
+			break;
+		case 'par_fld_list_dsp':
+		case 'fetchit7_field_par_fld_list_dsp':
+			$field_name = 'fetchit7_field_par_fld_list_dsp';
+			break;
+		case 'par_fld_list_uid':
+		case 'fetchit7_field_par_fld_list_uid':
+			$field_name = 'fetchit7_field_par_fld_list_uid';
+			break;
+		case 'par_fld_list_def':
+		case 'fetchit7_field_par_fld_list_def':
+			$field_name = 'fetchit7_field_par_fld_list_def';
+			break;
+		case 'par_fld_list_uid':
+		case 'fetchit7_field_par_fld_list_uid':
+			$field_name = 'fetchit7_field_par_fld_list_uid';
+			break;
+		case 'par_fld_data_tbl':
+		case 'fetchit7_field_par_fld_data_tbl':
+			$field_name = 'fetchit7_field_par_fld_data_tbl';
+			break;
+		case 'par_fld_data_key':
+		case 'fetchit7_field_par_fld_data_key':
+			$field_name = 'fetchit7_field_par_fld_data_key';
+			break;
+		case 'par_fld_data_uid':
+		case 'fetchit7_field_par_fld_data_uid':
+			$field_name = 'fetchit7_field_par_fld_data_uid';
 			break;
 
 		default:

@@ -17,7 +17,7 @@ include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.constants.inc');
  */
  
 function fetchit7_install () {
-	watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_content_types");
+	//watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_content_types");
 	// add the fetchit7_content_type records
 	$table = 'fetchit7_content_types';
 	$record = new stdClass();
@@ -126,7 +126,7 @@ function fetchit7_install () {
 	//$record->post_function = '';
 	drupal_write_record($table,$record);
 
-	watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_db_types");
+	//watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_db_types");
 	// add the fetchit7_db_type records
 	$table = 'fetchit7_db_types';
 	$record = new stdClass();
@@ -149,7 +149,7 @@ function fetchit7_install () {
 	$record->enabled = FALSE;
 	drupal_write_record($table,$record);
 
-	watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_location_types");
+	//watchdog("fetchit7 module","fetchit7_install: populating table fetchit7_location_types");
 	// add the fetchit7_location_type records
 	$table = 'fetchit7_location_types';
 	$record = new stdClass();
@@ -818,6 +818,149 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '-1',
 		),
+		// parameter field enabled
+		'fetchit7_field_par_fld_enabled' => array(
+			'label'						=> $t('Parameter enabled'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_enabled',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field required
+		'fetchit7_field_par_fld_required' => array(
+			'label'						=> $t('Parameter required'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_required',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field parameter string
+		'fetchit7_field_par_fld_parstr' => array(
+			'label'						=> $t('Parameter string'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_parstr',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field value list table
+		'fetchit7_field_par_fld_list_tbl' => array(
+			'label'						=> $t('Parameter value list table'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_list_tbl',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field value list table key field
+		'fetchit7_field_par_fld_list_key' => array(
+			'label'						=> $t('Parameter value list table key field'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_list_key',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field value list table display field
+		'fetchit7_field_par_fld_list_dsp' => array(
+			'label'						=> $t('Parameter value list table display field'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_list_dsp',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field value list table uid field
+		'fetchit7_field_par_fld_list_uid' => array(
+			'label'						=> $t('Parameter value list table uid field'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_list_uid',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field value list table default key value
+		'fetchit7_field_par_fld_list_def' => array(
+			'label'						=> $t('Parameter value list table default key value'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_list_def',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field selection data table
+		'fetchit7_field_par_fld_data_tbl' => array(
+			'label'						=> $t('Parameter selection data table'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_data_tbl',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field selection data table key field
+		'fetchit7_field_par_fld_data_key' => array(
+			'label'						=> $t('Parameter selection data table key field'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_data_key',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field selection data table uid field
+		'fetchit7_field_par_fld_data_uid' => array(
+			'label'						=> $t('Parameter selection data table uid field'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_data_uid',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
 		
 		//'12345678901234567890123456789012'
 		//'fetchit7_field_par_tbl_rows' //integer
@@ -831,7 +974,9 @@ function _fetchit7_installed_fields () {
 		//'fetchit7_field_par_fld_enabled' // parameter field enabled
 		//'fetchit7_field_par_fld_required' => array(
 		//'fetchit7_field_par_fld_validate' => array(
-
+		//'fetchit7_field_par_fld_submit' => array(
+		//'fetchit7_field_par_fld_parstr' => array(
+				
 		//'12345678901234567890123456789012'
 		//'fetchit7_field_par_fld_list_tbl' => array(
 		//'fetchit7_field_par_fld_list_key' => array(
@@ -1781,13 +1926,14 @@ function _fetchit7_content_param_installed_instances () {
 			'description'		=> $t('A label to put on the submit button on this form.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> '',
+					'value'					=> 'Submit',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_submit_label',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// submit button weight
 		'fetchit7_field_submit_weight' => array(
 			'label'					=> $t('Submit button weight'),
 			'type'					=> 'list_integer',
@@ -1899,7 +2045,7 @@ function _fetchit7_content_param_installed_instances () {
 			'description'		=> $t('How many rows to have in the prameter input table.  The columns are then filled out until no controls are left.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> '8',
+					'value'					=> '10',
 				),
 			),
 			//'settings'			=> array (
@@ -2028,14 +2174,311 @@ function _fetchit7_content_param_installed_instances () {
 			'description'		=> $t('The type of input control to use for this parameter: [text,list,checkbox,...]'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> '',
+					'value'					=> 'text',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_type',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
-
+		// fetchit7_field_par_fld_enabled
+		'fetchit7_field_par_fld_enabled' => array(
+			'label'					=> $t('Parameter enabled'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('Whether this parameter control is enabled for input'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '1',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_enabled',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// fetchit7_field_par_fld_required
+		'fetchit7_field_par_fld_required' => array(
+			'label'					=> $t('Parameter required'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('Whether this parameter control requires a value'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '1',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_required',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// fetchit7_field_par_fld_parstr
+		'fetchit7_field_par_fld_parstr' => array(
+			'label'					=> $t('Parameter string'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Parameter string'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_parstr',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table
+		'fetchit7_field_par_fld_list_tbl' => array(
+			'label'					=> $t('Parameter value list table'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the database table containing the list of allowed parameter values'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_tbl',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table key field
+		'fetchit7_field_par_fld_list_key' => array(
+			'label'					=> $t('Parameter value list table key field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the key field in the database table containing the list of allowed parameter values'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'stored',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_key',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table display field
+		'fetchit7_field_par_fld_list_dsp' => array(
+			'label'					=> $t('Parameter value list table display field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the display field in the database table containing the list of allowed parameter values'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'displayed',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_dsp',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table uid field
+		'fetchit7_field_par_fld_list_uid' => array(
+			'label'					=> $t('Parameter value list table uid field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the uid field in the database table containing the list of allowed parameter values'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'drupal_userid',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_uid',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table key field default value
+		'fetchit7_field_par_fld_list_def' => array(
+			'label'					=> $t('Parameter value list default key field value'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The key field value in the value list table corresponding to the default parameter value'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_def',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field data selection table
+		'fetchit7_field_par_fld_data_tbl' => array(
+			'label'					=> $t('Parameter data selection table'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('The name of the database table (data selection table) into which the selected keys/entered values will be stored'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_data_tbl',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field data selection table key field
+		'fetchit7_field_par_fld_data_key' => array(
+			'label'					=> $t('Parameter data selection table key field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('The name of the key field in the data selection table'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'stored',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_data_key',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field data selection table uid field
+		'fetchit7_field_par_fld_data_uid' => array(
+			'label'					=> $t('Parameter data selection table uid field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the uid field in the data selection table'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'drupal_userid',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_data_uid',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+				
 	);
 	
 	return $fetchit7_instances;
@@ -2047,7 +2490,7 @@ function _fetchit7_content_param_installed_instances () {
  */
 function fetchit7_schema () {	
 	// create the fetchit7_content_types table
-	watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_content_types");
+	//watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_content_types");
 	$schema['fetchit7_content_types'] = array(
 	  'description' => 'This static table defines the custom content types that will be available to the fetchit7 module',
 	  'fields' => array(
@@ -2129,7 +2572,7 @@ function fetchit7_schema () {
 	  'primary key' => array('ndx'),
 	);
 	
-	watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_db_types");
+	//watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_db_types");
 	$schema['fetchit7_db_types'] = array(
 	  'description' => 'allowable fetchit7 db types',
 	  'fields' => array(
@@ -2166,7 +2609,7 @@ function fetchit7_schema () {
 	  'primary key' => array('ndx'),
 	);
 
-	watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_location_types");
+	//watchdog("fetchit7 module","fetchit7_schema: creating table fetchit7_location_types");
 	$schema['fetchit7_location_types'] = array(
 	  'description' => 'fetchit7 output location types 0 not displayed, 1 page content, 2 block content',
 	  'fields' => array(
@@ -2269,7 +2712,7 @@ function fetchit7_schema () {
  */
 
 function fetchit7_uninstall () {
-	watchdog("fetchit7 module","fetchit7_uninstall: ");
+	//watchdog("fetchit7 module","fetchit7_uninstall: ");
 
 	// get all the created content for the fetchit7 content types
 	$sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
@@ -2320,5 +2763,5 @@ function fetchit7_uninstall () {
  */
 
 function fetchit7_enable () {
-	watchdog("fetchit7 module","fetchit7_enable: ");
+	//watchdog("fetchit7 module","fetchit7_enable: ");
 }
