@@ -770,27 +770,27 @@ function _fetchit7_installed_fields () {
 		'fetchit7_field_par_fld_name' => array(
 			'label'						=> $t('Parameter names'),
 			'settings'				=> array (
-					'max_length'	=> '255',
+					'max_length'	=> '60',
 			),
 			'field_name'			=> 'fetchit7_field_par_fld_name',
 			'type'						=> 'text',
 			'module'					=> 'text',
 			'active'					=> '1',
 			'locked'					=> '0',
-			'cardinality'			=> '1',
+			'cardinality'			=> '-1',
 		),
 		// parameter field titles
 		'fetchit7_field_par_fld_title' => array(
 			'label'						=> $t('Parameter titles'),
 			'settings'				=> array (
-					'max_length'	=> '255',
+					'max_length'	=> '60',
 			),
 			'field_name'			=> 'fetchit7_field_par_fld_title',
 			'type'						=> 'text',
 			'module'					=> 'text',
 			'active'					=> '1',
 			'locked'					=> '0',
-			'cardinality'			=> '1',
+			'cardinality'			=> '-1',
 		),
 		// parameter field descriptions
 		'fetchit7_field_par_fld_desc' => array(
@@ -803,20 +803,20 @@ function _fetchit7_installed_fields () {
 			'module'					=> 'text',
 			'active'					=> '1',
 			'locked'					=> '0',
-			'cardinality'			=> '1',
+			'cardinality'			=> '-1',
 		),
 		// parameter field types
 		'fetchit7_field_par_fld_type' => array(
 			'label'						=> $t('Parameter input types'),
 			'settings'				=> array (
-					'max_length'	=> '255',
+					'max_length'	=> '60',
 			),
 			'field_name'			=> 'fetchit7_field_par_fld_type',
 			'type'						=> 'text',
 			'module'					=> 'text',
 			'active'					=> '1',
 			'locked'					=> '0',
-			'cardinality'			=> '1',
+			'cardinality'			=> '-1',
 		),
 		
 		//'12345678901234567890123456789012'
@@ -1881,6 +1881,157 @@ function _fetchit7_content_param_installed_instances () {
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_shw_ttl',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//Parameter table row count
+		'fetchit7_field_par_tbl_rows' => array(
+			'label'					=> $t('Parameter table row count'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('How many rows to have in the prameter input table.  The columns are then filled out until no controls are left.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '8',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_par_tbl_rows',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
+		// parameter field name
+		'fetchit7_field_par_fld_name' => array(
+			'label'					=> $t('Parameter name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('The name of this parameter.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_name',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// parameter field title
+		'fetchit7_field_par_fld_title' => array(
+			'label'					=> $t('Parameter title'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The title for this parameter.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_title',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// parameter field description
+		'fetchit7_field_par_fld_desc' => array(
+			'label'					=> $t('Parameter description'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A description of this parameter.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_desc',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// Parameter input control type
+		'fetchit7_field_par_fld_type' => array(
+			'label'					=> $t('Parameter input control type'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('The type of input control to use for this parameter: [text,list,checkbox,...]'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_type',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),

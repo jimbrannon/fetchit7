@@ -277,10 +277,11 @@ function fetchit7_admin_backupcontent_submit ($form, $form_state) {
 	// TODO: should loop through all fetchit7 content types - search by name? - rather than have them hardcoded here
 	$content_types = array();
 	$content_types[] = 'fetchit7_content_table';
+	$content_types[] = 'fetchit7_content_param';
 	$contenttypecount = 0;
 	$contentcount = 0;
 	foreach ($content_types as $content_type) {
-		$tablename = 'fetchit7_content_table_backup_'.$string;
+		$tablename = $content_type.'_backup_'.$string;
 		if($newrecords = fetchit7_content_backuptable_create($content_type,$tablename)) {
 			++$contenttypecount;
 			$contentcount = $contentcount + $newrecords;
@@ -363,6 +364,7 @@ function fetchit7_content_backuptable_create($type,$tablename) {
 				$myfield = $mynode->$entityfield;
 				if(array_count_values($mylanguagekeys = array_keys($myfield))) {
 					$mylanguagekey = $mylanguagekeys[0];
+					//TODO: need to update backup function to handle multiple valued fields (how to store this in a flat table?!?! uh oh)
 					$data[$entityfield] = $myfield[$mylanguagekey][0]['value'];
 				}
 			}

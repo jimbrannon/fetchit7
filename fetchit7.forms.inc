@@ -535,10 +535,6 @@ function fetchit7_param_form($form, &$form_state) {
 		//TODO: check pre function result?
 	}
 
-	// get the user entered field names and input methods
-	// these are the parameters
-	$user_field_data = array();
-	//$user_field_data = fetchit_get_user_field_data($nid);
 	
 	// submit button attributes
 	$submit_label = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_label','value'));
@@ -551,7 +547,22 @@ function fetchit7_param_form($form, &$form_state) {
 	// table attributes 
 	$showtitles = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_shw_ttl','value');
 	$table_weight = fetchit7_content_field_fetcher($nid,'fetchit7_field_table_weight','value');
-			
+	$table_rows = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_tbl_rows','value');
+	//these should all be the same sized arrays or something is whacked
+	$param_names = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_name','values'); //should return an array
+	debug($param_names,'$param_names');
+	$param_titles = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_title','values'); //should return an array
+	debug($param_titles,'$param_titles');
+	$param_descriptions = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_desc','values'); //should return an array
+	debug($param_descriptions,'$param_descriptions');
+	$param_types = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_type','values'); //should return an array
+	debug($param_types,'$param_types');
+	//use the above arrays to contruct the $user_field_data array allowing the use of the fetchit2 code AMAP
+	$user_field_data = array();
+	//$user_field_data = fetchit_get_user_field_data($nid);
+	
+	// this form will be a table of pre-rendered controls - hope it works!
+		
 }
 
 /**
@@ -761,19 +772,50 @@ function fetchit7_content_field_mapper ($field_id) {
 		case 'fetchit7_field_tbl_sel_typ':
 			$field_name = 'fetchit7_field_tbl_sel_typ';
 			break;
-		CASE 'tbl_sel_tbl':
+		case 'tbl_sel_tbl':
 		case 'record_select_table':
 		case 'table_selection_table':
 		case 'fetchit7_field_tbl_sel_tbl':
 			$field_name = 'fetchit7_field_tbl_sel_tbl';
 			break;
 		// fetchit7 custom fields used by parameter input content type
-		CASE 'par_shw_ttl':
+		case 'par_shw_ttl':
 		case 'showtitles':
 		case 'show_titles':
 		case 'fetchit7_field_par_shw_ttl':
 			$field_name = 'fetchit7_field_par_shw_ttl';
 			break;
+		case 'param_table_rows':
+		case 'parameter_table_rows':
+		case 'par_tbl_rows':
+		case 'fetchit7_field_par_tbl_rows':
+			$field_name = 'fetchit7_field_par_tbl_rows';
+			break;
+		// fetchit7_field_par_fld_name title desc type
+		case 'par_fld_name':
+		case 'fieldname':
+		case 'field_name':
+		case 'fetchit7_field_par_fld_name':
+			$field_name = 'fetchit7_field_par_fld_name';
+			break;
+		case 'par_fld_title':
+		case 'fieldtitle':
+		case 'field_title':
+		case 'fetchit7_field_par_fld_title':
+			$field_name = 'fetchit7_field_par_fld_title';
+			break;
+		case 'par_fld_desc':
+		case 'field_description':
+		case 'fetchit7_field_par_fld_desc':
+			$field_name = 'fetchit7_field_par_fld_desc';
+			break;
+		case 'par_fld_type':
+		case 'fieldtype':
+		case 'field_type':
+		case 'fetchit7_field_par_fld_type':
+			$field_name = 'fetchit7_field_par_fld_type';
+			break;
+
 		default:
 			break;
 	}
@@ -792,7 +834,6 @@ function fetchit7_content_field_mapper ($field_id) {
  */
 function fetchit7_content_field_fetcher ($nid, $field_id = 'title', $format = 'value') {
 	//$output = array();
-	$output = '';
 	if ($node = node_load($nid)) {
 		if ($field_name = fetchit7_node_field_mapper ($field_id)) {
 			// it is a recognized node field so get the value from $node object
@@ -812,12 +853,23 @@ function fetchit7_content_field_fetcher ($nid, $field_id = 'title', $format = 'v
 				case 'display':
 					$output = field_view_value($entity_type,$node,$field_name,$items[0]);
 					break;
+				case 'values':
+					$output = array();
+					$keys = array_keys($items);
+					foreach ($keys as $key) {
+						$output[] = $items[$key]['value'];
+					}
+					break;
 				case 'value':
 				default:
 					$output = $items[0]['value'];
 			}
 		} else {
 			// for now do nothing
+			debug($nid,'nid');
+			debug($field_id,'field_id');
+			debug($format,'format');
+			$output = array();
 		}
 		return $output;
 	}
