@@ -792,7 +792,7 @@ function fetchit7_param_form($form, &$form_state) {
 												$db_value
 											);
 					*/
-					$form[$element_name] = array(
+					$myform[$element_name] = array(
 						'#type' => 'textfield',
 						'#default_value' => $user_field_data[$i][F_DR_FIELD_DEFAULT_STR],
 						'#title' => $user_field_data[$i][F_DR_FIELD_TITLE_STR],
@@ -805,6 +805,36 @@ function fetchit7_param_form($form, &$form_state) {
 			}
 		}
 	}
+	
+	$table_column_count =  intval( ($param_count-1) / $table_rows) + 1; 
+	
+	$header = array();
+	for ($col_ndx = 0; $col_ndx < $table_column_count; $col_ndx++) {
+			// TODO: need to add column header labels to parameter input form inputs
+			$header[] = "Column $col_ndx";
+	}
+	$rows = array();
+	for ($row_ndx = 0; $row_ndx < $table_rows; $row_ndx++) {
+		$row = array();
+		for ($col_ndx = 0; $col_ndx < $table_column_count; $col_ndx++) {
+			// numbering goes down the columns first
+			$p_ndx = $row_ndx + $col_ndx * $table_rows;
+			if ($p_ndx < $param_count) {
+				$element_name = fetchit_make_element_name($nid,0,$p_ndx);
+				$row[] = drupal_render($myform[$element_name]);
+			} else {
+				//$row[] = drupal_render(array('#type' => 'item','#title' => 'Empty Cell','#markup' => 'I am empty.',));
+				$row[] = $p_ndx;
+			}
+		}
+		$rows[] = $row;
+	}
+	
+	$form['table'] = array(
+		'#theme' => 'table',
+		'#header' => $header,
+		'#rows' => $rows,
+	);
 	
 	return $form;
 	
