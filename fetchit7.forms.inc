@@ -806,8 +806,8 @@ function fetchit7_param_form($form, &$form_state) {
 		}
 	}
 	
+	// this form will be a table of pre-rendered controls - hope it works!
 	$table_column_count =  intval( ($param_count-1) / $table_rows) + 1; 
-	
 	$header = array();
 	for ($col_ndx = 0; $col_ndx < $table_column_count; $col_ndx++) {
 			// TODO: need to add column header labels to parameter input form inputs
@@ -823,8 +823,9 @@ function fetchit7_param_form($form, &$form_state) {
 				$element_name = fetchit_make_element_name($nid,0,$p_ndx);
 				$row[] = drupal_render($myform[$element_name]);
 			} else {
-				//$row[] = drupal_render(array('#type' => 'item','#title' => 'Empty Cell','#markup' => 'I am empty.',));
-				$row[] = $p_ndx;
+				$sillyform[$p_ndx] = array('#type' => 'item','#title' => 'Empty Cell','#markup' => "I am empty cell $p_ndx.",);
+				$row[] = drupal_render($sillyform[$p_ndx]);
+				//$row[] = $p_ndx;
 			}
 		}
 		$rows[] = $row;
@@ -835,12 +836,17 @@ function fetchit7_param_form($form, &$form_state) {
 		'#header' => $header,
 		'#rows' => $rows,
 	);
+
+	$submit_button_flag = TRUE;
+	if ($submit_button_flag) {
+		$form['submit'] = array(
+			'#type' => 'submit',
+			'#value' => $submit_label,
+			'#weight' => $submit_weight,
+		);
+	}
 	
 	return $form;
-	
-		
-	// this form will be a table of pre-rendered controls - hope it works!
-		
 }
 
 /**
@@ -848,7 +854,9 @@ function fetchit7_param_form($form, &$form_state) {
  */
 function fetchit7_param_form_validate ($form, &$form_state) {
 	// pop a log message
-	watchdog("fetchit7 module","entered fetchit7_param_form_validate");
+	//watchdog("fetchit7 module","entered fetchit7_param_form_validate");
+	$string = $form_state['values']['param_count'];
+		debug($string,'Hello from the all important parameter input form validate function. From here it appears the param_count is:');
 }
 
 /**
@@ -856,10 +864,10 @@ function fetchit7_param_form_validate ($form, &$form_state) {
  */
 function fetchit7_param_form_submit ($form, &$form_state) {
 	// pop a log message
-	watchdog("fetchit7 module","entered fetchit7_param_form_submit");
+	//watchdog("fetchit7 module","entered fetchit7_param_form_submit");
 	// reset the text
-	if(!strlen(trim($string = $form_state['values']['fetchit7_param_text']))) $string = 'fetchit7_param_text_default_value';
-	variable_set('fetchit7_param_text',$string);
+	$string = $form_state['values']['param_count'];
+	debug($string,'Hello from the all important parameter input form submit function. From here it appears the param_count is:');
 }
 
 
