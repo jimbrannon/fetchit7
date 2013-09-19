@@ -361,15 +361,16 @@ function fetchit7_content_backuptable_create($type,$tablename) {
 			foreach ($entityfields as $entityfield) {
 				$mynode = $entityfieldnodes[$row->nid];
 				$myfield = $mynode->$entityfield;
-				if (!(is_null($myfield['und'][0]['value']))) {
-					$data[$entityfield] = $myfield['und'][0]['value'];
+				if(array_count_values($mylanguagekeys = array_keys($myfield))) {
+					$mylanguagekey = $mylanguagekeys[0];
+					$data[$entityfield] = $myfield[$mylanguagekey][0]['value'];
 				}
 			}
 			//now do the insert
 			$insertednid = db_insert($tablename) // Table name no longer needs {}
 				->fields($data)
 				->execute();
-			if ($insertednid) ++$inserted_count;
+			++$inserted_count;
 		}
 	}
 	

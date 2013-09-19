@@ -677,6 +677,170 @@ function _fetchit7_installed_fields () {
 			'cardinality'			=> '1',
 		),
 		
+		// =====================================================
+		// these are fields that apply to param inputs only
+		// =====================================================
+		// show titles on each param control
+		'fetchit7_field_par_shw_ttl' => array(
+			'label'						=> $t('show titles'),
+			'settings'				=> array (
+					'allowed_values'	=> array (
+							0		=> '',
+							1		=> '',
+					),
+			),
+			'field_name'			=> 'fetchit7_field_par_shw_ttl',
+			'type'						=> 'list_boolean',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// parameter table row count
+		'fetchit7_field_par_tbl_rows' => array(
+			'label'						=> $t('Parameter table row count'),
+			'settings'				=> array (
+					'allowed_values'	=> array (
+							0		=> '0',
+							1		=> '1',
+							2		=> '2',
+							3		=> '3',
+							4		=> '4',
+							5		=> '5',
+							6		=> '6',
+							7		=> '7',
+							8		=> '8',
+							9		=> '9',
+							10	=> '10',
+							11	=> '11',
+							12	=> '12',
+							25	=> '25',
+					),
+					//'allowed_values_function' => '',
+			),
+			//'entity_types'		=> array (),
+			//'translatable'		=> '0',
+			//'storage'					=> array (
+			//		'type'						=> 'field_sql_storage',
+			//		'settings'				=> array (),
+			//		'module'					=> 'field_sql_storage',
+			//		'active'					=> '1',
+			//		'details'					=> array (
+			//				'sql' => array (
+			//						'FIELD_LOAD_CURRENT' => array (
+			//								'field_data_fetchit7_field_location' => array (
+			//										'value' => 'ffetchit7_field_location_value',
+			//								),
+			//						),
+			//						'FIELD_LOAD_REVISION' => array (
+			//								'field_revision_fetchit7_field_location' => array (
+			//										'value' => 'fetchit7_field_location_value',
+			//								),
+			//						),
+			//				),
+			//		),
+			//),
+			//'foreign keys'		=> array (),
+			//'indexes'					=> array (
+			//		'value'						=> array (
+			//				0 => 'value',
+			//		),
+			//),
+			//'id'							=> '10',
+			'field_name'			=> 'fetchit7_field_par_tbl_rows',
+			'type'						=> 'list_integer',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+			//'deleted'					=> '0',
+			//'columns'					=> array (
+			//		'value'						=> array (
+			//				'type' => 'int',
+			//				'not null' => false,
+			//		),
+			//),
+			//'bundles'					=> array (
+			//		'node'						=> array (
+			//				0 => 'fetchit7_content_table',
+			//		),
+			//),
+		),
+		// parameter field names
+		'fetchit7_field_par_fld_name' => array(
+			'label'						=> $t('Parameter names'),
+			'settings'				=> array (
+					'max_length'	=> '255',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_name',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// parameter field titles
+		'fetchit7_field_par_fld_title' => array(
+			'label'						=> $t('Parameter titles'),
+			'settings'				=> array (
+					'max_length'	=> '255',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_title',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// parameter field descriptions
+		'fetchit7_field_par_fld_desc' => array(
+			'label'						=> $t('Parameter descriptions'),
+			'settings'				=> array (
+					'max_length'	=> '255',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_desc',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		// parameter field types
+		'fetchit7_field_par_fld_type' => array(
+			'label'						=> $t('Parameter input types'),
+			'settings'				=> array (
+					'max_length'	=> '255',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_type',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+		
+		//'12345678901234567890123456789012'
+		//'fetchit7_field_par_tbl_rows' //integer
+
+		//'12345678901234567890123456789012'
+		// comma delimited lists in a large text field
+		//'fetchit7_field_par_fld_name'  // parameter field names
+		//'fetchit7_field_par_fld_title' // parameter field titles
+		//'fetchit7_field_par_fld_desc'  // parameter field descriptions - necessary? if so gotta be a large text field, not varchar limited to 255
+		//'fetchit7_field_par_fld_type' // parameter field types, short names
+		//'fetchit7_field_par_fld_enabled' // parameter field enabled
+		//'fetchit7_field_par_fld_required' => array(
+		//'fetchit7_field_par_fld_validate' => array(
+
+		//'12345678901234567890123456789012'
+		//'fetchit7_field_par_fld_list_tbl' => array(
+		//'fetchit7_field_par_fld_list_key' => array(
+		//'fetchit7_field_par_fld_list_dsp' => array(
+		//'fetchit7_field_par_fld_list_uid' => array(
+		//'fetchit7_field_par_fld_list_def' => array(
+		//'fetchit7_field_par_fld_data_tbl' => array(
+		//'fetchit7_field_par_fld_data_key' => array(
+		//'fetchit7_field_par_fld_data_uid' => array(
 		
 	);
 	
@@ -1139,7 +1303,10 @@ function _fetchit7_content_table_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('A label to put on the submit button on this form.  Note that the button label changes automatically to DELETE when this is the selection type.'),
+			'description'		=> $t('A label to put on the submit button on this form. 
+On copy single, copy multiple, or delete multiple tables a button is automatically added 
+and this will overwrite the default label.  On plain tables, a submit button is not 
+automatically added, but specifying a label here will cause a button to be added to the form.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -1290,7 +1457,7 @@ function _fetchit7_content_param_installed_instances () {
 	$content_name = 'fetchit7_content_param';
 	$t = get_t();
 	$fetchit7_instances = array(
-		// on this first one I am including many of the instance definition parameters in the array
+		// on this example I am including many of the instance definition parameters in the array
 		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
 		//'fetchit7_field_location' => array(
 			//'label'					=> $t('form output location'),
@@ -1335,6 +1502,10 @@ function _fetchit7_content_param_installed_instances () {
 			//'deleted'				=> '0',
 		//),
 		// the rest will be defined in a more compressed fashion
+		// =====================================================
+		// these are fields that apply to multiple content types
+		// =====================================================
+		// form location
 		'fetchit7_field_location' => array(
 			'label'					=> $t('form output location'),
 			'widget'				=> array(
@@ -1356,6 +1527,7 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// form enabled
 		'fetchit7_field_enabled' => array(
 			'label'					=> $t('Form output enabled'),
 			'widget'				=> array(
@@ -1378,6 +1550,7 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// database server host name
 		'fetchit7_field_db_host' => array(
 			'label'					=> $t('Database server host name'),
 			'widget'				=> array(
@@ -1404,6 +1577,7 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// database server type
 		'fetchit7_field_db_type' => array(
 			'label'					=> $t('Database server type'),
 			'widget'				=> array(
@@ -1425,6 +1599,7 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// database server port
 		'fetchit7_field_db_port' => array(
 			'label'					=> $t('Database server port number'),
 			'widget'				=> array(
@@ -1451,6 +1626,7 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// database name
 		'fetchit7_field_db_name' => array(
 			'label'					=> $t('Database name'),
 			'widget'				=> array(
@@ -1466,7 +1642,7 @@ function _fetchit7_content_param_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> FALSE,
+			'required'			=> TRUE,
 			'description'		=> $t('The name of the database to connect to.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -1477,6 +1653,7 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// database user login
 		'fetchit7_field_db_login' => array(
 			'label'					=> $t('Database user login'),
 			'widget'				=> array(
@@ -1503,6 +1680,7 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// database user password
 		'fetchit7_field_db_password' => array(
 			'label'					=> $t('Database user password'),
 			'widget'				=> array(
@@ -1529,6 +1707,184 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// pre-(form display) query (SQL) or function name (php function)
+		'fetchit7_field_pre_function' => array(
+			'label'					=> $t('Pre-(form display) SQL query or php.function'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A query (SQL) or the name of a php function (prepend with php.) to execute before displaying this form.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_pre_function',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// post-(form submit) SQL query or PHP.function
+		'fetchit7_field_post_function' => array(
+			'label'					=> $t('Post-(form submit) SQL query or php.function'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A query (SQL) or the name of a php function (prepend with php.) to execute after the form data has been submitted.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_post_function',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// submit button label
+		'fetchit7_field_submit_label' => array(
+			'label'					=> $t('Submit button label'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A label to put on the submit button on this form.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_submit_label',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_submit_weight' => array(
+			'label'					=> $t('Submit button weight'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where on the form to display the submit button (relative to other form elements).'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '8',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_submit_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
+		// submit button redirect
+		'fetchit7_field_submit_redirect' => array(
+			'label'					=> $t('Submit button redirect'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A page URL (e.g. node/10) for Drupal to redirect the user to after a successful form submission caused by pressing this submit button.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_submit_redirect',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		
+		// =====================================================
+		// these are fields that apply to parameter input only
+		// =====================================================
+		// show titles
+		'fetchit7_field_par_shw_ttl' => array(
+			'label'					=> $t('Show titles'),
+			'widget'				=> array(
+				'type'					=> 'options_onoff',
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'display_label'	=> TRUE,
+				),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter defines whether titles are displayed on every parameter control on the form.  The form can get messy (too busy) with too many titles.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '1',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_shw_ttl',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+
 	);
 	
 	return $fetchit7_instances;

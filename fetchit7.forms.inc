@@ -495,21 +495,63 @@ function fetchit7_table_form_submit ($form, &$form_state) {
   * @see system_settings_form().
   */
 function fetchit7_param_form($form, &$form_state) {
-	// form builder function
+	$table_weight = -8; // it goes at the top of the form
+	$submit_weight = 8; // it goes at the bottom of the form
+	
+	// get nid embedded into original form_id; format fetchit7_param_form_X### - nid starts at 21
+	$form_id = $form_state['build_info']['form_id'];
+	$nid = (int) substr($form_id, 21);
+	$form['nid'] = array('#type' => 'value','#value' => $nid);
 
-	// text element
-	$myform['fetchit7_param_text'] = array(
-		'#type' => 'textfield',
-		'#default_value' => variable_get('fetchit7_param_text','fetchit7_param_text_default_value'),
-		'#title' => t('Enter some text'),
-		'#size' => 30,
-		'#maxlength' => 60,
-		'#required' => TRUE,
-	);
+	// get database type and store it (hidden) in the form so it is available to the form validate and submit functions
+	$db_type = trim(fetchit7_content_field_fetcher($nid,'db_type','value'));
+	if(strlen($db_type)) {
+		$form['db_type'] = array('#type' => 'value','#value' => $db_type);
+	} else {
+		drupal_set_message("An error occurred in fetchit7_param_form (nid = $nid) when accessing the database type.",'error');
+		return $form;
+	}
+
+	// get database handle
+	if ($db_handle = fetchit_get_db_handle($nid)) {
+		$form['db_handle'] = array('#type' => 'value','#value' => $db_handle);
+	} else {
+		drupal_set_message("An error occurred in fetchit7_param_form (nid = $nid) when creating the database connection handle.",'error');
+		return $form;
+	}
 	
-	$myform['#submit'][] = 'fetchit7_param_form_submit';
-	return system_settings_form($myform);
+	// run the pre query before doing anything else
+	// TODO: figure out why pre-fn is getting hit twice prior to the form drawing!!!
+	$preqry = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_pre_function','value'));
+	if (strlen($preqry)) {
+		if (strtolower(substr($preqry,0,4)) == 'php.') {
+			$thefunction = substr($preqry,4); 
+			global $user;
+    		$user_uid = (int) $user->uid;
+			$result = $thefunction($user_uid);
+		} else {
+			$result = fetchit_run_query($db_type,$db_handle,$preqry);
+		}
+		//TODO: check pre function result?
+	}
+
+	// get the user entered field names and input methods
+	// these are the parameters
+	$user_field_data = array();
+	//$user_field_data = fetchit_get_user_field_data($nid);
 	
+	// submit button attributes
+	$submit_label = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_label','value'));
+	//$form['submit_label'] = array('#type' => 'value','#value' => $submit_label);
+	if (!(strlen($submit_label))) {
+		$submit_label = 'Submit';
+	}
+	$submit_weight = fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_weight','value');
+	$submit_redirect = fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_redirect','value');
+	// table attributes 
+	$showtitles = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_shw_ttl','value');
+	$table_weight = fetchit7_content_field_fetcher($nid,'fetchit7_field_table_weight','value');
+			
 }
 
 /**
@@ -725,6 +767,13 @@ function fetchit7_content_field_mapper ($field_id) {
 		case 'fetchit7_field_tbl_sel_tbl':
 			$field_name = 'fetchit7_field_tbl_sel_tbl';
 			break;
+		// fetchit7 custom fields used by parameter input content type
+		CASE 'par_shw_ttl':
+		case 'showtitles':
+		case 'show_titles':
+		case 'fetchit7_field_par_shw_ttl':
+			$field_name = 'fetchit7_field_par_shw_ttl';
+			break;
 		default:
 			break;
 	}
@@ -801,9 +850,6 @@ function fetchit_get_db_handle($nid) {
 				// create the pg connection
 				$db_string = "host=$db_host port=$db_port user=$db_login password=$db_password dbname=$db_name";
 				$db_handle = pg_connect($db_string);
-				if(!$db_handle) {
-					return $db_handle;
-				}
 				break;
 			case FETCHIT7_DBTYPE_NAME_MYSQL: //'mysql':
 				break;
