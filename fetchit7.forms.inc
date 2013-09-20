@@ -2191,6 +2191,7 @@ function fetchit_get_field_element_array ($field_name,$field_type,$db_handle,$us
 }
 
 function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type,$db_handle,$user_field_ndx,$user_field_data,$nid,$showtitles,$db_value) {
+	$form = array();
 	switch (strtolower(trim($field_type))) {
 		case 'bool': // a boolean from a pg database
 			if ($user_field_ndx) { // the user specified something
@@ -2249,10 +2250,10 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 			if ($user_field_ndx) { // the user specified something
 				switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
 					case F_DR_CONTROL_DROPDOWN_SINGLE:
-						$output = fetchit_get_select_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_select_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_RADIOBTN:
-						$output = fetchit_get_radios_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_radios_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_TEXTBOX:
 						$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2262,20 +2263,19 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						} else {
 							$size = 7;
 						}
-						$output = fetchit_get_textbox_element($err,$user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
+						return fetchit_get_textbox_element($user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_CHECKBOXES:
-						$output = fetchit_get_checkboxes_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_checkboxes_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_DROPDOWN_MULTI:
-						$output = fetchit_get_selectmultiple_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_CHECKBOX:
 					case F_DR_CONTROL_DATETIMESEL:
 					case F_DR_CONTROL_POPUPDATE:
 					case F_DR_CONTROL_DATESEL:
 					default:
-						$err=15;
 				}
 			} else { // create the default input control element for integers - a text box
 				$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2292,7 +2292,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 				if (strlen(trim($db_value))) {
 					$default = (int) $db_value;
 				}
-				$output = array(
+				$form['mytextbox'] = array(
 					'#type' => 'textfield',
 					'#title' => $title,
 					'#description' => $description,
@@ -2302,6 +2302,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					'#disabled' => FALSE,
 				);
 			}
+			return $form;
 			break;
 		case 'numeric': // a "numeric" real number field from a pg database
 		case 'float4': // a single precision real number field from a pg database
@@ -2309,10 +2310,10 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 			if ($user_field_ndx) { // the user specified something
 				switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
 					case F_DR_CONTROL_DROPDOWN_SINGLE:
-						$output = fetchit_get_select_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_select_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_RADIOBTN:
-						$output = fetchit_get_radios_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_radios_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_TEXTBOX:
 						$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2322,20 +2323,19 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						} else {
 							$size = 9;
 						}
-						$output = fetchit_get_textbox_element($err,$user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
+						return fetchit_get_textbox_element($user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_CHECKBOXES:
-						$output = fetchit_get_checkboxes_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_checkboxes_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_DROPDOWN_MULTI:
-						$output = fetchit_get_selectmultiple_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_CHECKBOX:
 					case F_DR_CONTROL_DATETIMESEL:
 					case F_DR_CONTROL_POPUPDATE:
 					case F_DR_CONTROL_DATESEL:
 					default:
-						$err=15;
 				}
 			} else { // create the default input control element for reals - a text box
 				$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2350,7 +2350,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					$description=$field_type;
 				}
 				$default = $db_value;
-				$output = array(
+				$form['mytextbox'] = array(
 					'#type' => 'textfield',
 					'#title' => $title,
 					'#description' => $description,
@@ -2359,23 +2359,24 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					'#required' => FALSE,
 					'#disabled' => FALSE,
 				);
+				return $form;
 			}
 			break;
 		case 'date': // a date field from a pg database
 			if ($user_field_ndx) { // the user specified something
 				switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
 					case F_DR_CONTROL_DATESEL:
-						$output = fetchit_get_date_element($err,$user_field_data,$user_field_ndx-1,$showtitles,$db_value);
+						return fetchit_get_date_element($user_field_data,$user_field_ndx-1,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_DATETIMESEL:
 						$date_format='M j, Y';
 						$year_range='-15:+15';
-						$output = fetchit_get_date_select_element($err,$user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
+						return fetchit_get_date_select_element($user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_POPUPDATE:
 						$date_format='M j, Y';
 						$year_range='-15:+15';
-						$output = fetchit_get_date_popup_element($err,$user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
+						return fetchit_get_date_popup_element($user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_TEXTBOX:
 						$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2385,7 +2386,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						} else {
 							$size = 20;
 						}
-						$output = fetchit_get_textbox_element($err,$user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
+						return fetchit_get_textbox_element($user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_DROPDOWN_SINGLE:
 					case F_DR_CONTROL_DROPDOWN_MULTI:
@@ -2393,7 +2394,6 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					case F_DR_CONTROL_CHECKBOX:
 					case F_DR_CONTROL_CHECKBOXES:
 					default:
-						$err=15;
 				}
 			} else { // the default input control element for dates - the drupal 6 core date element
 				$default = array(
@@ -2412,7 +2412,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'year' => format_date(strtotime($db_value),'custom','Y',0),
 					);
 				}
-				$output = array(
+				$form['mydate'] = array(
 					'#type' => 'date', // this is the drupal 6 core date element, default is today's date, returns an associative array with 'year' 'month' and 'day' elements
 					'#title' => $title,
 					'#description' => $description,
@@ -2420,6 +2420,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					'#disabled' => FALSE,
 					'#default_value' => $default,
 				);
+				return $form;
 			}
 			break;
 		case 'time': // a time field from a pg database
@@ -2429,12 +2430,12 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					case F_DR_CONTROL_DATETIMESEL:
 						$date_format='g:i A';
 						$year_range='-15:+15';
-						$output = fetchit_get_date_select_element($err,$user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
+						return fetchit_get_date_select_element($user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_POPUPDATE:
 						$date_format='g:i A';
 						$year_range='-15:+15';
-						$output = fetchit_get_date_popup_element($err,$user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
+						return fetchit_get_date_popup_element($user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
 						case F_DR_CONTROL_DATESEL:
 					case F_DR_CONTROL_TEXTBOX:
 						$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2444,7 +2445,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						} else {
 							$size = 20;
 						}
-						$output = fetchit_get_textbox_element($err,$user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
+						return fetchit_get_textbox_element($user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_DROPDOWN_SINGLE:
 					case F_DR_CONTROL_DROPDOWN_MULTI:
@@ -2452,7 +2453,6 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					case F_DR_CONTROL_CHECKBOX:
 					case F_DR_CONTROL_CHECKBOXES:
 					default:
-						$err=15;
 				}
 			} else { // the default input control element for times - the drupal 6 date module api element, date_select formatted to only show hours and minutes 
 				$default = format_date(time(),'custom','Y-m-d H:i:s');
@@ -2464,7 +2464,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 				if (strlen(trim($db_value))) {
 					$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
 				}
-				$output = array(
+				$form['mydateselect'] = array(
 					'#type' => 'date_select',
 					'#title' => $title,
 					'#description' => $description,
@@ -2472,6 +2472,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					'#default_value' => $default,
     				'#date_label_position' => 'none', //'none' 'within' 'above'
 				);
+				return $form;
 			}
 			break;
 		case 'timestamp': // a timestamp field from a pg database
@@ -2481,12 +2482,12 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					case F_DR_CONTROL_DATETIMESEL:
 						$date_format='M j, Y g:i A';
 						$year_range='-15:+15';
-						$output = fetchit_get_date_select_element($err,$user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
+						return fetchit_get_date_select_element($user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_POPUPDATE:
 						$date_format='M j, Y g:i A';
 						$year_range='-15:+15';
-						$output = fetchit_get_date_popup_element($err,$user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
+						return fetchit_get_date_popup_element($user_field_data,$user_field_ndx-1,$date_format,$year_range,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_TEXTBOX:
 						$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2496,7 +2497,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						} else {
 							$size = 20;
 						}
-						$output = fetchit_get_textbox_element($err,$user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
+						return fetchit_get_textbox_element($user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_DATESEL:
 					case F_DR_CONTROL_DROPDOWN_SINGLE:
@@ -2505,7 +2506,6 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					case F_DR_CONTROL_CHECKBOX:
 					case F_DR_CONTROL_CHECKBOXES:
 					default:
-						$err=15;
 				}
 			} else { // the default input control element for timestamps - the drupal 6 date module api element, date_select formatted to show months, days, years, hours and minutes
 				$date_format = 'M j, Y g:i A';
@@ -2518,7 +2518,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 				if (strlen(trim($db_value))) {
 					$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
 				}
-				$output = array(
+				$form['mydateselect'] = array(
 					'#type' => 'date_select',
 					'#title' => $title,
 					'#description' => $description,
@@ -2527,6 +2527,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
     				'#date_year_range' => $year_range,
 					'#default_value' => $default,
 				);
+				return $form;
 			}
 			break;
 		case 'text':  // a text field from a pg database
@@ -2535,10 +2536,10 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 			if ($user_field_ndx) { // the user specified something
 				switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
 					case F_DR_CONTROL_DROPDOWN_SINGLE:
-						$output = fetchit_get_select_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_select_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_RADIOBTN:
-						$output = fetchit_get_radios_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_radios_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_TEXTBOX:
 						$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2548,20 +2549,19 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						} else {
 							$size = 20;
 						}
-						$output = fetchit_get_textbox_element($err,$user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
+						return fetchit_get_textbox_element($user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_CHECKBOXES:
-						$output = fetchit_get_checkboxes_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_checkboxes_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_DROPDOWN_MULTI:
-						$output = fetchit_get_selectmultiple_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_CHECKBOX:
 					case F_DR_CONTROL_DATESEL:
 					case F_DR_CONTROL_DATETIMESEL:
 					case F_DR_CONTROL_POPUPDATE:
 					default:
-						$err=15;
 				}
 			} else { // the default input control element for text fields - a text box
 				$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2576,7 +2576,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					$description=$field_type;
 				}
 				$default = $db_value;
-				$output = array(
+				$form['mytextbox'] = array(
 					'#type' => 'textfield',
 					'#title' => $title,
 					'#description' => $description,
@@ -2585,6 +2585,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					'#required' => FALSE,
 					'#disabled' => FALSE,
 				);
+				return $form;
 			}
 			break;
 		default: // an unanticipated field type, put a text box or single selects, but may not work
@@ -2598,20 +2599,19 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						} else {
 							$size = 20;
 						}
-						$output = fetchit_get_textbox_element($err,$user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
+						return fetchit_get_textbox_element($user_field_data,$user_field_ndx-1,$size,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_DROPDOWN_SINGLE:
-						$output = fetchit_get_select_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_select_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_RADIOBTN:
-						$output = fetchit_get_radios_element($err,$user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
+						return fetchit_get_radios_element($user_field_data,$user_field_ndx-1,$db_handle,$nid,$showtitles,$db_value);
 						break;
 					case F_DR_CONTROL_CHECKBOXES:
 					case F_DR_CONTROL_CHECKBOX:
 					case F_DR_CONTROL_DROPDOWN_MULTI:
 					case F_DR_CONTROL_DATESEL:
 					default:
-						$err=15;
 				}
 			} else { // try a text box for this unanticipated field foeld
 				$parameter_string = $user_field_data[$user_field_ndx-1][F_DR_FIELD_PARAMETER_STR];
@@ -2626,7 +2626,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					$description=$field_type;
 				}
 				$default = $db_value;
-				$output = array(
+				$form['mytextbox'] = array(
 					'#type' => 'textfield',
 					'#title' => $title,
 					'#description' => $description,
@@ -2635,11 +2635,11 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					'#required' => FALSE,
 					'#disabled' => FALSE,
 				);
+				return $form;
 			}
 	}
-	return $output;
+	return $form;
 }
-
 
 
 function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$showtitles,$db_value) {
@@ -2678,7 +2678,70 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 	return $form;
 }
 
+function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_values) {
+	$form = array();
+	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$options = array();
+		foreach($vals as $val) {
+			$options[$val]=$val;
+		}
+	} else {
+		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
+		if(strlen(trim($list_tbl))) {
+			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+			if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+				return $form;
+			}
+		} else {
+			return $form;
+		}
+	}
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
+		$required = TRUE;
+		foreach($options as $key=>$val) { // set defaults array to the first value in the list
+			$defaults = array($key);
+			break;
+		}
+	} else {
+		$defaults = array();
+		$required = FALSE;
+	}
+	// over write defaults with the values they entered last time
+	if ($db_values) {
+		$defaults = array();
+		foreach ($db_values as $db_value) {
+			$defaults[] = $db_value;
+		}
+	}
+	// finally over write defaults with user entered values if they put anything 
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		$defaults = split(',',$user_field_data[$user_field_ndx-1][F_DR_FIELD_DEFAULT_STR]);
+	}
+	// now see if the control is enabled or disabled
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
+		$disabled = TRUE;
+	} else {
+		$disabled = FALSE;
+	}
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+	}
+	$form['mycheckboxes'] = array(
+		'#title' =>$title,
+		'#type' => 'checkboxes',
+		'#options' => $options,
+		'#required' => $required,
+		'#default_value' => $defaults,
+		'#disabled' => $disabled,
+		'#description' => $description,
+	);
+	return $form;
+}
+
 function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
+	$form = array();
 	$options = array();
 	$options[0] = "false";
 	$options[1] = "true";
@@ -2739,7 +2802,67 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 	return $form;
 }
 
+function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
+	$form=array();
+	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$options = array();
+		foreach($vals as $val) {
+			$options[$val]=$val;
+		}
+	} else {
+		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
+		if(strlen(trim($list_tbl))) {
+			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+			$options = array();
+			if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+				return $form;
+			}
+		} else {
+			return $form;
+		}
+	}
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
+		$required = TRUE;
+		// choose the first item in the list as the default
+		foreach($options as $key=>$val) {
+			$default = $key;
+			break;
+		}
+	} else {
+		$required = FALSE;
+	}
+	if (strlen(trim($db_value))) {
+		$default = $db_value;
+	}
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		$default = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR];
+	}
+	// now see if the control is enabled or disabled
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
+		$disabled = TRUE;
+	} else {
+		$disabled = FALSE;
+	}
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+	}
+	$form['myselect'] = array(
+		'#title' =>$title,
+		'#type' => 'select',
+		'#options' => $options,
+		'#multiple' => FALSE,
+		'#required' => $required,
+		'#default_value' => $default,
+		'#disabled' => $disabled,
+		'#description' => $description,
+	);
+	return $form;
+}
+
 function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
+	$form = array();
 	$options = array();
 	$options[0] = "false";
 	$options[1] = "true";
@@ -2801,7 +2924,131 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 	return $form;
 }
 
+function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_values) {
+	$form = array();
+	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$options = array();
+		foreach($vals as $val) {
+			$options[$val]=$val;
+		}
+	} else {
+		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
+		if(strlen(trim($list_tbl))) {
+			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+			$options = array();
+			if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+				return $form;
+			}
+		} else {
+			return $form;
+		}
+	}
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
+		$required = TRUE;
+		// make sure there is atleast one selected by default if it is required
+		foreach($options as $key=>$val) {
+			$defaults = array($key);
+			break;
+		}
+	} else {
+		$defaults = array();
+		$required = FALSE;
+	}
+	// over write defaults with the values they entered last time
+	if ($db_values) {
+		$defaults = array();
+		foreach ($db_values as $db_value) {
+			$defaults[] = $db_value;
+		}
+	}
+	// finally over write defaults with preset values if they are in the configuration 
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		$defaults = split(',',$user_field_data[$user_field_ndx-1][F_DR_FIELD_DEFAULT_STR]);
+	}
+	// now see if the control is enabled or disabled
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
+		$disabled = TRUE;
+	} else {
+		$disabled = FALSE;
+	}
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+	}
+	$form['myselect'] = array(
+		'#title' =>$title,
+		'#type' => 'select',
+		'#options' => $options,
+		'#multiple' => TRUE,
+		'#required' => $required,
+		'#default_value' => $defaults,
+		'#attributes' => array('size'=>5),
+		'#disabled' => $disabled,
+		'#description' => $description,
+	);
+	return $form;
+}
+
+function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
+	$form=array();
+	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$options = array();
+		foreach($vals as $val) {
+			$options[$val]=$val;
+		}
+	} else {
+		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
+		if(strlen(trim($list_tbl))) {
+			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+			$options = array();
+			if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+				return $form;
+			}
+		} else {
+			return $form;
+		}
+	}
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
+		$required = TRUE;
+		foreach($options as $key=>$val) {
+			$default = $key;
+			break;
+		}
+	} else {
+		$required = FALSE;
+	}
+	if (strlen(trim($db_value))) {
+		$default = $db_value;
+	}
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		$default = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR];
+	}
+	// now see if the control is enabled or disabled
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
+		$disabled = TRUE;
+	} else {
+		$disabled = FALSE;
+	}
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+	}
+	$form['myradios'] = array(
+		'#title' =>$title,
+		'#type' => 'radios',
+		'#options' => $options,
+		'#required' => $required,
+		'#default_value' => $default,
+		'#disabled' => $disabled,
+		'#description' => $description,
+	);
+	return $form;
+}
+
 function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
+	$form = array();
 	$options = array();
 	$options[0] = "false";
 	$options[1] = "true";
@@ -2888,4 +3135,152 @@ function fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid) {
 		}
 	}
 	return $options;
+}
+
+function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$db_value) {
+	$form = array();
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
+		$required = TRUE;
+		// use the system date as a default
+		$default = array(
+			'month' => format_date(time(),'custom','n',0),
+			'day' => format_date(time(),'custom','j',0),
+			'year' => format_date(time(),'custom','Y',0),
+		);
+	} else {
+		$required = FALSE;
+	}
+	if (strlen(trim($db_value))) {
+		$default = array(
+			'month' => format_date(strtotime($db_value),'custom','n',0),
+			'day' => format_date(strtotime($db_value),'custom','j',0),
+			'year' => format_date(strtotime($db_value),'custom','Y',0),
+		);
+	}
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		$entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
+		dpm(strtotime($entered));
+		$default = array(
+			'month' => format_date(strtotime($entered),'custom','n',0),
+			'day' => format_date(strtotime($entered),'custom','j',0),
+			'year' => format_date(strtotime($entered),'custom','Y',0),
+		);
+	}
+	// now see if the control is enabled or disabled
+	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
+		$disabled = TRUE;
+	} else {
+		$disabled = FALSE;
+	}
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+	}
+	$form['mydate'] = array(
+		'#title' =>$title,
+		'#type' => 'date',
+		'#required' => $required,
+		'#default_value' => $default,
+		'#disabled' => $disabled,
+		//'#process' => array('expand_date_fetchit'),
+		'#description' => $description,
+	);
+	return $form;
+}
+/**
+ * Roll out a single date element.
+ */
+function expand_date_fetchit($element) {
+	// Default to current date
+  if (empty($element['#value'])) {
+    $element['#value'] = array('day' => format_date(time(), 'custom', 'j'),
+                            'month' => format_date(time(), 'custom', 'n'),
+                            'year' => format_date(time(), 'custom', 'Y'));
+  }
+
+  $element['#tree'] = TRUE;
+
+  // Determine the order of day, month, year in the site's chosen date format.
+  $format = variable_get('date_format_short', 'm/d/Y - H:i');
+  $sort = array();
+  $sort['day'] = max(strpos($format, 'd'), strpos($format, 'j'));
+  $sort['month'] = max(strpos($format, 'm'), strpos($format, 'M'));
+  $sort['year'] = strpos($format, 'Y');
+  asort($sort);
+  $order = array_keys($sort);
+  
+  // Output multi-selector for date.
+  foreach ($order as $type) {
+    switch ($type) {
+      case 'day':
+        $options = drupal_map_assoc(range(1, 31));
+        break;
+      case 'month':
+        $options = drupal_map_assoc(range(1, 12), 'map_month');
+        break;
+      case 'year':
+        $options = drupal_map_assoc(range($minyear, $maxyear));
+        break;
+    }
+    $parents = $element['#parents'];
+    $parents[] = $type;
+    $element[$type] = array(
+      '#type' => 'select',
+      '#value' => $element['#value'][$type],
+      '#attributes' => $element['#attributes'],
+      '#options' => $options,
+    );
+  }
+}
+
+function fetchit_get_date_select_element($user_field_data,$user_field_ndx,$date_format,$year_range,$showtitles,$db_value) {
+	$form = array();
+	$default = format_date(time(),'custom','Y-m-d H:i:s');
+	if (strlen(trim($db_value))) {
+		$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
+	}
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		$default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]),'custom','Y-m-d H:i:s',0);
+	}
+	if(!strlen(trim($date_format)))$date_format='Y-m-d g:i:s A';
+	if(!strlen(trim($year_range)))$year_range='-15:+15';
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+	}
+	$form['mydateselect'] = array(
+		'#type' => 'date_select',
+		'#title' =>$title,
+		'#default_value' => $default,
+    	'#date_label_position' => 'none', //'none' 'within' 'above'
+    	'#date_year_range' => $year_range, //'-3:+3'
+		'#date_format' => $date_format, //'Y-m-d H:i' 'm-d-Y', 
+		'#description' => $description,
+	);
+	return $form;
+}
+function fetchit_get_date_popup_element($user_field_data,$user_field_ndx,$date_format,$year_range,$showtitles,$db_value) {
+	$form = array();
+	$default = format_date(time(),'custom','Y-m-d H:i:s');
+	if (strlen(trim($db_value))) {
+		$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
+	}
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		$default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]),'custom','Y-m-d H:i:s',0);
+	}
+	if(!strlen(trim($date_format)))$date_format='Y-m-d g:i:s A';
+	if(!strlen(trim($year_range)))$year_range='-15:+15';
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+	}
+	$form['mydatepopup'] = array(
+		'#title' =>$title,
+		'#type' => 'date_popup',
+		'#default_value' => $default,
+		'#date_format' => $date_format,
+    	'#date_year_range' => $year_range, //'-3:+3'
+		'#description' => $description,
+	);
+	return $form;
 }
