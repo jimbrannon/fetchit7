@@ -569,7 +569,10 @@ function fetchit7_node_info() {
   if (substr($form_id, 0, 20) == 'fetchit7_param_form_') {
     $forms[$form_id] = array('callback' => 'fetchit7_param_form');
   }
-
+	// these are elements on the param input form
+  if (substr($form_id, 0, 17) == 'fetchit7_element_') {
+    $forms[$form_id] = array('callback' => 'fetchit7_param_element_form');
+  }
   return $forms;
 }
 
