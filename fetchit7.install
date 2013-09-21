@@ -807,7 +807,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field types
 		'fetchit7_field_par_fld_type' => array(
-			'label'						=> $t('Parameter input types'),
+			'label'						=> $t('Parameter input control types'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -818,9 +818,23 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '-1',
 		),
+		// parameter field types
+		'fetchit7_field_par_fld_weight' => array(
+			'label'						=> $t('Parameter input control weights'),
+			'settings'				=> array (
+					'max_length'	=> '10',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_weight',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
+
 		// parameter field enabled
 		'fetchit7_field_par_fld_enabled' => array(
-			'label'						=> $t('Parameter enabled'),
+			'label'						=> $t('Parameter input control enabled'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -833,7 +847,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field required
 		'fetchit7_field_par_fld_required' => array(
-			'label'						=> $t('Parameter required'),
+			'label'						=> $t('Parameter input value required'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -846,7 +860,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field parameter string
 		'fetchit7_field_par_fld_parstr' => array(
-			'label'						=> $t('Parameter string'),
+			'label'						=> $t('Additional parameters string'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -859,7 +873,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field value list table
 		'fetchit7_field_par_fld_list_tbl' => array(
-			'label'						=> $t('Parameter value list table'),
+			'label'						=> $t('Parameter input list table'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -872,7 +886,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field value list table key field
 		'fetchit7_field_par_fld_list_key' => array(
-			'label'						=> $t('Parameter value list table key field'),
+			'label'						=> $t('Parameter input list table key field'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -885,7 +899,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field value list table display field
 		'fetchit7_field_par_fld_list_dsp' => array(
-			'label'						=> $t('Parameter value list table display field'),
+			'label'						=> $t('Parameter input list table display field'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -898,7 +912,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field value list table uid field
 		'fetchit7_field_par_fld_list_uid' => array(
-			'label'						=> $t('Parameter value list table uid field'),
+			'label'						=> $t('Parameter input list table uid field'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -911,7 +925,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field value list table default key value
 		'fetchit7_field_par_fld_list_def' => array(
-			'label'						=> $t('Parameter value list table default key value'),
+			'label'						=> $t('Parameter input default value'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -924,7 +938,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field selection data table
 		'fetchit7_field_par_fld_data_tbl' => array(
-			'label'						=> $t('Parameter selection data table'),
+			'label'						=> $t('Parameter output data table'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -937,7 +951,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field selection data table key field
 		'fetchit7_field_par_fld_data_key' => array(
-			'label'						=> $t('Parameter selection data table key field'),
+			'label'						=> $t('Parameter output data table key field'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -950,7 +964,7 @@ function _fetchit7_installed_fields () {
 		),
 		// parameter field selection data table uid field
 		'fetchit7_field_par_fld_data_uid' => array(
-			'label'						=> $t('Parameter selection data table uid field'),
+			'label'						=> $t('Parameter output data table uid field'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
@@ -2042,10 +2056,10 @@ function _fetchit7_content_param_installed_instances () {
 				//'weight'				=> -3,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('How many rows to have in the prameter input table.  The columns are then filled out until no controls are left.'),
+			'description'		=> $t('Number of rows in the table of parameter input controls.  Enter 0 to output controls in a stack ordered by weight (NOT a table).'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> '10',
+					'value'					=> 3,
 				),
 			),
 			//'settings'			=> array (
@@ -2090,7 +2104,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('The name of this parameter.'),
+			'description'		=> $t('The parameter name. fetchit7 will create a control for each parameter name specified here.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -2102,7 +2116,7 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		// parameter field title
 		'fetchit7_field_par_fld_title' => array(
-			'label'					=> $t('Parameter title'),
+			'label'					=> $t('Parameter input control title.'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -2117,7 +2131,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The title for this parameter.'),
+			'description'		=> $t('A title to put above the parameter input control.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -2144,7 +2158,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('A description of this parameter.'),
+			'description'		=> $t('A description to put below the parameter input control.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -2162,7 +2176,7 @@ function _fetchit7_content_param_installed_instances () {
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '20',
 				),
 				//'weight'				=> -3,
 			),
@@ -2171,7 +2185,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('The type of input control to use for this parameter: [text,list,checkbox,...]'),
+			'description'		=> $t('The type of input control to use for entering data for this parameter: [textbox, dropdown_single, dropdown_multiple, radio_buttons, checkboxes, checkbox, date_popup, date_select, datetime_select]'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'text',
@@ -2181,15 +2195,15 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
-		// fetchit7_field_par_fld_enabled
-		'fetchit7_field_par_fld_enabled' => array(
-			'label'					=> $t('Parameter enabled'),
+		// Parameter input control weight
+		'fetchit7_field_par_fld_weight' => array(
+			'label'					=> $t('Parameter input control weight'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> 5,
 				),
 				//'weight'				=> -3,
 			),
@@ -2198,10 +2212,37 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('Whether this parameter control is enabled for input'),
+			'description'		=> $t('The input control weight is an integer -20 to 20 that determines the order in which multiple controls are displayed when NOT in a table (rows = 0). Lower numbers float to the top.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> '1',
+					'value'					=> 'text',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// fetchit7_field_par_fld_enabled
+		'fetchit7_field_par_fld_enabled' => array(
+			'label'					=> $t('Parameter input control enabled'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '10',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('Whether this parameter control is enabled for input. Enter true or false.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'true',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_enabled',
@@ -2210,22 +2251,22 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		// fetchit7_field_par_fld_required
 		'fetchit7_field_par_fld_required' => array(
-			'label'					=> $t('Parameter required'),
+			'label'					=> $t('Parameter input value required'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '10',
 				),
 				//'weight'				=> -3,
 			),
 			'settings'			=> array (
-				'text_processing'	=> '0',
+				'text_processing'	=> 'false',
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('Whether this parameter control requires a value'),
+			'description'		=> $t('Whether this parameter control requires an input value to be selected/entered before submitting the form.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '1',
@@ -2237,7 +2278,7 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		// fetchit7_field_par_fld_parstr
 		'fetchit7_field_par_fld_parstr' => array(
-			'label'					=> $t('Parameter string'),
+			'label'					=> $t('Additional parameters string'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -2252,7 +2293,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('Parameter string'),
+			'description'		=> $t('This string allows additional input control parameters to be entered.  Name:Value pairs separated by a semicolon.  Example: size:15;color:red'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -2264,7 +2305,7 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field value list table
 		'fetchit7_field_par_fld_list_tbl' => array(
-			'label'					=> $t('Parameter value list table'),
+			'label'					=> $t('Parameter input list table'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -2279,7 +2320,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The name of the database table containing the list of allowed parameter values'),
+			'description'		=> $t('The name of the database table containing the list of allowed parameter values to be input into the control'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -2291,13 +2332,13 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field value list table key field
 		'fetchit7_field_par_fld_list_key' => array(
-			'label'					=> $t('Parameter value list table key field'),
+			'label'					=> $t('Parameter input list table key field'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '20',
 				),
 				//'weight'				=> -3,
 			),
@@ -2306,7 +2347,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The name of the key field in the database table containing the list of allowed parameter values'),
+			'description'		=> $t('[CURRENTLY LOCKED TO DEFAULT VALUE] The name of the key field (default = stored) in the database table containing the list of allowed parameter values.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'stored',
@@ -2318,13 +2359,13 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field value list table display field
 		'fetchit7_field_par_fld_list_dsp' => array(
-			'label'					=> $t('Parameter value list table display field'),
+			'label'					=> $t('Parameter input list table display field'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '20',
 				),
 				//'weight'				=> -3,
 			),
@@ -2333,7 +2374,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The name of the display field in the database table containing the list of allowed parameter values'),
+			'description'		=> $t('[CURRENTLY LOCKED TO DEFAULT VALUE] The name of the display field (default = displayed) in the database table containing the list of allowed parameter values'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'displayed',
@@ -2345,13 +2386,13 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field value list table uid field
 		'fetchit7_field_par_fld_list_uid' => array(
-			'label'					=> $t('Parameter value list table uid field'),
+			'label'					=> $t('Parameter input list table uid flag'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '10',
 				),
 				//'weight'				=> -3,
 			),
@@ -2360,10 +2401,10 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The name of the uid field in the database table containing the list of allowed parameter values'),
+			'description'		=> $t('Whether the parameter input list table contains a uid field (named drupal_userid). Enter true or false.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'drupal_userid',
+					'value'					=> 'false',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_list_uid',
@@ -2372,13 +2413,13 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field value list table key field default value
 		'fetchit7_field_par_fld_list_def' => array(
-			'label'					=> $t('Parameter value list default key field value'),
+			'label'					=> $t('Parameter default value'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '20',
 				),
 				//'weight'				=> -3,
 			),
@@ -2387,7 +2428,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The key field value in the value list table corresponding to the default parameter value'),
+			'description'		=> $t('The default value for the input control.  It might be a default text value to put in the text box, or a selection in the parameter input list.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -2399,7 +2440,7 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field data selection table
 		'fetchit7_field_par_fld_data_tbl' => array(
-			'label'					=> $t('Parameter data selection table'),
+			'label'					=> $t('Parameter data output table'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -2414,7 +2455,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('The name of the database table (data selection table) into which the selected keys/entered values will be stored'),
+			'description'		=> $t('The name of the database table (data output table) into which the entered or selected values will be stored'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -2426,13 +2467,13 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field data selection table key field
 		'fetchit7_field_par_fld_data_key' => array(
-			'label'					=> $t('Parameter data selection table key field'),
+			'label'					=> $t(' Parameter data output table key field'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '20',
 				),
 				//'weight'				=> -3,
 			),
@@ -2441,7 +2482,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('The name of the key field in the data selection table'),
+			'description'		=> $t('[CURRENTLY LOCKED AT DEFAULT VALUE] The name of the key field in the data output table (default = stored)'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'stored',
@@ -2453,13 +2494,13 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field data selection table uid field
 		'fetchit7_field_par_fld_data_uid' => array(
-			'label'					=> $t('Parameter data selection table uid field'),
+			'label'					=> $t('Parameter data output table uid flag'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '10',
 				),
 				//'weight'				=> -3,
 			),
@@ -2468,10 +2509,10 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The name of the uid field in the data selection table'),
+			'description'		=> $t('[LOCKED AT TRUE] Whether the parameter data output table contains a uid field (named drupal_userid). Enter true or false.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'drupal_userid',
+					'value'					=> 'true',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_data_uid',

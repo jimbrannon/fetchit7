@@ -212,12 +212,6 @@ function fetchit7_admin_dbsettings_submit ($form, $form_state) {
 }
 
 
-/**
- * Process fetchit7 settings form submission
- */
-function fetchit7_admin_reset_submit ($form, $form_state) {
-}
-
  /**
   * Form builder.  Configure fetchit7.
   * 
@@ -275,9 +269,7 @@ function fetchit7_admin_backupcontent_submit ($form, $form_state) {
 	if(!strlen(trim($string = $form_state['values']['fetchit7_admin_backupcontent_name']))) $string = 'default';
 	// fetchit7 content types
 	// TODO: should loop through all fetchit7 content types - search by name? - rather than have them hardcoded here
-	$content_types = array();
-	$content_types[] = 'fetchit7_content_table';
-	$content_types[] = 'fetchit7_content_param';
+	$content_types = array('fetchit7_content_table','fetchit7_content_param');
 	$contenttypecount = 0;
 	$contentcount = 0;
 	foreach ($content_types as $content_type) {
@@ -301,7 +293,6 @@ function fetchit7_content_backuptable_create($type,$tablename) {
 	$fieldstrings[] = 'ndx int PRIMARY KEY';
 	$query  = fetchit7_maketablequery_create($tablename,$fieldstrings);
 	if(!($result = db_query($query))) return FALSE;
-	
 	$query = "DROP TABLE $tablename;";
 	if(!($result = db_query($query))) return FALSE;
 	// the node table fields
@@ -319,11 +310,17 @@ function fetchit7_content_backuptable_create($type,$tablename) {
 		$entityfields[] = $field_name;
 		$field = field_info_field($field_name);
 		$field_type = $field['columns']['value']['type'];
+		$field_types[$field_name] = $field_type;
 		if ($field_type == 'varchar') {
-			$field_type .= ' ('.$field['columns']['value']['length'].')';
+			//actually, had to make it as big as possible (255) so that we can cram
+			// as many comma delimited values in there as possible because of
+			// multiple valued fields in the param input content type
+			//$field_type .= ' ('.$field['columns']['value']['length'].')';
+			$field_type .= ' (255)';
 		}
 		$fieldstrings[] = $field_name.' '.$field_type;
 	}
+	debug($field_types,'$field_types');
 	$query  = fetchit7_maketablequery_create($tablename,$fieldstrings);
 	if(!($result = db_query($query))) return FALSE;
 
@@ -359,13 +356,38 @@ function fetchit7_content_backuptable_create($type,$tablename) {
 			foreach ($nodetablefields as $nodetablefield) {
 				$data[$nodetablefield] = $row->$nodetablefield;
 			}
+			$datnode = $entityfieldnodes[$row->nid];
 			foreach ($entityfields as $entityfield) {
-				$mynode = $entityfieldnodes[$row->nid];
-				$myfield = $mynode->$entityfield;
-				if(array_count_values($mylanguagekeys = array_keys($myfield))) {
-					$mylanguagekey = $mylanguagekeys[0];
-					//TODO: need to update backup function to handle multiple valued fields (how to store this in a flat table?!?! uh oh)
-					$data[$entityfield] = $myfield[$mylanguagekey][0]['value'];
+				$datfield = $datnode->$entityfield;
+				if(array_count_values($dozlanguagekeys = array_keys($datfield))) {
+					// use the first language key, whatever it is - usually it is 'und'
+					$datlanguagekey = $dozlanguagekeys[0];
+					//TODO: need to update backup function to find a better way (something non-text based and not assuming varchars) to handle multiple valued fields
+					if (array_count_values($dozdatakeys = array_keys($datfield[$datlanguagekey]))) {
+						$datcounter = 0;
+						foreach ($dozdatakeys as $datdatakey) {
+							if ($datcounter) {
+								// it HAS to be a varchar or we can do nothing more !! (for now...)
+								// param input content types only have multiple values for varchars, so we are good. (for now...)
+								if ($field_types[$entityfield] == 'varchar') {
+									// it's a varchar! chunk more data in that puppy
+									// we are assuming that we set the varchar size as high as it goes (255) on this field
+									// there better be no commas in those strings or we are screwed!!
+									// how much room do we have left?
+									$daroomleft = 255 - strlen($data[$entityfield]);
+									if (strlen($datfield[$datlanguagekey][$datdatakey]['value']) < $daroomleft) {
+										$data[$entityfield] .= ',';
+										$data[$entityfield] .= $datfield[$datlanguagekey][$datdatakey]['value'];
+									}
+								}
+							} else {
+								// $datdatakey SHOULD be zero, but just to be careful....
+								$data[$entityfield] = $datfield[$datlanguagekey][$datdatakey]['value'];
+								// most times...and we are done...but sometimes...
+							}
+							++$datcounter;
+						}
+					}
 				}
 			}
 			//now do the insert

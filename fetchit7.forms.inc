@@ -780,16 +780,10 @@ function fetchit7_param_form($form, &$form_state) {
 						default:
 					}
 
-					// the following creates the "renderable array" of a drupal form element
-					
-					//$xxxformid = 'fetchit7_xxx_form_'.$param_count;
-					//$form[$element_name] = drupal_get_form(
-					//	$xxxformid,
-					//	$param_count,
-					//	$param_count
-					//);
-					
-										
+					// the following creates the "renderable array" of the current drupal form element
+					// this had to be redesigned for D7 since simple element render arrays now need to be
+					// proprocessed by the drupal_get_form function before rendering with drupal_render()
+					// this means we had to build a generic element builder function much like the form builder function 
 					$myform[$element_name] = drupal_get_form(
 						$element_name,
 						$param_name,
@@ -801,27 +795,6 @@ function fetchit7_param_form($form, &$form_state) {
 						$showtitles,
 						$db_value
 					);
-					
-					//$form[$element_name] = fetchit_get_field_element_array(
-					//	$param_name,
-					//	$data_tbl_field_type,
-					//	$db_handle,
-					//	$i+1,
-					//	$user_field_data,
-					//	$nid,
-					//	$showtitles,
-					//	$db_value
-					//);
-					
-					//$myform[$element_name] = array(
-					//	'#type' => 'textfield',
-					//	'#default_value' => $user_field_data[$i][F_DR_FIELD_DEFAULT_STR],
-					//	'#title' => $user_field_data[$i][F_DR_FIELD_TITLE_STR],
-					//	'#size' => 30,
-					//	'#maxlength' => 60,
-					//	'#required' => $user_field_data[$i][F_DR_FIELD_REQUIRED_STR],
-					//);
-
 					$param_count++;
 				}
 			}
@@ -837,8 +810,7 @@ function fetchit7_param_form($form, &$form_state) {
 	// and start working on a builder function for these form elements so then can be called through drupal_get_form(uniqueelementformid)
 	//  and uniqueelementformid is mapped to a builder function in hook_forms 
 	// ***sigh*** 
-	$make_param_table = true;
-	if ($make_param_table) { //pre-render the elements and put them in a table
+	if ($table_rows) { //pre-render the elements and put them in a table
 		// this form will be a table of pre-rendered controls - hope it works!
 		$table_column_count =  intval( ($param_count-1) / $table_rows) + 1; 
 		$header = array();
@@ -855,11 +827,8 @@ function fetchit7_param_form($form, &$form_state) {
 				if ($p_ndx < $param_count) {
 					$element_name = fetchit_make_element_name($nid,0,$p_ndx);
 					$row[] = drupal_render($myform[$element_name]);
-					//$xxxformid = 'fetchit7_xxx_form_'.$p_ndx;
-					//$xxxform = drupal_get_form($xxxformid,$row_ndx,$col_ndx);
-					//$row[] = drupal_render($xxxform);
 				} else {
-					$sillyform[$p_ndx] = array('#type' => 'item','#title' => 'Empty Cell','#markup' => "I am empty cell $p_ndx.",);
+					$sillyform[$p_ndx] = array('#type' => 'item','#title' => 'Empty Cell','#markup' => "I am an empty cell.",);
 					$row[] = drupal_render($sillyform[$p_ndx]);
 					//$row[] = $p_ndx;
 				}
@@ -2303,7 +2272,7 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_values) {
 	$form = array();
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
-		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$options = array();
 		foreach($vals as $val) {
 			$options[$val]=$val;
@@ -2338,7 +2307,7 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 	}
 	// finally over write defaults with user entered values if they put anything 
 	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$defaults = split(',',$user_field_data[$user_field_ndx-1][F_DR_FIELD_DEFAULT_STR]);
+		$defaults = explode(',',$user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
 	}
 	// now see if the control is enabled or disabled
 	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
@@ -2376,7 +2345,7 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 	$options[0] = "false";
 	$options[1] = "true";
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
-		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$i=0;
 		foreach($vals as $val) {
 			$options[$i]=$val;
@@ -2445,7 +2414,7 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
 	$form=array();
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
-		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$options = array();
 		foreach($vals as $val) {
 			$options[$val]=$val;
@@ -2516,7 +2485,7 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 	$options[0] = "false";
 	$options[1] = "true";
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
-		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$i=0;
 		foreach($vals as $val) {
 			$options[$i]=$val;
@@ -2585,7 +2554,7 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_values) {
 	$form = array();
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
-		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$options = array();
 		foreach($vals as $val) {
 			$options[$val]=$val;
@@ -2622,7 +2591,7 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 	}
 	// finally over write defaults with preset values if they are in the configuration 
 	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$defaults = split(',',$user_field_data[$user_field_ndx-1][F_DR_FIELD_DEFAULT_STR]);
+		$defaults = explode(',',$user_field_data[$user_field_ndx-1][F_DR_FIELD_DEFAULT_STR]);
 	}
 	// now see if the control is enabled or disabled
 	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
@@ -2661,7 +2630,7 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
 	$form=array();
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
-		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$options = array();
 		foreach($vals as $val) {
 			$options[$val]=$val;
@@ -2729,7 +2698,7 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 	$options[0] = "false";
 	$options[1] = "true";
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
-		$vals = split(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$i=0;
 		foreach($vals as $val) {
 			$options[$i]=$val;
