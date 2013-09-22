@@ -28,6 +28,7 @@ define("FETCHIT7_CONTROLTYPE_TEXTBOXTYPE_NAME_DATE","date"); //define("F_DR_TEXT
 define("FETCHIT7_FIELD_LIST_NDX_STR","list_ndx"); //define("F_DR_LIST_TBL_NDX_FLD","stored");
 define("FETCHIT7_FIELD_LIST_DSP_STR","list_dsp"); //define("F_DR_LIST_TBL_DSP_FLD","displayed");
 define("FETCHIT7_FIELD_DATA_NDX_STR","data_ndx"); //define("F_DR_DATA_TBL_NDX_FLD","stored");
+define("FETCHIT7_FIELD_WEIGHT_STR","weight"); //define("F_DR_DATA_TBL_NDX_FLD","stored");
 
 
 

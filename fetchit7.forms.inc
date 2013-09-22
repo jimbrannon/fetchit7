@@ -554,6 +554,7 @@ function fetchit7_param_form($form, &$form_state) {
 	$param_titles = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_title','values'); //should return an array
 	$param_descriptions = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_desc','values'); //should return an array
 	$param_types = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_type','values'); //should return an array
+	$param_weights = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_weight','values'); //should return an array
 	$param_enabled = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_enabled','values'); //should return an array
 	$param_required = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_required','values'); //should return an array
 	$param_str = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_parstr','values'); //should return an array
@@ -625,6 +626,13 @@ function fetchit7_param_form($form, &$form_state) {
 				// can't have a default here, too many complications
 				drupal_set_message("Parameter $param_index control type missing.  There must be as many control types specified as there are parameter names. Please contact the site administrator.",'error');
 				return;
+			}
+
+			//weight default of field_index is OK (defaults to the order they were created)
+			if ($param_index < count($param_weights)) {
+				$user_field_data[$field_index][FETCHIT7_FIELD_WEIGHT_STR] = trim($param_weights[$param_index]);
+			} else {
+				$user_field_data[$field_index][FETCHIT7_FIELD_WEIGHT_STR] = $field_index;
 			}
 
 			//$param_enabled
@@ -1213,9 +1221,9 @@ function fetchit7_content_field_fetcher ($nid, $field_id = 'title', $format = 'v
 			}
 		} else {
 			// for now do nothing
-			debug($nid,'nid');
-			debug($field_id,'field_id');
-			debug($format,'format');
+			//debug($nid,'nid');
+			//debug($field_id,'field_id');
+			//debug($format,'format');
 			$output = array();
 		}
 		return $output;
@@ -1747,6 +1755,11 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 				if (strlen(trim($db_value))) {
 					$default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
 				}
+				if (strlen(trim($user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+					$weight = (int) $user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR];
+				} else {
+					$weight = $user_field_ndx-1;
+				}
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
@@ -1758,6 +1771,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#return_value' => 1,
 						'#disabled' => FALSE,
 						'#required' => FALSE,
+						'#weight' => $weight,
 					);
 				} else {
 					$title=$field_name;
@@ -1768,6 +1782,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#return_value' => 1,
 						'#disabled' => FALSE,
 						'#required' => FALSE,
+						'#weight' => $weight,
 					);
 				}
 				return $form;
@@ -1817,6 +1832,11 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 				if (strlen(trim($db_value))) {
 					$default = (int) $db_value;
 				}
+				if (strlen(trim($user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+					$weight = (int) $user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR];
+				} else {
+					$weight = $user_field_ndx-1;
+				}
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
@@ -1828,6 +1848,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#size' => $size,
 						'#required' => FALSE,
 						'#disabled' => FALSE,
+						'#weight' => $weight,
 					);
 				} else {
 					$form['mytextbox'] = array(
@@ -1836,6 +1857,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#size' => $size,
 						'#required' => FALSE,
 						'#disabled' => FALSE,
+						'#weight' => $weight,
 					);
 				}
 				return $form;
@@ -1883,6 +1905,11 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					$size = 9;
 				}
 				$default = $db_value;
+				if (strlen(trim($user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+					$weight = (int) $user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR];
+				} else {
+					$weight = $user_field_ndx-1;
+				}
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
@@ -1894,6 +1921,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#size' => $size,
 						'#required' => FALSE,
 						'#disabled' => FALSE,
+						'#weight' => $weight,
 					);
 				} else {
 					$form['mytextbox'] = array(
@@ -1902,6 +1930,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#size' => $size,
 						'#required' => FALSE,
 						'#disabled' => FALSE,
+						'#weight' => $weight,
 					);
 				}
 				return $form;
@@ -1953,6 +1982,11 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'year' => format_date(strtotime($db_value),'custom','Y',0),
 					);
 				}
+				if (strlen(trim($user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+					$weight = (int) $user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR];
+				} else {
+					$weight = $user_field_ndx-1;
+				}
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
@@ -1963,6 +1997,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#required' => FALSE,
 						'#disabled' => FALSE,
 						'#default_value' => $default,
+						'#weight' => $weight,
 					);
 				} else {
 					$form['mydate'] = array(
@@ -1970,6 +2005,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#required' => FALSE,
 						'#disabled' => FALSE,
 						'#default_value' => $default,
+						'#weight' => $weight,
 					);
 				}
 				return $form;
@@ -2012,6 +2048,11 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 				if (strlen(trim($db_value))) {
 					$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
 				}
+				if (strlen(trim($user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+					$weight = (int) $user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR];
+				} else {
+					$weight = $user_field_ndx-1;
+				}
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
@@ -2022,6 +2063,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#date_format' => $date_format,
 						'#default_value' => $default,
 	    				'#date_label_position' => 'none', //'none' 'within' 'above'
+						'#weight' => $weight,
 					);
 				} else {
 					$form['mydateselect'] = array(
@@ -2029,7 +2071,8 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#date_format' => $date_format,
 						'#default_value' => $default,
 	    				'#date_label_position' => 'none', //'none' 'within' 'above'
-					);
+						'#weight' => $weight,
+	    		);
 				}
 				return $form;
 			}
@@ -2073,6 +2116,11 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 				if (strlen(trim($db_value))) {
 					$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
 				}
+				if (strlen(trim($user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+					$weight = (int) $user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR];
+				} else {
+					$weight = $user_field_ndx-1;
+				}
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
@@ -2084,6 +2132,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 	    				'#date_label_position' => 'none', //'none' 'within' 'above'
 	    				'#date_year_range' => $year_range,
 						'#default_value' => $default,
+						'#weight' => $weight,
 					);
 				} else {
 					$form['mydateselect'] = array(
@@ -2092,6 +2141,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 	    				'#date_label_position' => 'none', //'none' 'within' 'above'
 	    				'#date_year_range' => $year_range,
 						'#default_value' => $default,
+						'#weight' => $weight,
 					);
 				}
 				return $form;
@@ -2139,6 +2189,11 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					$size = 20;
 				}
 				$default = $db_value;
+				if (strlen(trim($user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+					$weight = (int) $user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR];
+				} else {
+					$weight = $user_field_ndx-1;
+				}
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
@@ -2150,6 +2205,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#size' => $size,
 						'#required' => FALSE,
 						'#disabled' => FALSE,
+						'#weight' => $weight,
 					);
 				} else {
 					$form['mytextbox'] = array(
@@ -2158,6 +2214,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#size' => $size,
 						'#required' => FALSE,
 						'#disabled' => FALSE,
+						'#weight' => $weight,
 					);
 				}
 				return $form;
@@ -2197,6 +2254,11 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 					$size = 40;
 				}
 				$default = $db_value;
+				if (strlen(trim($user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+					$weight = (int) $user_field_data[$user_field_ndx-1][FETCHIT7_FIELD_WEIGHT_STR];
+				} else {
+					$weight = $user_field_ndx-1;
+				}
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
@@ -2208,6 +2270,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#default_value' => $default,
 						'#required' => FALSE,
 						'#disabled' => FALSE,
+						'#weight' => $weight,
 					);
 				} else {
 					$form['mytextbox'] = array(
@@ -2216,6 +2279,7 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 						'#default_value' => $default,
 						'#required' => FALSE,
 						'#disabled' => FALSE,
+						'#weight' => $weight,
 					);
 				}
 				return $form;
@@ -2226,10 +2290,10 @@ function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type
 
 
 function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$showtitles,$db_value) {
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
 		// put some random string as the default
-		$default = "valid value required here";
+		if ($required) $default = "valid value required here";
 	} else {
 		$required = FALSE;
 	}
@@ -2240,10 +2304,15 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 		$default = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
 	}
 	// now see if the control is enabled or disabled
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
-		$disabled = TRUE;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]))) {
+		$disabled = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]), FILTER_VALIDATE_BOOLEAN);
 	} else {
 		$disabled = FALSE;
+	}
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
 	}
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
@@ -2256,6 +2325,7 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 			'#required' => $required,
 			'#disabled' => $disabled,
 			'#description' => $description,
+			'#weight' => $weight,
 		);
 	} else {
 		$form['mytextbox'] = array(
@@ -2264,8 +2334,10 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 			'#default_value' => $default,
 			'#required' => $required,
 			'#disabled' => $disabled,
+			'#weight' => $weight,
 		);
 	}
+
 	return $form;
 }
 
@@ -2315,6 +2387,11 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 	} else {
 		$disabled = FALSE;
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2326,6 +2403,7 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 			'#default_value' => $defaults,
 			'#disabled' => $disabled,
 			'#description' => $description,
+			'#weight' => $weight,
 		);
 	} else {
 		$form['mycheckboxes'] = array(
@@ -2334,8 +2412,10 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 			'#required' => $required,
 			'#default_value' => $defaults,
 			'#disabled' => $disabled,
+			'#weight' => $weight,
 		);
 	}
+
 	return $form;
 }
 
@@ -2385,6 +2465,11 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 	} else {
 		$disabled = FALSE;
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2396,6 +2481,7 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 			'#return_value' => 1,
 			'#disabled' => $disabled,
 			'#description' => $description,
+			'#weight' => $weight,
 		);
 	} else {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
@@ -2406,8 +2492,10 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 			'#default_value' => $default,
 			'#return_value' => 1,
 			'#disabled' => $disabled,
+			'#weight' => $weight,
 		);
 	}
+
 	return $form;
 }
 
@@ -2453,6 +2541,11 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 	} else {
 		$disabled = FALSE;
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2465,6 +2558,7 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 			'#default_value' => $default,
 			'#disabled' => $disabled,
 			'#description' => $description,
+			'#weight' => $weight,
 		);
 	} else {
 		$form['myselect'] = array(
@@ -2474,8 +2568,10 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 			'#required' => $required,
 			'#default_value' => $default,
 			'#disabled' => $disabled,
+			'#weight' => $weight,
 		);
 	}
+
 	return $form;
 }
 
@@ -2525,6 +2621,11 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 	} else {
 		$disabled = FALSE;
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2537,6 +2638,7 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 			'#default_value' => $default,
 			'#disabled' => $disabled,
 			'#description' => $description,
+			'#weight' => $weight,
 		);
 	} else {
 		$form['myselect'] = array(
@@ -2546,8 +2648,10 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 			'#required' => $required,
 			'#default_value' => $default,
 			'#disabled' => $disabled,
+			'#weight' => $weight,
 		);
 	}
+
 	return $form;
 }
 
@@ -2599,6 +2703,11 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 	} else {
 		$disabled = FALSE;
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2612,6 +2721,7 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 			'#attributes' => array('size'=>5),
 			'#disabled' => $disabled,
 			'#description' => $description,
+			'#weight' => $weight,
 		);
 	} else {
 		$form['myselect'] = array(
@@ -2622,8 +2732,10 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 			'#default_value' => $defaults,
 			'#attributes' => array('size'=>5),
 			'#disabled' => $disabled,
+			'#weight' => $weight,
 		);
 	}
+
 	return $form;
 }
 
@@ -2668,6 +2780,11 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 	} else {
 		$disabled = FALSE;
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2679,6 +2796,7 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 			'#default_value' => $default,
 			'#disabled' => $disabled,
 			'#description' => $description,
+			'#weight' => $weight,
 		);
 	} else {
 		$form['myradios'] = array(
@@ -2687,8 +2805,10 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 			'#required' => $required,
 			'#default_value' => $default,
 			'#disabled' => $disabled,
+			'#weight' => $weight,
 		);
 	}
+
 	return $form;
 }
 
@@ -2738,6 +2858,11 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 	} else {
 		$disabled = FALSE;
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2749,6 +2874,7 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 			'#default_value' => $default,
 			'#disabled' => $disabled,
 			'#description' => $description,
+			'#weight' => $weight,
 		);
 	} else {
 		$form['myradios'] = array(
@@ -2757,37 +2883,11 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 			'#required' => $required,
 			'#default_value' => $default,
 			'#disabled' => $disabled,
+			'#weight' => $weight,
 		);
 	}
-	return $form;
-}
 
-function fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid) {
-	$db_type = trim(fetchit7_content_field_fetcher($nid,'db_type','value'));
-	if(strlen($db_type)) {
-		switch ($db_type) {
-			case FETCHIT7_DBTYPE_NAME_PGSQL:
-				$stored = F_DR_LIST_TBL_NDX_FLD;
-				$displayed = F_DR_LIST_TBL_DSP_FLD;
-				$db_query = "SELECT $stored,$displayed FROM $list_tbl";
-				if ($list_uid) {
-					global $user;
-					$uid_field = F_DR_LIST_TBL_UID_FLD;
-					$db_query .= " WHERE $uid_field = " .$user->uid; 
-				} 
-				if ($db_object = pg_query($db_handle,$db_query)) {
-						$options = array();
-						while ($row = pg_fetch_object($db_object)) {
-							$options[$row->$stored]=$row->$displayed;
-						}
-				}
-				break;
-			case FETCHIT7_DBTYPE_NAME_MYSQL:
-			case FETCHIT7_DBTYPE_NAME_MSSQL:
-			default:
-		}
-	}
-	return $options;
+	return $form;
 }
 
 function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$db_value) {
@@ -2825,21 +2925,153 @@ function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$
 	} else {
 		$disabled = FALSE;
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+		$form['mydate'] = array(
+			'#title' =>$title,
+			'#type' => 'date',
+			'#required' => $required,
+			'#default_value' => $default,
+			'#disabled' => $disabled,
+			//'#process' => array('expand_date_fetchit'),
+			'#description' => $description,
+			'#weight' => $weight,
+		);
+	} else {
+		$form['mydate'] = array(
+			'#type' => 'date',
+			'#required' => $required,
+			'#default_value' => $default,
+			'#disabled' => $disabled,
+			//'#process' => array('expand_date_fetchit'),
+			'#weight' => $weight,
+		);
 	}
-	$form['mydate'] = array(
-		'#title' =>$title,
-		'#type' => 'date',
-		'#required' => $required,
-		'#default_value' => $default,
-		'#disabled' => $disabled,
-		//'#process' => array('expand_date_fetchit'),
-		'#description' => $description,
-	);
+
 	return $form;
 }
+
+function fetchit_get_date_select_element($user_field_data,$user_field_ndx,$date_format,$year_range,$showtitles,$db_value) {
+	$form = array();
+	$default = format_date(time(),'custom','Y-m-d H:i:s');
+	if (strlen(trim($db_value))) {
+		$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
+	}
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		$default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]),'custom','Y-m-d H:i:s',0);
+	}
+	if(!strlen(trim($date_format)))$date_format='Y-m-d g:i:s A';
+	if(!strlen(trim($year_range)))$year_range='-15:+15';
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+		$form['mydateselect'] = array(
+			'#type' => 'date_select',
+			'#title' =>$title,
+			'#default_value' => $default,
+	    	'#date_label_position' => 'none', //'none' 'within' 'above'
+	    	'#date_year_range' => $year_range, //'-3:+3'
+			'#date_format' => $date_format, //'Y-m-d H:i' 'm-d-Y', 
+			'#description' => $description,
+			'#weight' => $weight,
+		);
+	} else {
+		$form['mydateselect'] = array(
+			'#type' => 'date_select',
+			'#default_value' => $default,
+	    	'#date_label_position' => 'none', //'none' 'within' 'above'
+	    	'#date_year_range' => $year_range, //'-3:+3'
+			'#date_format' => $date_format, //'Y-m-d H:i' 'm-d-Y', 
+			'#weight' => $weight,
+		);
+	}
+
+	return $form;
+}
+
+function fetchit_get_date_popup_element($user_field_data,$user_field_ndx,$date_format,$year_range,$showtitles,$db_value) {
+	$form = array();
+	$default = format_date(time(),'custom','Y-m-d H:i:s');
+	if (strlen(trim($db_value))) {
+		$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
+	}
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		$default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]),'custom','Y-m-d H:i:s',0);
+	}
+	if(!strlen(trim($date_format)))$date_format='Y-m-d g:i:s A';
+	if(!strlen(trim($year_range)))$year_range='-15:+15';
+	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
+		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	} else {
+		$weight = $user_field_ndx;
+	}
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+		$form['mydatepopup'] = array(
+			'#title' =>$title,
+			'#type' => 'date_popup',
+			'#default_value' => $default,
+			'#date_format' => $date_format,
+	    	'#date_year_range' => $year_range, //'-3:+3'
+			'#description' => $description,
+			'#weight' => $weight,
+		);
+	} else {
+		$form['mydatepopup'] = array(
+			'#type' => 'date_popup',
+			'#default_value' => $default,
+			'#date_format' => $date_format,
+	    	'#date_year_range' => $year_range, //'-3:+3'
+			'#weight' => $weight,
+		);
+	}
+
+	return $form;
+}
+
+
+function fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid) {
+	$db_type = trim(fetchit7_content_field_fetcher($nid,'db_type','value'));
+	if(strlen($db_type)) {
+		switch ($db_type) {
+			case FETCHIT7_DBTYPE_NAME_PGSQL:
+				$stored = F_DR_LIST_TBL_NDX_FLD;
+				$displayed = F_DR_LIST_TBL_DSP_FLD;
+				$db_query = "SELECT $stored,$displayed FROM $list_tbl";
+				if ($list_uid) {
+					global $user;
+					$uid_field = F_DR_LIST_TBL_UID_FLD;
+					$db_query .= " WHERE $uid_field = " .$user->uid; 
+				} 
+				if ($db_object = pg_query($db_handle,$db_query)) {
+						$options = array();
+						while ($row = pg_fetch_object($db_object)) {
+							$options[$row->$stored]=$row->$displayed;
+						}
+				}
+				break;
+			case FETCHIT7_DBTYPE_NAME_MYSQL:
+			case FETCHIT7_DBTYPE_NAME_MSSQL:
+			default:
+		}
+	}
+	return $options;
+}
+
+
+
 /**
  * Roll out a single date element.
  */
@@ -2882,58 +3114,7 @@ function expand_date_fetchit($element) {
       '#value' => $element['#value'][$type],
       '#attributes' => $element['#attributes'],
       '#options' => $options,
+			'#weight' => $weight,
     );
   }
-}
-
-function fetchit_get_date_select_element($user_field_data,$user_field_ndx,$date_format,$year_range,$showtitles,$db_value) {
-	$form = array();
-	$default = format_date(time(),'custom','Y-m-d H:i:s');
-	if (strlen(trim($db_value))) {
-		$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
-	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]),'custom','Y-m-d H:i:s',0);
-	}
-	if(!strlen(trim($date_format)))$date_format='Y-m-d g:i:s A';
-	if(!strlen(trim($year_range)))$year_range='-15:+15';
-	if ($showtitles) {
-		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
-		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-	}
-	$form['mydateselect'] = array(
-		'#type' => 'date_select',
-		'#title' =>$title,
-		'#default_value' => $default,
-    	'#date_label_position' => 'none', //'none' 'within' 'above'
-    	'#date_year_range' => $year_range, //'-3:+3'
-		'#date_format' => $date_format, //'Y-m-d H:i' 'm-d-Y', 
-		'#description' => $description,
-	);
-	return $form;
-}
-function fetchit_get_date_popup_element($user_field_data,$user_field_ndx,$date_format,$year_range,$showtitles,$db_value) {
-	$form = array();
-	$default = format_date(time(),'custom','Y-m-d H:i:s');
-	if (strlen(trim($db_value))) {
-		$default = format_date(strtotime($db_value),'custom','Y-m-d H:i:s',0);
-	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]),'custom','Y-m-d H:i:s',0);
-	}
-	if(!strlen(trim($date_format)))$date_format='Y-m-d g:i:s A';
-	if(!strlen(trim($year_range)))$year_range='-15:+15';
-	if ($showtitles) {
-		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
-		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-	}
-	$form['mydatepopup'] = array(
-		'#title' =>$title,
-		'#type' => 'date_popup',
-		'#default_value' => $default,
-		'#date_format' => $date_format,
-    	'#date_year_range' => $year_range, //'-3:+3'
-		'#description' => $description,
-	);
-	return $form;
 }
