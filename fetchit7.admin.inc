@@ -320,7 +320,7 @@ function fetchit7_content_backuptable_create($type,$tablename) {
 		}
 		$fieldstrings[] = $field_name.' '.$field_type;
 	}
-	debug($field_types,'$field_types');
+	//debug($field_types,'$field_types');
 	$query  = fetchit7_maketablequery_create($tablename,$fieldstrings);
 	if(!($result = db_query($query))) return FALSE;
 
