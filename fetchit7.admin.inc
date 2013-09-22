@@ -524,7 +524,6 @@ function fetchit7_content_backuptable_restore($type,$tablename) {
 		if(in_array($field_name, $backuptablecolumns)) $entityfieldsinbackuptable[] = $field_name;
 		//$entityfields[] = $field_name;
 	}
-	
 	// 3
 	$query = db_select($tablename,'t')->fields('t',$backuptablecolumns);
 	$result = $query->execute();
@@ -540,10 +539,25 @@ function fetchit7_content_backuptable_restore($type,$tablename) {
 			$newNode->$field_name = $row->$field_name;
 		}
 		// 4
+		$dozexplodablefields = array('fetchit7_field_par_fld');
 		foreach ($entityfieldsinbackuptable as $field_name) {
 			// 5
+			if (in_array(substr($field_name,0,22),$dozexplodablefields)) {
+				$explodeit = true;
+			} else {
+				$explodeit = false;
+			}
 			$myarray = array();
-			$myarray['und'][0]['value'] = $row->$field_name;
+			if ($explodeit) {
+				$dozvalues = explode(",",$row->$field_name);
+				$datvaluecounter = 0;
+				foreach ($dozvalues as $datvalue) {
+					$myarray['und'][$datvaluecounter]['value'] = $datvalue;
+					++$datvaluecounter;
+				}
+			} else {
+				$myarray['und'][0]['value'] = $row->$field_name;
+			}
 			$newNode->$field_name = $myarray;
 		}
 		// 6
