@@ -2796,7 +2796,7 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 	}
 	// finally over write defaults with preset values if they are in the configuration 
 	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$defaults = explode(',',$user_field_data[$user_field_ndx-1][F_DR_FIELD_DEFAULT_STR]);
+		$defaults = explode(',',$user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
 	}
 	// now see if the control is enabled or disabled
 	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
