@@ -494,20 +494,39 @@ function fetchit7_table_form_submit ($form, &$form_state) {
   * 
   * @ingroup forms
   * @see system_settings_form().
+ 	* 
+ 	* this function creates the parameter data input form
+ 	* first it gets the data stored in the drupal node and content type tables (created in the .install file)
+ 	* that define what the form will look like
+ 	* this is done via a function, fetchit7_content_field_fetcher(), that calls the drupal API functions for extracting node and field data
+ 	* next it stores that data in a special array, $user_field_data, that was designed when fetchit2 was created
+ 	* using this array maximizes the amount of fetchit2 code that can be reused
+ 	* that array is used with a special form builder function, fetchit7_param_element_form,
+ 	* that calls a bunch of element (form controls) creation functions 
+ 	* this collection of form elements is pre-rendered and then arranged on the form
+ 	* that the user uses to enter the various parameter data or make parameter value selections    
+ 	*  
   */
 function fetchit7_param_form($form, &$form_state) {
 	$table_weight = -8; // it goes at the top of the form
 	$submit_weight = 8; // it goes at the bottom of the form
 	
-	// get nid embedded into original form_id; format fetchit7_param_form_X### - nid starts at 21
-	$form_id = $form_state['build_info']['form_id'];
+	// get nid embedded into original form_id; format fetchit7_param_form_X### - nid starts at character 21
+	$form_id = $form_state['build_info']['form_id']; // to get here, this is definitely set
 	$nid = (int) substr($form_id, 21);
 	$form['nid'] = array('#type' => 'value','#value' => $nid);
 
 	// get database type and store it (hidden) in the form so it is available to the form validate and submit functions
+	// this is not optional, and can not be filled in with a default, so if it is missing, throw an error and exit
+	// this should be a single string
 	$db_type = trim(fetchit7_content_field_fetcher($nid,'db_type','value'));
-	if(strlen($db_type)) {
-		$form['db_type'] = array('#type' => 'value','#value' => $db_type);
+	if (isset($db_type)) {
+		if(strlen($db_type)) {
+			$form['db_type'] = array('#type' => 'value','#value' => $db_type);
+		} else {
+			drupal_set_message("An error occurred in fetchit7_param_form (nid = $nid) when accessing the database type.",'error');
+			return $form;
+		} 
 	} else {
 		drupal_set_message("An error occurred in fetchit7_param_form (nid = $nid) when accessing the database type.",'error');
 		return $form;
@@ -523,38 +542,109 @@ function fetchit7_param_form($form, &$form_state) {
 	
 	// run the pre query before doing anything else
 	// TODO: figure out why pre-fn is getting hit twice prior to the form drawing!!!
+	// get query string. this is optional, so if it is missing, move on
+	// this should be a single string
 	$preqry = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_pre_function','value'));
-	if (strlen($preqry)) {
-		if (strtolower(substr($preqry,0,4)) == 'php.') {
-			$thefunction = substr($preqry,4); 
-			global $user;
-    		$user_uid = (int) $user->uid;
-			$result = $thefunction($user_uid);
-		} else {
-			$result = fetchit_run_query($db_type,$db_handle,$preqry);
+	if (isset($preqry)) {
+		if (strlen($preqry)) {
+			if (strtolower(substr($preqry,0,4)) == 'php.') {
+				$thefunction = substr($preqry,4); 
+				global $user;
+	    		$user_uid = (int) $user->uid;
+				$result = $thefunction($user_uid);
+			} else {
+				$result = fetchit_run_query($db_type,$db_handle,$preqry);
+			}
+			//TODO: check pre function result?
 		}
-		//TODO: check pre function result?
 	}
 
-	
 	// submit button attributes
+	// submit button label should be a single string value
+	// use it if something is entered.   if not offer a default of Submit
 	$submit_label = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_label','value'));
-	//$form['submit_label'] = array('#type' => 'value','#value' => $submit_label);
-	if (!(strlen($submit_label))) {
+	if (isset($submit_label)) {
+		if (strlen($submit_label)) {
+			//$form['submit_label'] = array('#type' => 'value','#value' => $submit_label);
+		} else {
+			$submit_label = 'Submit';
+		}
+	} else {
 		$submit_label = 'Submit';
 	}
-	$submit_weight = fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_weight','value');
-	$submit_redirect = fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_redirect','value');
+	// submit button weight should be a single integer value
+	// use it if something is entered.   if not offer a default of 10 - puts it at or close to the bottom of the form
+	$submit_weight = (int) fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_weight','value');
+	if (isset($submit_weight)) {
+		if (is_int($submit_weight)) {
+			// keep it
+		} else {
+			$submit_weight = 10;
+		}
+	} else {
+		$submit_weight = 10;
+	}
+	// submit button label should be a single string value
+	// optional, use it if something is entered.   if not set it to an empty string
+	$submit_redirect = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_redirect','value'));
+	if (isset($submit_redirect)) {
+		if (strlen($submit_redirect)) {
+			// keep it
+		} else {
+			$submit_redirect = '';
+		}
+	} else {
+		$submit_redirect = '';
+	}
+	
 	// table attributes 
-	$showtitles = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_shw_ttl','value');
-	$table_weight = fetchit7_content_field_fetcher($nid,'fetchit7_field_table_weight','value');
-	$table_rows = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_tbl_rows','value');
-	//these should all be the same sized arrays or something is whacked
+	// showtitles should be a single boolean value
+	// use it if something valid is entered.   if not set it to a default of true
+	$showtitles = (bool) fetchit7_content_field_fetcher($nid,'fetchit7_field_par_shw_ttl','value');
+	if (isset($showtitles)) {
+		if (is_bool($showtitles)) {
+			// keep it
+		} else {
+			$showtitles = TRUE;
+		}
+	} else {
+		$showtitles = TRUE;
+	}
+	// parameter table weight should be a single integer value
+	// use it if something is entered.   if not offer a default of 0.  keeps it above the submit button default
+	$table_weight = (int) fetchit7_content_field_fetcher($nid,'fetchit7_field_table_weight','value');
+	if (isset($table_weight)) {
+		if (is_int($table_weight)) {
+			// keep it
+		} else {
+			$table_weight = 0;
+		}
+	} else {
+		$table_weight = 0;
+	}
+	// parameter table_rows should be a single integer value
+	// use it if something is entered.   if not offer a default of 0.  this puts the controls into a non tabular stack by weight
+	$table_rows = (int) fetchit7_content_field_fetcher($nid,'fetchit7_field_par_tbl_rows','value');
+	if (isset($table_rows)) {
+		if (is_int($table_rows)) {
+			// keep it
+		} else {
+			$table_rows = 0;
+		}
+	} else {
+		$table_rows = 0;
+	}
+	// these should all be arrays of string values entered by the user because of the only multiple valued form type available in D7 core
+	// because they are arrays therefore pass the values format tag to fetchit7_content_field_fetcher()
+	// because they are strings, need to do some type conversion eventually, but not here
+	// depending on what the user entered, the arrays are potentially different sizes
+	// these are preprocessed (cleaned up and converted to the appropriate variable type) and stored in the $user_field_data array below
 	$param_names = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_name','values'); //should return an array
 	$param_titles = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_title','values'); //should return an array
 	$param_descriptions = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_desc','values'); //should return an array
 	$param_types = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_type','values'); //should return an array
 	$param_weights = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_weight','values'); //should return an array
+	//debug($param_weights,'$param_weights');
 	$param_enabled = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_enabled','values'); //should return an array
 	$param_required = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_required','values'); //should return an array
 	$param_str = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_parstr','values'); //should return an array
@@ -630,7 +720,8 @@ function fetchit7_param_form($form, &$form_state) {
 
 			//weight default of field_index is OK (defaults to the order they were created)
 			if ($param_index < count($param_weights)) {
-				$user_field_data[$field_index][FETCHIT7_FIELD_WEIGHT_STR] = trim($param_weights[$param_index]);
+				$user_field_data[$field_index][FETCHIT7_FIELD_WEIGHT_STR] = (int) $param_weights[$param_index];
+				//debug($user_field_data[$field_index][FETCHIT7_FIELD_WEIGHT_STR],'$user_field_data['.$field_index.']['.FETCHIT7_FIELD_WEIGHT_STR.']');
 			} else {
 				$user_field_data[$field_index][FETCHIT7_FIELD_WEIGHT_STR] = $field_index;
 			}
@@ -1120,6 +1211,10 @@ function fetchit7_content_field_mapper ($field_id) {
 		case 'fetchit7_field_par_fld_type':
 			$field_name = 'fetchit7_field_par_fld_type';
 			break;
+		case 'par_fld_weight':
+		case 'fetchit7_field_par_fld_weight':
+			$field_name = 'fetchit7_field_par_fld_weight';
+			break;
 		case 'par_fld_enabled':
 		case 'fetchit7_field_par_fld_enabled':
 			$field_name = 'fetchit7_field_par_fld_enabled';
@@ -1196,6 +1291,7 @@ function fetchit7_content_field_fetcher ($nid, $field_id = 'title', $format = 'v
 			// assume it is a custom content field and use field_get_items() to get the value
 			$entity_type = 'node';
 			$items = field_get_items($entity_type,$node,$field_name);
+			//debug($items,$field_name.' $items');
 			switch ($format) {
 				case 'item':
 					$output = $items[0];
@@ -2309,11 +2405,11 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 	} else {
 		$disabled = FALSE;
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
-		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	} else {
-		$weight = $user_field_ndx;
-	}
+	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	//debug($default,'textbox $default');
+	//debug($required,'textbox $required');
+	//debug($disabled,'textbox $disabled');
+	//debug($weight,'textbox $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2360,11 +2456,13 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 			return $form;
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
-		foreach($options as $key=>$val) { // set defaults array to the first value in the list
-			$defaults = array($key);
-			break;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+		$keys = array_keys($options);
+		if (count($keys)) {
+			$defaults = array($keys[0]);
+		} else {
+			$defaults = array();
 		}
 	} else {
 		$defaults = array();
@@ -2387,11 +2485,11 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 	} else {
 		$disabled = FALSE;
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
-		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	} else {
-		$weight = $user_field_ndx;
-	}
+	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	//debug($defaults,'checkboxes $defaults');
+	//debug($required,'checkboxes $required');
+	//debug($disabled,'checkboxes $disabled');
+	//debug($weight,'checkboxes $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2447,8 +2545,8 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 			} 
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
 	} else {
 		$required = FALSE;
 	}
@@ -2519,14 +2617,14 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 			return $form;
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
-		// choose the first item in the list as the default
-		foreach($options as $key=>$val) {
-			$default = $key;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+		foreach($options as $key=>$val) { // set defaults array to the first value in the list
+			$default = array($key);
 			break;
 		}
 	} else {
+		$defaults = array();
 		$required = FALSE;
 	}
 	if (strlen(trim($db_value))) {
@@ -2541,11 +2639,11 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 	} else {
 		$disabled = FALSE;
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
-		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	} else {
-		$weight = $user_field_ndx;
-	}
+	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	//debug($default,'select $default');
+	//debug($required,'select $required');
+	//debug($disabled,'select $disabled');
+	//debug($weight,'select $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2603,8 +2701,8 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 			}
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
 	} else {
 		$required = FALSE;
 	}
@@ -2626,6 +2724,10 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 	} else {
 		$weight = $user_field_ndx;
 	}
+	//debug($default,'selectboolean $default');
+	//debug($required,'selectboolean $required');
+	//debug($disabled,'selectboolean $disabled');
+	//debug($weight,'selectboolean $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2675,10 +2777,9 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 			return $form;
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
-		// make sure there is atleast one selected by default if it is required
-		foreach($options as $key=>$val) {
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+		foreach($options as $key=>$val) { // set defaults array to the first value in the list
 			$defaults = array($key);
 			break;
 		}
@@ -2695,7 +2796,7 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 	}
 	// finally over write defaults with preset values if they are in the configuration 
 	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$defaults = explode(',',$user_field_data[$user_field_ndx-1][F_DR_FIELD_DEFAULT_STR]);
+		$defaults = explode(',',$user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
 	}
 	// now see if the control is enabled or disabled
 	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
@@ -2703,11 +2804,11 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 	} else {
 		$disabled = FALSE;
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
-		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	} else {
-		$weight = $user_field_ndx;
-	}
+	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	//debug($default,'selectmultiple $default');
+	//debug($required,'selectmultiple $required');
+	//debug($disabled,'selectmultiple $disabled');
+	//debug($weight,'selectmultiple $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2759,10 +2860,10 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 			return $form;
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
-		foreach($options as $key=>$val) {
-			$default = $key;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+		foreach($options as $key=>$val) { // set defaults array to the first value in the list
+			$defaults = array($key);
 			break;
 		}
 	} else {
@@ -2780,11 +2881,11 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 	} else {
 		$disabled = FALSE;
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
-		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	} else {
-		$weight = $user_field_ndx;
-	}
+	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	//debug($default,'radios $default');
+	//debug($required,'radios $required');
+	//debug($disabled,'radios $disabled');
+	//debug($weight,'radios $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2840,6 +2941,11 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 			}
 		}
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+	} else {
+		$required = FALSE;
+	}
 	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
 		$required = TRUE;
 	} else {
@@ -2892,33 +2998,35 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 
 function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$db_value) {
 	$form = array();
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
+	/*
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
 		// use the system date as a default
 		$default = array(
-			'month' => format_date(time(),'custom','n',0),
-			'day' => format_date(time(),'custom','j',0),
-			'year' => format_date(time(),'custom','Y',0),
+			'month' => format_date(time(),'custom','n'),
+			'day' => format_date(time(),'custom','j'),
+			'year' => format_date(time(),'custom','Y'),
 		);
 	} else {
 		$required = FALSE;
 	}
 	if (strlen(trim($db_value))) {
 		$default = array(
-			'month' => format_date(strtotime($db_value),'custom','n',0),
-			'day' => format_date(strtotime($db_value),'custom','j',0),
-			'year' => format_date(strtotime($db_value),'custom','Y',0),
+			'month' => format_date(strtotime($db_value),'custom','n'),
+			'day' => format_date(strtotime($db_value),'custom','j'),
+			'year' => format_date(strtotime($db_value),'custom','Y'),
 		);
 	}
 	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
 		$entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
 		dpm(strtotime($entered));
 		$default = array(
-			'month' => format_date(strtotime($entered),'custom','n',0),
-			'day' => format_date(strtotime($entered),'custom','j',0),
-			'year' => format_date(strtotime($entered),'custom','Y',0),
+			'month' => format_date(strtotime($entered),'custom','n'),
+			'day' => format_date(strtotime($entered),'custom','j'),
+			'year' => format_date(strtotime($entered),'custom','Y'),
 		);
 	}
+	 */
 	// now see if the control is enabled or disabled
 	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
 		$disabled = TRUE;
@@ -2936,8 +3044,8 @@ function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$
 		$form['mydate'] = array(
 			'#title' =>$title,
 			'#type' => 'date',
-			'#required' => $required,
-			'#default_value' => $default,
+			//'#required' => $required,
+			//'#default_value' => $default,
 			'#disabled' => $disabled,
 			//'#process' => array('expand_date_fetchit'),
 			'#description' => $description,
@@ -2946,8 +3054,8 @@ function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$
 	} else {
 		$form['mydate'] = array(
 			'#type' => 'date',
-			'#required' => $required,
-			'#default_value' => $default,
+			//'#required' => $required,
+			//'#default_value' => $default,
 			'#disabled' => $disabled,
 			//'#process' => array('expand_date_fetchit'),
 			'#weight' => $weight,
