@@ -2262,7 +2262,7 @@ function _fetchit7_content_param_installed_instances () {
 				//'weight'				=> -3,
 			),
 			'settings'			=> array (
-				'text_processing'	=> 'false',
+				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> TRUE,
