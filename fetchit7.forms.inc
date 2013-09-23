@@ -2314,6 +2314,10 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 	} else {
 		$weight = $user_field_ndx;
 	}
+	debug($default,'textbox $default');
+	debug($required,'textbox $required');
+	debug($disabled,'textbox $disabled');
+	debug($weight,'textbox $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2360,11 +2364,13 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 			return $form;
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
-		foreach($options as $key=>$val) { // set defaults array to the first value in the list
-			$defaults = array($key);
-			break;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+		$keys = array_keys($options);
+		if (count($keys)) {
+			$defaults = array($keys[0]);
+		} else {
+			$defaults = array();
 		}
 	} else {
 		$defaults = array();
@@ -2392,6 +2398,10 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 	} else {
 		$weight = $user_field_ndx;
 	}
+	debug($defaults,'checkboxes $defaults');
+	debug($required,'checkboxes $required');
+	debug($disabled,'checkboxes $disabled');
+	debug($weight,'checkboxes $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2447,8 +2457,8 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 			} 
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
 	} else {
 		$required = FALSE;
 	}
@@ -2519,14 +2529,14 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 			return $form;
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
-		// choose the first item in the list as the default
-		foreach($options as $key=>$val) {
-			$default = $key;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+		foreach($options as $key=>$val) { // set defaults array to the first value in the list
+			$default = array($key);
 			break;
 		}
 	} else {
+		$defaults = array();
 		$required = FALSE;
 	}
 	if (strlen(trim($db_value))) {
@@ -2546,6 +2556,10 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 	} else {
 		$weight = $user_field_ndx;
 	}
+	debug($default,'select $default');
+	debug($required,'select $required');
+	debug($disabled,'select $disabled');
+	debug($weight,'select $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2603,8 +2617,8 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 			}
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
 	} else {
 		$required = FALSE;
 	}
@@ -2626,6 +2640,10 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 	} else {
 		$weight = $user_field_ndx;
 	}
+	debug($default,'selectboolean $default');
+	debug($required,'selectboolean $required');
+	debug($disabled,'selectboolean $disabled');
+	debug($weight,'selectboolean $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2675,10 +2693,9 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 			return $form;
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
-		// make sure there is atleast one selected by default if it is required
-		foreach($options as $key=>$val) {
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+		foreach($options as $key=>$val) { // set defaults array to the first value in the list
 			$defaults = array($key);
 			break;
 		}
@@ -2708,6 +2725,10 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 	} else {
 		$weight = $user_field_ndx;
 	}
+	debug($default,'selectmultiple $default');
+	debug($required,'selectmultiple $required');
+	debug($disabled,'selectmultiple $disabled');
+	debug($weight,'selectmultiple $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2759,10 +2780,10 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 			return $form;
 		}
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
-		foreach($options as $key=>$val) {
-			$default = $key;
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+		foreach($options as $key=>$val) { // set defaults array to the first value in the list
+			$defaults = array($key);
 			break;
 		}
 	} else {
@@ -2785,6 +2806,10 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 	} else {
 		$weight = $user_field_ndx;
 	}
+	debug($default,'radios $default');
+	debug($required,'radios $required');
+	debug($disabled,'radios $disabled');
+	debug($weight,'radios $weight');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -2840,6 +2865,11 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 			}
 		}
 	}
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+	} else {
+		$required = FALSE;
+	}
 	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
 		$required = TRUE;
 	} else {
@@ -2892,33 +2922,35 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 
 function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$db_value) {
 	$form = array();
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
+	/*
+	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
 		// use the system date as a default
 		$default = array(
-			'month' => format_date(time(),'custom','n',0),
-			'day' => format_date(time(),'custom','j',0),
-			'year' => format_date(time(),'custom','Y',0),
+			'month' => format_date(time(),'custom','n'),
+			'day' => format_date(time(),'custom','j'),
+			'year' => format_date(time(),'custom','Y'),
 		);
 	} else {
 		$required = FALSE;
 	}
 	if (strlen(trim($db_value))) {
 		$default = array(
-			'month' => format_date(strtotime($db_value),'custom','n',0),
-			'day' => format_date(strtotime($db_value),'custom','j',0),
-			'year' => format_date(strtotime($db_value),'custom','Y',0),
+			'month' => format_date(strtotime($db_value),'custom','n'),
+			'day' => format_date(strtotime($db_value),'custom','j'),
+			'year' => format_date(strtotime($db_value),'custom','Y'),
 		);
 	}
 	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
 		$entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
 		dpm(strtotime($entered));
 		$default = array(
-			'month' => format_date(strtotime($entered),'custom','n',0),
-			'day' => format_date(strtotime($entered),'custom','j',0),
-			'year' => format_date(strtotime($entered),'custom','Y',0),
+			'month' => format_date(strtotime($entered),'custom','n'),
+			'day' => format_date(strtotime($entered),'custom','j'),
+			'year' => format_date(strtotime($entered),'custom','Y'),
 		);
 	}
+	 */
 	// now see if the control is enabled or disabled
 	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
 		$disabled = TRUE;
@@ -2936,8 +2968,8 @@ function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$
 		$form['mydate'] = array(
 			'#title' =>$title,
 			'#type' => 'date',
-			'#required' => $required,
-			'#default_value' => $default,
+			//'#required' => $required,
+			//'#default_value' => $default,
 			'#disabled' => $disabled,
 			//'#process' => array('expand_date_fetchit'),
 			'#description' => $description,
@@ -2946,8 +2978,8 @@ function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$
 	} else {
 		$form['mydate'] = array(
 			'#type' => 'date',
-			'#required' => $required,
-			'#default_value' => $default,
+			//'#required' => $required,
+			//'#default_value' => $default,
 			'#disabled' => $disabled,
 			//'#process' => array('expand_date_fetchit'),
 			'#weight' => $weight,
