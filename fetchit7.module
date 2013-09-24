@@ -421,7 +421,7 @@ function fetchit7_block_info() {
 	$query->fieldCondition('fetchit7_field_location', 'value', 'block');
 	//$query->range(0,10);
 	$result = $query->execute();
-	$blocks = array();
+	//$blocks = array();
 	if (isset($result['node'])) {
 		$nids = array_keys($result['node']);
 		//$menu_urlbase_example = 'admin/config/fetchit7/blockcontent/';

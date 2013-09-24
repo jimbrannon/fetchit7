@@ -2188,7 +2188,7 @@ function _fetchit7_content_param_installed_instances () {
 			'description'		=> $t('The type of input control to use for entering data for this parameter: [textbox, dropdown_single, dropdown_multiple, radio_buttons, checkboxes, checkbox, date_popup, date_select, datetime_select]'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'text',
+					'value'					=> 'textbox',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_type',
@@ -2269,7 +2269,7 @@ function _fetchit7_content_param_installed_instances () {
 			'description'		=> $t('Whether this parameter control requires an input value to be selected/entered before submitting the form.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> '1',
+					'value'					=> 'false',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_required',
@@ -2293,7 +2293,7 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('This string allows additional input control parameters to be entered.  Name:Value pairs separated by a semicolon.  Example: size:15;color:red'),
+			'description'		=> $t('This string allows additional input control parameters to be entered for some controls.  Name:Value pairs (each pair separated by a semicolon).  Example: size:15;size:15'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -2386,7 +2386,7 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field value list table uid field
 		'fetchit7_field_par_fld_list_uid' => array(
-			'label'					=> $t('Parameter input list table uid flag'),
+			'label'					=> $t('Parameter input list table uid field'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -2401,10 +2401,10 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('Whether the parameter input list table contains a uid field (named drupal_userid). Enter true or false.'),
+			'description'		=> $t('The name of the parameter input list table drupal userid integer field.  Leave name blank to not use.  Adds a WHERE clause to the select query.  Default = blank.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'false',
+					'value'					=> '',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_list_uid',
@@ -2494,7 +2494,7 @@ function _fetchit7_content_param_installed_instances () {
 		),
 		//parameter field data selection table uid field
 		'fetchit7_field_par_fld_data_uid' => array(
-			'label'					=> $t('Parameter data output table uid flag'),
+			'label'					=> $t('Parameter data output table uid field'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -2509,14 +2509,14 @@ function _fetchit7_content_param_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('[LOCKED AT TRUE] Whether the parameter data output table contains a uid field (named drupal_userid). Enter true or false.'),
+			'description'		=> $t('The name of the parameter data output table drupal userid integer field.  Leave name blank to not use.  Adds a WHERE clause to the DELETE and INSERT queries.  Default = drupal_userid.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'true',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_data_uid',
-			'entity_type'		=> 'node',
+			'entity_type'		=> 'drupal_userid',
 			'bundle'				=> $content_name,
 		),
 				

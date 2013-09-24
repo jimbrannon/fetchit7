@@ -11,6 +11,18 @@ define("FETCHIT7_DBTYPE_LABEL_MYSQL","MySQL");
 define("FETCHIT7_DBTYPE_NAME_MSSQL","sqlserver");
 define("FETCHIT7_DBTYPE_LABEL_MSSQL","MS SQL Server");
 
+// these are the fetchit2 parameter form control types - as numbers
+define("F_DR_CONTROL_TEXTBOX",0);
+define("F_DR_CONTROL_DATESEL",1);
+define("F_DR_CONTROL_DROPDOWN_SINGLE",2);
+define("F_DR_CONTROL_RADIOBTN",3);
+define("F_DR_CONTROL_CHECKBOXES",4);
+define("F_DR_CONTROL_DROPDOWN_MULTI",5);
+define("F_DR_CONTROL_CHECKBOX",6);
+define("F_DR_CONTROL_DATETIMESEL",7);
+define("F_DR_CONTROL_POPUPDATE",8);
+
+// these are the fetchit7 parameter form control types - as string tokens
 define("FETCHIT7_CONTROLTYPE_NAME_TEXTBOX","textbox"); //define("F_DR_CONTROL_TEXTBOX",0);
 define("FETCHIT7_CONTROLTYPE_NAME_DATESEL","date_select"); //define("F_DR_CONTROL_DATESEL",1);
 define("FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_SINGLE","dropdown_single"); //define("F_DR_CONTROL_DROPDOWN_SINGLE",2);
@@ -21,15 +33,49 @@ define("FETCHIT7_CONTROLTYPE_NAME_CHECKBOX","checkbox"); //define("F_DR_CONTROL_
 define("FETCHIT7_CONTROLTYPE_NAME_DATETIMESEL","datetime_select"); //define("F_DR_CONTROL_DATETIMESEL",7);
 define("FETCHIT7_CONTROLTYPE_NAME_POPUPDATE","date_popup"); //define("F_DR_CONTROL_POPUPDATE",8);
 
+define("F_DR_TEXTBOX_TEXT",0);
+define("F_DR_TEXTBOX_NUMBER",1);
+define("F_DR_TEXTBOX_DATE",2);
 define("FETCHIT7_CONTROLTYPE_TEXTBOXTYPE_NAME_TEXT","text"); //define("F_DR_TEXTBOX_TEXT",0);
 define("FETCHIT7_CONTROLTYPE_TEXTBOXTYPE_NAME_NUMBER","number"); //define("F_DR_TEXTBOX_NUMBER",1);
 define("FETCHIT7_CONTROLTYPE_TEXTBOXTYPE_NAME_DATE","date"); //define("F_DR_TEXTBOX_DATE",2);
 
-define("FETCHIT7_FIELD_LIST_NDX_STR","list_ndx"); //define("F_DR_LIST_TBL_NDX_FLD","stored");
-define("FETCHIT7_FIELD_LIST_DSP_STR","list_dsp"); //define("F_DR_LIST_TBL_DSP_FLD","displayed");
-define("FETCHIT7_FIELD_DATA_NDX_STR","data_ndx"); //define("F_DR_DATA_TBL_NDX_FLD","stored");
+// these are the array keys used for field parameters
+define("F_DR_FIELD_NAME_STR","name");
+define("F_DR_FIELD_TITLE_STR","title");
+define("F_DR_FIELD_DESC_STR","desc");
+define("F_DR_FIELD_INPUT_TYPE_STR","input_type");
+define("F_DR_FIELD_DEFAULT_STR","default");
+define("F_DR_FIELD_DISABLED_STR","disabled");
+define("F_DR_FIELD_REQUIRED_STR","required");
+define("F_DR_FIELD_VALIDATE_STR","validate");
+define("F_DR_FIELD_SUBMIT_STR","submit");
+define("F_DR_FIELD_PARAMETER_STR","input_parm");
 define("FETCHIT7_FIELD_WEIGHT_STR","weight"); //define("F_DR_DATA_TBL_NDX_FLD","stored");
 
+// these are the array keys used for field input list table parameters
+define("F_DR_FIELD_LIST_TBL_STR","list_tbl");
+define("FETCHIT7_FIELD_LIST_NDX_STR","list_ndx"); //define("F_DR_LIST_TBL_NDX_FLD","stored");
+define("FETCHIT7_FIELD_LIST_DSP_STR","list_dsp"); //define("F_DR_LIST_TBL_DSP_FLD","displayed");
+define("F_DR_FIELD_LIST_UID_STR","list_uid"); //define("F_DR_LIST_TBL_UID_FLD","drupal_userid");
+
+// these are the array keys used for field data output table parameters
+define("F_DR_FIELD_DATA_TBL_STR","data_tbl");
+define("F_DR_FIELD_DATA_KEY_STR","data_key"); //define("F_DR_DATA_TBL_NDX_FLD","stored");
+define("F_DR_FIELD_DATA_UID_STR","data_uid"); //define("F_DR_DATA_TBL_UID_FLD","drupal_userid");
+
+//these are some default field input list table parameter values
+define("F_DR_LIST_TBL_SPECIAL_CHAR","#");
+define("F_DR_LIST_TBL_NDX_FLD","stored");
+define("F_DR_LIST_TBL_DSP_FLD","displayed");
+define("F_DR_LIST_TBL_UID_FLD","drupal_userid");
+
+//these are some default field data output table parameter values
+define("F_DR_DATA_TBL_NDX_FLD","stored");
+define("F_DR_DATA_TBL_UID_FLD","drupal_userid");
+
+define("F_DR_FORM_ELE_DEF","default");
+define("F_DR_FORM_ERROR_DEF","<br><b>Error: Form could not be created.</b><br>");
 
 
 

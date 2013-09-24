@@ -6,6 +6,7 @@ define("F_DR_FIELD_INPUT_TYPE_STR","input_type");
 define("F_DR_FIELD_LIST_TBL_STR","list_tbl");
 define("F_DR_FIELD_LIST_UID_STR","list_uid");
 define("F_DR_FIELD_DATA_TBL_STR","data_tbl");
+define("F_DR_FIELD_DATA_KEY_STR","data_key");
 define("F_DR_FIELD_DATA_UID_STR","data_uid");
 define("F_DR_FIELD_DEFAULT_STR","default");
 define("F_DR_FIELD_DISABLED_STR","disabled");
