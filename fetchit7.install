@@ -2215,7 +2215,7 @@ function _fetchit7_content_param_installed_instances () {
 			'description'		=> $t('The input control weight is an integer -20 to 20 that determines the order in which multiple controls are displayed when NOT in a table (rows = 0). Lower numbers float to the top.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'text',
+					'value'					=> '0',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_weight',

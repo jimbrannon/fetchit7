@@ -634,12 +634,39 @@ function fetchit7_param_form($form, &$form_state) {
 	} else {
 		$table_rows = 0;
 	}
-	// these should all be arrays of string values entered by the user because of the only multiple valued form type available in D7 core
-	// because they are arrays therefore pass the values format tag to fetchit7_content_field_fetcher()
-	// because they are strings, need to do some type conversion eventually, but not here
-	// depending on what the user entered, the arrays are potentially different sizes
-	// these are preprocessed (cleaned up and converted to the appropriate variable type) and stored in the $user_field_data array below
-	$param_names = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_name','values'); //should return an array
+  // fetchit7_content_field_fetcher() returns the type of the underlying field, 
+	// So these should all be arrays of string values entered by the user
+	//  because this was the only multiple valued multile control form type available in D7 core
+	// They are arrays therefore pass the values format tag to fetchit7_content_field_fetcher()
+	// They are strings, so there will need to do some type conversion later
+	// Depending on what the user entered, the arrays are potentially different sizes
+	// These are preprocessed (cleaned up and converted to the appropriate variable type)
+	// and stored in the $user_field_data array below
+	// check that they are defined and are arrays.  some can not be empty...
+	$param_names = array_map('trim',fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_name','values')); //should return an array
+  if (isset($param_names)) {
+    if (is_array($param_names)) {
+      $foundone = FALSE;
+      foreach ($param_names as $key=>$val) {
+        if (strlen($val)) {
+          $foundone = TRUE;
+        }
+      }
+      if ($foundone) {
+        // keep it
+      } else {
+        drupal_set_message("An error occurred creating the parameter input form (nid = $nid).  No parameter names were specified.",'error');
+        return $form;
+      }
+    } else {
+      drupal_set_message("An error occurred creating the parameter input form (nid = $nid).  No parameter names were specified.",'error');
+      return $form;
+    }
+  } else {
+    drupal_set_message("An error occurred creating the parameter input form (nid = $nid).  No parameter names were specified.",'error');
+    return $form;
+  }
+	
 	$param_titles = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_title','values'); //should return an array
 	$param_descriptions = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_desc','values'); //should return an array
 	$param_types = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_type','values'); //should return an array
