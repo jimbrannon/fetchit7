@@ -490,23 +490,23 @@ function fetchit7_table_form_submit ($form, &$form_state) {
 //===================================
 
 /**
-  * Form builder.  Display fetchit7 parameter input content.
-  * 
-  * @ingroup forms
-  * @see system_settings_form().
- 	* 
- 	* this function creates the parameter data input form
- 	* first it gets the data stored in the drupal node and content type tables (created in the .install file)
- 	* that define what the form will look like
- 	* this is done via a function, fetchit7_content_field_fetcher(), that calls the drupal API functions for extracting node and field data
- 	* next it stores that data in a special array, $user_field_data, that was designed when fetchit2 was created
- 	* using this array maximizes the amount of fetchit2 code that can be reused
- 	* that array is used with a special form builder function, fetchit7_param_element_form,
- 	* that calls a bunch of element (form controls) creation functions 
- 	* this collection of form elements is pre-rendered and then arranged on the form
- 	* that the user uses to enter the various parameter data or make parameter value selections    
- 	*  
-  */
+ * Form builder.  Display fetchit7 parameter input content.
+ * 
+ * @ingroup forms
+ * @see system_settings_form().
+ * 
+ * this function creates the parameter data input form
+ * first it gets the data stored in the drupal node and content type tables (created in the .install file)
+ * that define what the form will look like
+ * this is done via a function, fetchit7_content_field_fetcher(), that calls the drupal API functions for extracting node and field data
+ * next it stores that data in a special array, $user_field_data, that was designed when fetchit2 was created
+ * using this array maximizes the amount of fetchit2 code that can be reused
+ * that array is used with a special form builder function, fetchit7_param_element_form,
+ * that calls a bunch of element (form controls) creation functions 
+ * this collection of form elements is pre-rendered and then arranged on the form
+ * that the user uses to enter the various parameter data or make parameter value selections    
+ *  
+ */
 function fetchit7_param_form($form, &$form_state) {
 	$table_weight = -8; // it goes at the top of the form
 	$submit_weight = 8; // it goes at the bottom of the form
@@ -1134,10 +1134,16 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 		}
 	}
 
-
 }
 
 
+//function theme_fetchit7_param_form($variables) {
+//	$form = $variables['form'];
+//	$nid = $form['nid']['#value'];
+//	drupal_set_message("theme_fetchit7_param_form.  hi, jim.  the nid is $nid");
+//	//$output = drupal_render_children($form);
+//	return $form;
+//}
 
 //===================================
 // testing functions...
