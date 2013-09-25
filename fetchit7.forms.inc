@@ -487,7 +487,7 @@ function fetchit7_table_form_submit ($form, &$form_state) {
 //===================================
 
 /**
- * Form builder.  Display fetchit7 parameter input content.
+ * Form builder.  Setup the elements (controls) to be displayed on the fetchit7 parameter input form .
  * 
  * @ingroup forms
  * @see system_settings_form().
@@ -505,11 +505,18 @@ function fetchit7_table_form_submit ($form, &$form_state) {
  *  
  */
 function fetchit7_param_form($form, &$form_state) {
+	// some things we can put in the $form
+	//$form['#attached']['css'] = array(drupal_get_path('module', 'block') . '/block.css');
+  $form['elements'] = array();
+  $form['#tree'] = TRUE;
+		
+	// some default weights
 	$table_weight = -8; // it goes at the top of the form
 	$submit_weight = 8; // it goes at the bottom of the form
 	
 	// get nid embedded into original form_id; format fetchit7_param_form_X### - nid starts at character 21
 	$form_id = $form_state['build_info']['form_id']; // to get here, this is definitely set
+	//debug($form_state['build_info']);
 	$nid = (int) substr($form_id, 21);
 	$form['nid'] = array('#type' => 'value','#value' => $nid);
 
@@ -532,6 +539,7 @@ function fetchit7_param_form($form, &$form_state) {
 	// get database handle
 	if ($db_handle = fetchit_get_db_handle($nid)) {
 		$form['db_handle'] = array('#type' => 'value','#value' => $db_handle);
+		//debug($db_handle,'$db_handle');
 	} else {
 		drupal_set_message("An error occurred in fetchit7_param_form (nid = $nid) when creating the database connection handle.",'error');
 		return $form;
@@ -562,26 +570,30 @@ function fetchit7_param_form($form, &$form_state) {
 	$submit_label = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_label','value'));
 	if (isset($submit_label)) {
 		if (strlen($submit_label)) {
-			//$form['submit_label'] = array('#type' => 'value','#value' => $submit_label);
+			// ok
 		} else {
 			$submit_label = 'Submit';
 		}
 	} else {
 		$submit_label = 'Submit';
 	}
+	$form['submit_label'] = array('#type' => 'value','#value' => $submit_label);
+
 	// submit button weight should be a single integer value
 	// use it if something is entered.   if not offer a default of 10 - puts it at or close to the bottom of the form
 	$submit_weight = (int) fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_weight','value');
 	if (isset($submit_weight)) {
 		if (is_int($submit_weight)) {
-			// keep it
+			// ok
 		} else {
 			$submit_weight = 10;
 		}
 	} else {
 		$submit_weight = 10;
 	}
-	// submit button label should be a single string value
+	$form['submit_weight'] = array('#type' => 'value','#value' => $submit_weight);
+
+	// redirectl should be a single string value
 	// optional, use it if something is entered.   if not set it to an empty string
 	$submit_redirect = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_submit_redirect','value'));
 	if (isset($submit_redirect)) {
@@ -593,6 +605,7 @@ function fetchit7_param_form($form, &$form_state) {
 	} else {
 		$submit_redirect = '';
 	}
+	$form['submit_redirect'] = array('#type' => 'value','#value' => $submit_redirect);
 	
 	// table attributes 
 	// showtitles should be a single boolean value
@@ -607,6 +620,8 @@ function fetchit7_param_form($form, &$form_state) {
 	} else {
 		$showtitles = TRUE;
 	}
+	$form['showtitles'] = array('#type' => 'value','#value' => $showtitles);
+
 	// parameter table weight should be a single integer value
 	// use it if something is entered.   if not offer a default of 0.  keeps it above the submit button default
 	$table_weight = (int) fetchit7_content_field_fetcher($nid,'fetchit7_field_table_weight','value');
@@ -619,6 +634,9 @@ function fetchit7_param_form($form, &$form_state) {
 	} else {
 		$table_weight = 0;
 	}
+	$form['table_weight'] = array('#type' => 'value','#value' => $table_weight);
+	
+
 	// parameter table_rows should be a single integer value
 	// use it if something is entered.   if not offer a default of 0.  this puts the controls into a non tabular stack by weight
 	$table_rows = (int) fetchit7_content_field_fetcher($nid,'fetchit7_field_par_tbl_rows','value');
@@ -631,6 +649,8 @@ function fetchit7_param_form($form, &$form_state) {
 	} else {
 		$table_rows = 0;
 	}
+	$form['table_rows'] = array('#type' => 'value','#value' => $table_rows);
+
   // fetchit7_content_field_fetcher() returns the type of the underlying field, 
 	// So these should all be arrays of string values entered by the user
 	//  because this was the only multiple valued multile control form type available in D7 core
@@ -865,12 +885,7 @@ function fetchit7_param_form($form, &$form_state) {
 	for ($i=0; $i<$field_count; $i++) {
 		// loop through the user entered field name info
 		// when there are blank (unused) user entered field names, skip them
-		if (strlen(trim($param_name = $user_field_data[$i][F_DR_FIELD_NAME_STR]))) {
-			// a field name was specified, so create a parameter element control
-			// first - save some values into the form for use later
-			$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
-			$form['param_indices'][$param_count] = array('#type' => 'value','#value' => $i);
-			$form['param_names'][$param_count] = array('#type' => 'value','#value' => $param_name);
+		if (strlen(trim($param_name = $user_field_data[$i][F_DR_FIELD_NAME_STR]))) { // a field name was specified, so continue tryign to create a parameter element control
 			// param types are the field types of the "stored" (F_DR_DATA_TBL_NDX_FLD) field in the data tables where the parameter values are saved
 			// and probably (hopefully? required?) the same type as the stored values in the list tables if they are used  
 			// regardless, the control will be set-up to handle the data table field type
@@ -882,29 +897,23 @@ function fetchit7_param_form($form, &$form_state) {
 			//$data_uid = F_DR_DATA_TBL_UID_FLD;
 			$data_uid = $user_field_data[$i][F_DR_FIELD_DATA_UID_STR];
 			if (strlen(trim($data_tbl))) { // if a data table is specified then we can continue building the parameter input control
-				// save the data table name value into the form
-				$form['param_data_table'][$param_count] = array('#type' => 'value','#value' => $data_tbl);
-				$form['param_data_ndx'][$param_count] = array('#type' => 'value','#value' => $data_ndx);
-				$form['param_data_uid'][$param_count] = array('#type' => 'value','#value' => $data_uid);
 				//just need field names and types, does not really matter which record we get
 				$data_tbl_db_object = fetchit_get_data_object_1($db_type,$db_handle,$data_tbl,$data_uid);
 				$data_tbl_field_names = fetchit_get_field_names($db_type,$data_tbl_db_object);
 				$data_tbl_field_types = fetchit_get_field_types($db_type,$data_tbl_db_object);
 				$j=0;
 				//find the index field (named MUST BE F_DR_DATA_TBL_NDX_FLD) and get it's field type
+				$data_tbl_field_type = '';
 				foreach ($data_tbl_field_names as $data_tbl_field_name) {
-					if ($data_tbl_field_name == F_DR_DATA_TBL_NDX_FLD) {
+					if ($data_tbl_field_name == $data_ndx) {
 						$data_tbl_field_type = $data_tbl_field_types[$j];
 						break;
 					}
 					$j++;
 				}
 				if (strlen(trim($data_tbl_field_type))) {  // if we have a type, then an index field was found, and then we can continue building the parameter input control
-					// save the data table index field type into the form
-					$form['param_types'][$param_count] = array('#type' => 'value','#value' => $data_tbl_field_type);
-					$row_ndx = 0;
-					$fld_ndx = $param_count;
-					$element_name = fetchit_make_element_name($nid,$row_ndx,$fld_ndx);
+					$grp_ndx = 0;
+					$element_name = fetchit_make_element_name($nid,$grp_ndx,$param_count);
 					// set a default value to pass into the element generator
 					// this value is used unless the user specified a default value in the configuration
 					// get the last entered value from the selection table
@@ -925,16 +934,23 @@ function fetchit7_param_form($form, &$form_state) {
 							break;
 						default:
 					}
-
-					// the following creates the "renderable array" of the current drupal form element
-					// this had to be redesigned for D7 since simple element render arrays now need to be
-					// proprocessed by the drupal_get_form function before rendering with drupal_render()
-					// this means we had to build a generic element builder function much like the form builder function 
-					$dummy1 = array();
-					$dummy2 = array();
-					$myform[$element_name] = fetchit7_param_element_form(
-					//$myform[$element_name] = drupal_get_form(
-					//	$element_name,
+					// add everything else to the form we might need in the theme, validate, or submit functions
+					$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
+					$form['param_indices'][$param_count] = array('#type' => 'value','#value' => $i);
+					$form['field_types'][$param_count] = array('#type' => 'value','#value' => $data_tbl_field_type);
+					$form['param_names'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_NAME_STR]);
+					$form['param_types'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]);
+					$form['param_titles'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_TITLE_STR]);
+					$form['param_descriptions'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DESC_STR]);
+					$form['param_weights'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][FETCHIT7_FIELD_WEIGHT_STR]);
+					$form['param_data_table'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DATA_TBL_STR]);
+					$form['param_data_ndx'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DATA_KEY_STR]);
+					$form['param_data_uid'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DATA_UID_STR]);
+										
+					// the following creates the "renderable array" of the next parameter input control (drupal form element)
+					//   to be displayed on this form ($nid)
+					// stack these up in the array. "How" they are to be displayed will be handled by the theme function
+					$form['elements'][$element_name] = fetchit7_param_element_form(
 						$param_name,
 						$data_tbl_field_type,
 						$db_handle,
@@ -989,11 +1005,12 @@ function fetchit7_param_form($form, &$form_state) {
 	}
 	*/
 
-	$form['elements'] = $myform;
-	$form['#tree'] = TRUE;
-		
 	$submit_button_flag = TRUE;
 	if ($submit_button_flag) {
+	  $form['actions'] = array(
+	    '#tree' => FALSE,
+	    '#type' => 'actions',
+	  );
 		$form['actions']['submit'] = array(
 			'#type' => 'submit',
 			'#value' => $submit_label,
@@ -1008,16 +1025,16 @@ function fetchit7_param_form($form, &$form_state) {
  * Process form validation
  */
 function fetchit7_param_form_validate ($form, &$form_state) {
-	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	debug($string,'Hello from the all important parameter input form validate function. From here it appears the param_count is:');
+	//$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	//debug($string,'Hello from the all important parameter input form validate function. From here it appears the param_count is:');
 	$nid = $form['nid']['#value'];
-		$row_ndx = 0;
-		$param_ndx = 0;
-		$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
-		debug($element_name,'$element_name');
+		//$row_ndx = 0;
+		//$param_ndx = 0;
+		//$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
+		//debug($element_name,'$element_name');
 		//$control_type = $form['elements'][$element_name]['#type'];
 		//debug($control_type,'$control_type');
-		debug($form_state['values']['elements'],'$form_state[values][elements]');
+		//debug($form_state['values']['elements'],'$form_state[values][elements]');
 }
 
 /**
@@ -1025,11 +1042,12 @@ function fetchit7_param_form_validate ($form, &$form_state) {
  */
 function fetchit7_param_form_submit ($form, &$form_state) {
 	//debug($form_state,'form_state');
-	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	debug($string,'Hello from the all important parameter input form submit function. From here it appears the param_count is:');
+	//$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	//debug($string,'Hello from the all important parameter input form submit function. From here it appears the param_count is:');
 	$nid = $form['nid']['#value'];
 	$db_type = $form['db_type']['#value'];
 	$db_handle = $form['db_handle']['#value'];
+	//debug($db_handle,'fetchit7_param_form_submit $db_handle');
 	$param_count = $form['param_count']['#value'];
 	for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
 		$param_data_table =	$form['param_data_table'][$param_ndx]['#value'];
@@ -1047,34 +1065,41 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 			$fld_names .= ','.$param_data_uid;	
 			$val_str = "$param_ndx,13";
 		}
-		$query = "INSERT INTO $param_data_table($fld_names) VALUES (";
+		$query = "INSERT INTO $param_data_table ( $fld_names ) VALUES (";
+		//debug($query);
 		// here is the tricky part
 		// depending on what kind of control it is, there could be one or multiple or no values to store
 		$row_ndx = 0;
 		$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
+		//debug($element_name);
 		$control_type = $form['elements'][$element_name]['#type'];
-		debug($control_type,'$control_type');
-		/*
+		//debug($form['elements'][$element_name]);
+		//debug($form_state['values']);
+		//debug($control_type,'$control_type');
 		switch ($control_type) {
 			case 'date': // the weird drupal core date element - an array of three values
-				$tmp_val_str = $form_state['values'][$element_name]['year'];
+				$tmp_val_str = $form_state['values']['elements'][$element_name]['year'];
 				$tmp_val_str .= "-";
-				$tmp_val_str .= $form_state['values'][$element_name]['month'];
+				$tmp_val_str .= $form_state['values']['elements'][$element_name]['month'];
 				$tmp_val_str .= "-";
-				$tmp_val_str .= $form_state['values'][$element_name]['day'];
-				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]['#value']);
+				$tmp_val_str .= $form_state['values']['elements'][$element_name]['day'];
+				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]);
 				if (strlen(trim($param_data_uid))) {
 					global $user;
 					$user_uid = $user->uid;
 					$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 				}
 				$query .= "$val_str)";
-				$result = fetchit_run_query($err,$db_type,$db_handle,$query);
+					//debug($control_type,'$control_type');
+					//debug($db_type,'$db_type');
+					//debug($db_handle,'$db_handle');
+					//debug($query,'$query');
+				$result = fetchit_run_query($db_type,$db_handle,$query);
 				break;
 			case 'select':
-				$multiple = $form[$element_name]['#multiple'];
+				$multiple = $form['elements'][$element_name]['#multiple'];
 				if ($multiple) {
-					$values = $form_state['values'][$element_name];
+					$values = $form_state['values']['elements'][$element_name];
 					foreach ($values as $value) {
 						$val_str = fetchit_make_val_str($value,$param_type);
 						if (strlen(trim($param_data_uid))) {
@@ -1083,10 +1108,14 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 							$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 						}
 						$qry = $query.$val_str.")";
-						$result = fetchit_run_query($err,$db_type,$db_handle,$qry);
+						//debug($control_type,'$control_type');
+						//debug($db_type,'$db_type');
+						//debug($db_handle,'$db_handle');
+						//debug($qry,'$qry');
+						$result = fetchit_run_query($db_type,$db_handle,$qry);
 					}
 				} else {
-					$value = $form_state['values'][$element_name];
+					$value = $form_state['values']['elements'][$element_name];
 					$val_str = fetchit_make_val_str($value,$param_type);
 					if (strlen(trim($param_data_uid))) {
 						global $user;
@@ -1094,11 +1123,15 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 						$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 					}
 					$query .= "$val_str)";
-					$result = fetchit_run_query($err,$db_type,$db_handle,$query);
+					//debug($control_type,'$control_type');
+					//debug($db_type,'$db_type');
+					//debug($db_handle,'$db_handle');
+					//debug($query,'$query');
+					$result = fetchit_run_query($db_type,$db_handle,$query);
 				}
 				break;
 			case 'checkboxes':
-				$values = array_filter($form_state['values'][$element_name]);
+				$values = array_filter($form_state['values']['elements'][$element_name]);
 				foreach ($values as $value) {
 					$val_str = fetchit_make_val_str($value,$param_type);
 					if (strlen(trim($param_data_uid))) {
@@ -1107,22 +1140,29 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 						$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 					}
 					$qry = $query.$val_str.")";
-					$result = fetchit_run_query($err,$db_type,$db_handle,$qry);
+					//debug($control_type,'$control_type');
+					//debug($db_type,'$db_type');
+					//debug($db_handle,'$db_handle');
+					//debug($qry,'$qry');
+					$result = fetchit_run_query($db_type,$db_handle,$qry);
 				}
 				break;
 			default: //everything else until we get another that is not a string
-				$tmp_val_str = $form_state['values'][$element_name];
+				$tmp_val_str = $form_state['values']['elements'][$element_name];
 				if (!strlen(trim($tmp_val_str))) break;
-				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]['#value']);
+				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]);
 				if (strlen(trim($param_data_uid))) {
 					global $user;
 					$user_uid = $user->uid;
 					$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 				}
 				$query .= "$val_str)";
+					//debug($control_type,'$control_type');
+					//debug($db_type,'$db_type');
+					//debug($db_handle,'$db_handle');
+					//debug($query,'$query');
 				$result = fetchit_run_query($db_type,$db_handle,$query);
 		}
-	*/
 	}
 
 	$postqry = trim(fetchit7_content_field_fetcher($nid,'post_function','value'));
@@ -1153,8 +1193,47 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 function theme_fetchit7_param_form($variables) {
 	$form = $variables['form'];
 	$nid = $form['nid']['#value'];
-	debug($nid, "theme_fetchit7_param_form.  hi, jim.  the nid is");
-	$output = drupal_render_children($form);
+	$form_id = $form['form_id']['#value'];
+	//debug($nid, "theme_fetchit7_param_form.  hi, jim.  the nid is");
+	//debug($form['form_id']['#value'], "theme_fetchit7_param_form.  the form_id is");
+	//the drupal way is to do all this in a theme preprocessor function ... move it later ...
+	$table_row_count = $form_id = $form['table_rows']['#value'];
+	//figure out the formatting
+	if ($table_row_count) {
+		//figure out the table structure
+		$param_count = $form['param_count']['#value'];
+		$table_column_count =  intval( ($param_count-1) / $table_row_count) + 1; 
+		// create the header row		
+		$output  = '<table id="'.$form_id.'" class="sticky-enabled">';
+	  $output .= '<thead>';
+	  $output .= '  <tr>';
+		for ($c=0;$c<$table_column_count;++$c) {
+			$param_index = $c * $table_row_count + 0;
+			$param_name = $form['param_names'][$param_index]['#value'];
+		  $output .= '    <th>'.$param_name.'</th>';
+		}
+		$grp_ndx = 0;
+	  $output .= '  </tr>';
+	  $output .= '</thead>';
+	  $output .= '<tbody>';
+		for ($r=0;$r<$table_row_count;++$r) {
+		  $output .= '    <tr class="row'.$r.'">';
+			for ($c=0;$c<$table_column_count;++$c) {
+				$param_index = $c * $table_row_count + $r;
+				$element_name = fetchit_make_element_name($nid,$grp_ndx,$param_index);
+				$output .= '    <td>'.drupal_render($form['elements'][$element_name]).'</td>';
+				//$param_name = $form['param_names'][$param_index]['#value'];
+				//$output .= '    <td>'.$param_name.'</td>';
+			}
+		  $output .= '    </tr>';
+		}
+	  $output .= '</tbody>';
+		$output .= '</table>';
+	} else {
+		$output = '';
+	}
+	
+	$output .= drupal_render_children($form);
 	return $output;
 }
 
@@ -2079,7 +2158,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
-					$form['mycheckbox'] = array(
+					$form = array(
 						'#type' => 'checkbox',
 						'#title' => $title,
 						'#description' => $description,
@@ -2091,7 +2170,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 					);
 				} else {
 					$title=$field_name;
-					$form['mycheckbox'] = array(
+					$form = array(
 						'#type' => 'checkbox',
 						'#title' => $title,
 						'#default_value' => $default,
@@ -2156,7 +2235,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
-					$form['mytextbox'] = array(
+					$form = array(
 						'#type' => 'textfield',
 						'#title' => $title,
 						'#description' => $description,
@@ -2167,7 +2246,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 						'#weight' => $weight,
 					);
 				} else {
-					$form['mytextbox'] = array(
+					$form = array(
 						'#type' => 'textfield',
 						'#default_value' => $default,
 						'#size' => $size,
@@ -2229,7 +2308,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
-					$form['mytextbox'] = array(
+					$form = array(
 						'#type' => 'textfield',
 						'#title' => $title,
 						'#description' => $description,
@@ -2240,7 +2319,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 						'#weight' => $weight,
 					);
 				} else {
-					$form['mytextbox'] = array(
+					$form = array(
 						'#type' => 'textfield',
 						'#default_value' => $default,
 						'#size' => $size,
@@ -2306,7 +2385,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
-					$form['mydate'] = array(
+					$form = array(
 						'#type' => 'date', // this is the drupal 6 core date element, default is today's date, returns an associative array with 'year' 'month' and 'day' elements
 						'#title' => $title,
 						'#description' => $description,
@@ -2316,7 +2395,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 						'#weight' => $weight,
 					);
 				} else {
-					$form['mydate'] = array(
+					$form = array(
 						'#type' => 'date', // this is the drupal 6 core date element, default is today's date, returns an associative array with 'year' 'month' and 'day' elements
 						'#required' => FALSE,
 						'#disabled' => FALSE,
@@ -2372,7 +2451,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
-					$form['mydateselect'] = array(
+					$form = array(
 						'#type' => 'date_select',
 						'#title' => $title,
 						'#description' => $description,
@@ -2382,7 +2461,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 						'#weight' => $weight,
 					);
 				} else {
-					$form['mydateselect'] = array(
+					$form = array(
 						'#type' => 'date_select',
 						'#date_format' => $date_format,
 						'#default_value' => $default,
@@ -2440,7 +2519,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
-					$form['mydateselect'] = array(
+					$form = array(
 						'#type' => 'date_select',
 						'#title' => $title,
 						'#description' => $description,
@@ -2451,7 +2530,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 						'#weight' => $weight,
 					);
 				} else {
-					$form['mydateselect'] = array(
+					$form = array(
 						'#type' => 'date_select',
 						'#date_format' => $date_format,
 	    				'#date_label_position' => 'none', //'none' 'within' 'above'
@@ -2513,7 +2592,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
-					$form['mytextbox'] = array(
+					$form = array(
 						'#type' => 'textfield',
 						'#title' => $title,
 						'#description' => $description,
@@ -2524,7 +2603,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 						'#weight' => $weight,
 					);
 				} else {
-					$form['mytextbox'] = array(
+					$form = array(
 						'#type' => 'textfield',
 						'#default_value' => $default,
 						'#size' => $size,
@@ -2578,7 +2657,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 				if ($showtitles) {
 					$title=$field_name;
 					$description=$field_type;
-					$form['mytextbox'] = array(
+					$form = array(
 						'#type' => 'textfield',
 						'#title' => $title,
 						'#description' => $description,
@@ -2589,7 +2668,7 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 						'#weight' => $weight,
 					);
 				} else {
-					$form['mytextbox'] = array(
+					$form = array(
 						'#type' => 'textfield',
 						'#size' => $size,
 						'#default_value' => $default,
@@ -2633,7 +2712,7 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['mytextbox'] = array(
+		$form = array(
 			'#title' =>$title,
 			'#type' => 'textfield',
 			'#size' => $size,
@@ -2644,7 +2723,7 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 			'#weight' => $weight,
 		);
 	} else {
-		$form['mytextbox'] = array(
+		$form = array(
 			'#type' => 'textfield',
 			'#size' => $size,
 			'#default_value' => $default,
@@ -2713,7 +2792,7 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['mycheckboxes'] = array(
+		$form = array(
 			'#title' =>$title,
 			'#type' => 'checkboxes',
 			'#options' => $options,
@@ -2724,7 +2803,7 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 			'#weight' => $weight,
 		);
 	} else {
-		$form['mycheckboxes'] = array(
+		$form = array(
 			'#type' => 'checkboxes',
 			'#options' => $options,
 			'#required' => $required,
@@ -2791,7 +2870,7 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['mycheckbox'] = array(
+		$form = array(
 			'#title' =>$title,
 			'#type' => 'checkbox',
 			'#required' => $required,
@@ -2803,7 +2882,7 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 		);
 	} else {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
-		$form['mycheckbox'] = array(
+		$form = array(
 			'#title' =>$title,
 			'#type' => 'checkbox',
 			'#required' => $required,
@@ -2867,7 +2946,7 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['myselect'] = array(
+		$form = array(
 			'#title' =>$title,
 			'#type' => 'select',
 			'#options' => $options,
@@ -2879,7 +2958,7 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 			'#weight' => $weight,
 		);
 	} else {
-		$form['myselect'] = array(
+		$form = array(
 			'#type' => 'select',
 			'#options' => $options,
 			'#multiple' => FALSE,
@@ -2951,7 +3030,7 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['myselect'] = array(
+		$form = array(
 			'#title' => $title,
 			'#type' => 'select',
 			'#options' => $options,
@@ -2963,7 +3042,7 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 			'#weight' => $weight,
 		);
 	} else {
-		$form['myselect'] = array(
+		$form = array(
 			'#type' => 'select',
 			'#options' => $options,
 			'#multiple' => FALSE,
@@ -3032,7 +3111,7 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['myselect'] = array(
+		$form = array(
 			'#title' =>$title,
 			'#type' => 'select',
 			'#options' => $options,
@@ -3045,7 +3124,7 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 			'#weight' => $weight,
 		);
 	} else {
-		$form['myselect'] = array(
+		$form = array(
 			'#type' => 'select',
 			'#options' => $options,
 			'#multiple' => TRUE,
@@ -3109,7 +3188,7 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['myradios'] = array(
+		$form = array(
 			'#title' =>$title,
 			'#type' => 'radios',
 			'#options' => $options,
@@ -3120,7 +3199,7 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 			'#weight' => $weight,
 		);
 	} else {
-		$form['myradios'] = array(
+		$form = array(
 			'#type' => 'radios',
 			'#options' => $options,
 			'#required' => $required,
@@ -3192,7 +3271,7 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['myradios'] = array(
+		$form = array(
 			'#title' => $title,
 			'#type' => 'radios',
 			'#options' => $options,
@@ -3203,7 +3282,7 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 			'#weight' => $weight,
 		);
 	} else {
-		$form['myradios'] = array(
+		$form = array(
 			'#type' => 'radios',
 			'#options' => $options,
 			'#required' => $required,
@@ -3261,7 +3340,7 @@ function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['mydate'] = array(
+		$form = array(
 			'#title' =>$title,
 			'#type' => 'date',
 			//'#required' => $required,
@@ -3272,7 +3351,7 @@ function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$
 			'#weight' => $weight,
 		);
 	} else {
-		$form['mydate'] = array(
+		$form = array(
 			'#type' => 'date',
 			//'#required' => $required,
 			//'#default_value' => $default,
@@ -3304,7 +3383,7 @@ function fetchit_get_date_select_element($user_field_data,$user_field_ndx,$date_
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['mydateselect'] = array(
+		$form = array(
 			'#type' => 'date_select',
 			'#title' =>$title,
 			'#default_value' => $default,
@@ -3315,7 +3394,7 @@ function fetchit_get_date_select_element($user_field_data,$user_field_ndx,$date_
 			'#weight' => $weight,
 		);
 	} else {
-		$form['mydateselect'] = array(
+		$form = array(
 			'#type' => 'date_select',
 			'#default_value' => $default,
 	    	'#date_label_position' => 'none', //'none' 'within' 'above'
@@ -3347,7 +3426,7 @@ function fetchit_get_date_popup_element($user_field_data,$user_field_ndx,$date_f
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form['mydatepopup'] = array(
+		$form = array(
 			'#title' =>$title,
 			'#type' => 'date_popup',
 			'#default_value' => $default,
@@ -3357,7 +3436,7 @@ function fetchit_get_date_popup_element($user_field_data,$user_field_ndx,$date_f
 			'#weight' => $weight,
 		);
 	} else {
-		$form['mydatepopup'] = array(
+		$form = array(
 			'#type' => 'date_popup',
 			'#default_value' => $default,
 			'#date_format' => $date_format,
@@ -3446,4 +3525,77 @@ function expand_date_fetchit($element) {
 			'#weight' => $weight,
     );
   }
+}
+
+function fetchit_make_val_str($val,$field_type) {
+	switch (strtolower(trim($field_type))) {
+		case 'bool': // a boolean from a pg database
+		case 'boolean': // a generic type
+			switch (strtolower(trim($val))) {
+		        case "":
+		        	return "NULL";
+        		case "f":
+		        case "false":
+        		case "n":
+        		case "no":
+        		case "0":
+          			return "FALSE";
+		        case "t":
+    		    case "true":
+        		case "y":
+        		case "yes":
+	        	case "1":
+    	    	case "-1":
+        		default:
+					return "TRUE";
+			}
+		case 'int2': // a small integer from a pg database
+		case 'int4': // an integer from a pg database
+		case 'int8': // a long integer from a pg database
+		case 'integer': // a generic type
+			if ($val == "") {
+				return "NULL";
+			} else {
+				return strval(intval($val));
+			}
+		case 'numeric': // a "numeric" real number field from a pg database
+		case 'float4': // a single precision real number field from a pg database
+		case 'float8': // a double precision real number field from a pg database
+		case 'real': // a generic type
+			if ($val == "") {
+				return "NULL";
+			} else {
+				return strval(floatval($val));
+			}
+		case 'text':  // a text field from a pg database
+		case 'varchar': // a varchar field from a pg database
+		case 'bpchar': // a bpchar field from a pg database
+			return "'".pg_escape_string($val)."'";
+		case 'date': // a date field from a pg database
+			if ($val == "") {
+				return "NULL";
+			} else {
+				return "DATE '".$val."'";
+			}
+		case 'time': // a time field from a pg database
+		case 'timetz': // a time field with timezone from a pg database
+			if ($val == "") {
+				return "NULL";
+			} else {
+				return "TIME '".$val."'";
+			}
+		case 'timestamp': // a timestamp field from a pg database
+		case 'timestamptz': // a timestamp field with timezone from a pg database
+			if ($val == "") {
+				return "NULL";
+			} else {
+				return "TIMESTAMP '".$val."'";
+			}
+		default: // an unanticipated field type, put a text box or single selects, but may not work
+			if ($val == "") {
+				return "NULL";
+			} else {
+				return "'".$val."'";
+			}
+	}
 }
