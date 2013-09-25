@@ -327,10 +327,9 @@ function fetchit7_table_form($form, &$form_state) {
  * Process form validation
  */
 function fetchit7_table_form_validate ($form, &$form_state) {
-	// pop a log message
-	watchdog("fetchit7 module","entered fetchit7_table_form_validate");
 	// get the form nid 
 	$nid = $form['nid']['#value'];
+	debug($nid,'fetchit7_table_form_validate the nid is ');
 	// get the table type
 	$record_select = $form['record_select']['#value'];
 	// check out the table for errors
@@ -382,10 +381,8 @@ function fetchit7_table_form_validate ($form, &$form_state) {
  * Process form submission
  */
 function fetchit7_table_form_submit ($form, &$form_state) {
-	// pop a log message
-	watchdog("fetchit7 module","entered fetchit7_table_form_submit");
-	
 	$nid = $form['nid']['#value'];
+	debug($nid,'fetchit7_table_form_submit the nid is ');
 	$record_select = $form['record_select']['#value'];
 	$db_type = $form['db_type']['#value'];
 	$db_handle = $form['db_handle']['#value'];
@@ -933,8 +930,11 @@ function fetchit7_param_form($form, &$form_state) {
 					// this had to be redesigned for D7 since simple element render arrays now need to be
 					// proprocessed by the drupal_get_form function before rendering with drupal_render()
 					// this means we had to build a generic element builder function much like the form builder function 
-					$myform[$element_name] = drupal_get_form(
-						$element_name,
+					$dummy1 = array();
+					$dummy2 = array();
+					$myform[$element_name] = fetchit7_param_element_form(
+					//$myform[$element_name] = drupal_get_form(
+					//	$element_name,
 						$param_name,
 						$data_tbl_field_type,
 						$db_handle,
@@ -950,7 +950,7 @@ function fetchit7_param_form($form, &$form_state) {
 			}
 		}
 	}
-
+	/*
 	// choose whether to output form elements in a table ($table_rows>0)
 	// 	or put them in a stack accd to weight ($table_rows=0)
 	if ($table_rows) { //pre-render the elements and put them in a table
@@ -987,10 +987,14 @@ function fetchit7_param_form($form, &$form_state) {
 	} else { // just output the form elements in their weight order
 		$form['elements'] = $myform;
 	}
+	*/
 
+	$form['elements'] = $myform;
+	$form['#tree'] = TRUE;
+		
 	$submit_button_flag = TRUE;
 	if ($submit_button_flag) {
-		$form['submit'] = array(
+		$form['actions']['submit'] = array(
 			'#type' => 'submit',
 			'#value' => $submit_label,
 			'#weight' => $submit_weight,
@@ -1004,8 +1008,16 @@ function fetchit7_param_form($form, &$form_state) {
  * Process form validation
  */
 function fetchit7_param_form_validate ($form, &$form_state) {
-	//$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	//debug($string,'Hello from the all important parameter input form validate function. From here it appears the param_count is:');
+	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	debug($string,'Hello from the all important parameter input form validate function. From here it appears the param_count is:');
+	$nid = $form['nid']['#value'];
+		$row_ndx = 0;
+		$param_ndx = 0;
+		$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
+		debug($element_name,'$element_name');
+		//$control_type = $form['elements'][$element_name]['#type'];
+		//debug($control_type,'$control_type');
+		debug($form_state['values']['elements'],'$form_state[values][elements]');
 }
 
 /**
@@ -1013,8 +1025,8 @@ function fetchit7_param_form_validate ($form, &$form_state) {
  */
 function fetchit7_param_form_submit ($form, &$form_state) {
 	//debug($form_state,'form_state');
-	//$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	//debug($string,'Hello from the all important parameter input form submit function. From here it appears the param_count is:');
+	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	debug($string,'Hello from the all important parameter input form submit function. From here it appears the param_count is:');
 	$nid = $form['nid']['#value'];
 	$db_type = $form['db_type']['#value'];
 	$db_handle = $form['db_handle']['#value'];
@@ -1040,7 +1052,8 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 		// depending on what kind of control it is, there could be one or multiple or no values to store
 		$row_ndx = 0;
 		$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
-		//$control_type = $form[$element_name]['#type'];
+		$control_type = $form['elements'][$element_name]['#type'];
+		debug($control_type,'$control_type');
 		/*
 		switch ($control_type) {
 			case 'date': // the weird drupal core date element - an array of three values
@@ -1137,13 +1150,21 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 }
 
 
-//function theme_fetchit7_param_form($variables) {
-//	$form = $variables['form'];
-//	$nid = $form['nid']['#value'];
-//	drupal_set_message("theme_fetchit7_param_form.  hi, jim.  the nid is $nid");
-//	//$output = drupal_render_children($form);
-//	return $form;
-//}
+function theme_fetchit7_param_form($variables) {
+	$form = $variables['form'];
+	$nid = $form['nid']['#value'];
+	debug($nid, "theme_fetchit7_param_form.  hi, jim.  the nid is");
+	$output = drupal_render_children($form);
+	return $output;
+}
+
+function theme_fetchit7_table_form($variables) {
+	$form = $variables['form'];
+	$nid = $form['nid']['#value'];
+	debug($nid, "theme_fetchit7_table_form.  hi, jim.  the nid is");
+	$output = drupal_render_children($form);
+	return $output;
+}
 
 //===================================
 // testing functions...
@@ -2011,7 +2032,8 @@ function fetchit_parse_parameter_string($parameter_name,$parameter_string) {
 }
 
 
-function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type,$db_handle,$user_field_ndx,$user_field_data,$nid,$showtitles,$db_value) {
+//function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type,$db_handle,$user_field_ndx,$user_field_data,$nid,$showtitles,$db_value) {
+function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_field_ndx,$user_field_data,$nid,$showtitles,$db_value) {
 	$form = array();
 	switch (strtolower(trim($field_type))) {
 		case 'bool': // a boolean from a pg database

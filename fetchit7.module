@@ -576,4 +576,17 @@ function fetchit7_node_info() {
   return $forms;
 }
 
+/*
+ * Implementation of hook_theme(). 
+ */
+function fetchit7_theme() {
+	return array(
+		'fetchit7_table_form' => array(
+				'render element' => 'form',
+		),
+		'fetchit7_param_form' => array(
+				'render element' => 'form',
+		),
+	);
+}
 
