@@ -67,7 +67,7 @@ function fetchit7_install () {
 	$record->title = 'Parameter Input';
 	$record->description = 'Parameter Input';
 	$record->location = 'block'; // block
-	$record->enabled = 0; // false
+	$record->enabled = 1; // false
 	$record->db_host = 'localhost';
 	$record->db_type = 'postgresql'; // pgsql
 	$record->db_port = 5432;
@@ -79,11 +79,11 @@ function fetchit7_install () {
 	drupal_write_record($table,$record);
 	// append record
 	$record->ndx = 7;
-	$record->name = 'fetchit7_content_append';
+	$record->name = 'fetchit7_content_appnd';
 	$record->title = 'Append Record Form';
 	$record->description = 'Append Record Form';
 	$record->location = 'block'; // block
-	$record->enabled = 0; // false
+	$record->enabled = 1; // false
 	$record->db_host = 'localhost';
 	$record->db_type = 'postgresql'; // pgsql
 	$record->db_port = 5432;
@@ -95,11 +95,11 @@ function fetchit7_install () {
 	drupal_write_record($table,$record);
 	// editable grid
 	$record->ndx = 8;
-	$record->name = 'fetchit7_content_editgrid';
+	$record->name = 'fetchit7_content_egrid';
 	$record->title = 'Editable HTML Table';
 	$record->description = 'Editable HTML Table';
 	$record->location = 'block'; // block
-	$record->enabled = 0; // false
+	$record->enabled = 1; // false
 	$record->db_host = 'localhost';
 	$record->db_type = 'postgresql'; // pgsql
 	$record->db_port = 5432;
@@ -187,6 +187,8 @@ function fetchit7_install () {
 	// TODO: ask Kelly if they really want a body in these types since there is an above/below field (only reason would be to get better HTML WYSIWYG editor in GUI)
 	$body_instance = node_add_body_field($types['fetchit7_content_table']);
 	$body_instance = node_add_body_field($types['fetchit7_content_param']);
+	$body_instance = node_add_body_field($types['fetchit7_content_egrid']);
+	$body_instance = node_add_body_field($types['fetchit7_content_appnd']);
 	//$body_instance = node_add_body_field($types['fetchit7_content_xxxxxx']);
 	// ...
 	//
@@ -2525,6 +2527,1097 @@ function _fetchit7_content_param_installed_instances () {
 	return $fetchit7_instances;
 }
 
+/**
+ * function that returns an array of all the field instances created by this module for the fetchit7_content_egrid content type
+ * 
+ * the best way to figure this out is using drush and the devel module:
+ * drush ev 'print var_export(field_info_instance("entity_type","field_name","bundle_name"));'
+ * e.g. drush ev 'print var_export(field_info_instance("node","fetchit7_field_location","fetchit7_content_table"));'
+ **/
+function _fetchit7_content_egrid_installed_instances () {
+	$content_name = 'fetchit7_content_egrid';
+	$t = get_t();
+	$fetchit7_instances = array(
+		// on this example I am including many of the instance definition parameters in the array
+		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
+		//'fetchit7_field_location' => array(
+			//'label'					=> $t('form output location'),
+			//'type'					=> 'list_integer',
+			//'widget'				=> array(
+			//	//'type'					=> 'options_select', // dropdown list
+			//	'type'					=> 'options_buttons', // radio buttons or check boxes
+			//	'module'				=> 'options',
+			//	'settings'			=> array (),
+			//	//'weight'				=> -3,
+			//),
+			//'required'			=> TRUE,
+			//'description'		=> $t('This parameter tells fetchit7 where to display the form: 0 - not displayed, 1 - page, 2 - block'),
+			//'default_value'	=> array(
+			//	0								=> array(
+			//		'value'					=> '2',
+			//	),
+			//),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			//'field_name'		=> 'fetchit7_field_location',
+			//'entity_type'		=> 'node',
+			//'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		//),
+		// the rest will be defined in a more compressed fashion
+		// =====================================================
+		// these are fields that apply to multiple content types
+		// =====================================================
+		// form location
+		'fetchit7_field_location' => array(
+			'label'					=> $t('form output location'),
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where to display the form: none, page, block'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'block',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_location',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// form enabled
+		'fetchit7_field_enabled' => array(
+			'label'					=> $t('Form output enabled'),
+			'widget'				=> array(
+				'type'					=> 'options_onoff',
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'display_label'	=> TRUE,
+				),
+				//'weight'				=> -3,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('This parameter defines whether the form is enabled for output or not.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '1',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_enabled',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database server host name
+		'fetchit7_field_db_host' => array(
+			'label'					=> $t('Database server host name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The host name of the database server.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'localhost',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_host',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database server type
+		'fetchit7_field_db_type' => array(
+			'label'					=> $t('Database server type'),
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('The database server software type: postgresql, mysql, sqlserver'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'postgresql',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_type',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database server port
+		'fetchit7_field_db_port' => array(
+			'label'					=> $t('Database server port number'),
+			'widget'				=> array(
+				'type'					=> 'number',
+				'module'				=> 'number',
+				'active'				=> FALSE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'min'	=> '0',
+				'max'	=> '65000',
+				'prefix'	=> 'prefix string',
+				'suffix'	=> 'suffix string',
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database server port number used for network connections.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '5432',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_port',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database name
+		'fetchit7_field_db_name' => array(
+			'label'					=> $t('Database name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the database to connect to.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_name',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database user login
+		'fetchit7_field_db_login' => array(
+			'label'					=> $t('Database user login'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database user login'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_login',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database user password
+		'fetchit7_field_db_password' => array(
+			'label'					=> $t('Database user password'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database user password'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_password',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// pre-(form display) query (SQL) or function name (php function)
+		'fetchit7_field_pre_function' => array(
+			'label'					=> $t('Pre-(form display) SQL query or php.function'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A query (SQL) or the name of a php function (prepend with php.) to execute before displaying this form.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_pre_function',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// post-(form submit) SQL query or PHP.function
+		'fetchit7_field_post_function' => array(
+			'label'					=> $t('Post-(form submit) SQL query or php.function'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A query (SQL) or the name of a php function (prepend with php.) to execute after the form data has been submitted.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_post_function',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database source data table/view name
+		'fetchit7_field_source_view' => array(
+			'label'					=> $t('Source data view'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Database source data table/view name'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_source_view',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// drupal user id (uid) field name
+		'fetchit7_field_uid_field' => array(
+			'label'					=> $t('User id (uid) field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Drupal user ID (uid) field name.  Used in where clauses of queries and helps the drupal site developer keep each users data separate.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_uid_field',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// key field name
+		'fetchit7_field_key_field' => array(
+			'label'					=> $t('Key field name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The source table key field name.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_key_field',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_table_weight' => array(
+			'label'					=> $t('Table weight'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where on the form to display the table (relative to other form elements).'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '-8',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_table_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
+		// submit button label
+		'fetchit7_field_submit_label' => array(
+			'label'					=> $t('Submit button label'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A label to put on the submit button on this form.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_submit_label',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_submit_weight' => array(
+			'label'					=> $t('Submit button weight'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where on the form to display the submit button (relative to other form elements).'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '8',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_submit_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
+		// submit button redirect
+		'fetchit7_field_submit_redirect' => array(
+			'label'					=> $t('Submit button redirect'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A page URL (e.g. node/10) for Drupal to redirect the user to after a successful form submission caused by pressing this submit button.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_submit_redirect',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+				
+		// =====================================================
+		// these are fields that apply to editable grids
+		// =====================================================
+		
+		
+	);
+	
+	return $fetchit7_instances;
+}
+
+
+/**
+ * function that returns an array of all the field instances created by this module for the fetchit7_content_appnd content type
+ * 
+ * the best way to figure this out is using drush and the devel module:
+ * drush ev 'print var_export(field_info_instance("entity_type","field_name","bundle_name"));'
+ * e.g. drush ev 'print var_export(field_info_instance("node","fetchit7_field_location","fetchit7_content_table"));'
+ **/
+function _fetchit7_content_appnd_installed_instances () {
+	$content_name = 'fetchit7_content_appnd';
+	$t = get_t();
+	$fetchit7_instances = array(
+		// on this example I am including many of the instance definition parameters in the array
+		//   but commenting out the ones I think I should let drupal 7 handle with defaults for now
+		//'fetchit7_field_location' => array(
+			//'label'					=> $t('form output location'),
+			//'type'					=> 'list_integer',
+			//'widget'				=> array(
+			//	//'type'					=> 'options_select', // dropdown list
+			//	'type'					=> 'options_buttons', // radio buttons or check boxes
+			//	'module'				=> 'options',
+			//	'settings'			=> array (),
+			//	//'weight'				=> -3,
+			//),
+			//'required'			=> TRUE,
+			//'description'		=> $t('This parameter tells fetchit7 where to display the form: 0 - not displayed, 1 - page, 2 - block'),
+			//'default_value'	=> array(
+			//	0								=> array(
+			//		'value'					=> '2',
+			//	),
+			//),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			//'field_name'		=> 'fetchit7_field_location',
+			//'entity_type'		=> 'node',
+			//'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		//),
+		// the rest will be defined in a more compressed fashion
+		// =====================================================
+		// these are fields that apply to multiple content types
+		// =====================================================
+		// form location
+		'fetchit7_field_location' => array(
+			'label'					=> $t('form output location'),
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where to display the form: none, page, block'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'block',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_location',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// form enabled
+		'fetchit7_field_enabled' => array(
+			'label'					=> $t('Form output enabled'),
+			'widget'				=> array(
+				'type'					=> 'options_onoff',
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'display_label'	=> TRUE,
+				),
+				//'weight'				=> -3,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('This parameter defines whether the form is enabled for output or not.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '1',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_enabled',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database server host name
+		'fetchit7_field_db_host' => array(
+			'label'					=> $t('Database server host name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The host name of the database server.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'localhost',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_host',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database server type
+		'fetchit7_field_db_type' => array(
+			'label'					=> $t('Database server type'),
+			'widget'				=> array(
+				//'type'					=> 'options_select', // dropdown list
+				'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('The database server software type: postgresql, mysql, sqlserver'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'postgresql',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_type',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database server port
+		'fetchit7_field_db_port' => array(
+			'label'					=> $t('Database server port number'),
+			'widget'				=> array(
+				'type'					=> 'number',
+				'module'				=> 'number',
+				'active'				=> FALSE,
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'min'	=> '0',
+				'max'	=> '65000',
+				'prefix'	=> 'prefix string',
+				'suffix'	=> 'suffix string',
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database server port number used for network connections.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '5432',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_port',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database name
+		'fetchit7_field_db_name' => array(
+			'label'					=> $t('Database name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the database to connect to.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_name',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database user login
+		'fetchit7_field_db_login' => array(
+			'label'					=> $t('Database user login'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database user login'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_login',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database user password
+		'fetchit7_field_db_password' => array(
+			'label'					=> $t('Database user password'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The database user password'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_db_password',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// pre-(form display) query (SQL) or function name (php function)
+		'fetchit7_field_pre_function' => array(
+			'label'					=> $t('Pre-(form display) SQL query or php.function'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A query (SQL) or the name of a php function (prepend with php.) to execute before displaying this form.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_pre_function',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// post-(form submit) SQL query or PHP.function
+		'fetchit7_field_post_function' => array(
+			'label'					=> $t('Post-(form submit) SQL query or php.function'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A query (SQL) or the name of a php function (prepend with php.) to execute after the form data has been submitted.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_post_function',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// database source data table/view name
+		'fetchit7_field_source_view' => array(
+			'label'					=> $t('Source data view'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Database source data table/view name'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_source_view',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// drupal user id (uid) field name
+		'fetchit7_field_uid_field' => array(
+			'label'					=> $t('User id (uid) field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Drupal user ID (uid) field name.  Used in where clauses of queries and helps the drupal site developer keep each users data separate.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_uid_field',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// key field name
+		'fetchit7_field_key_field' => array(
+			'label'					=> $t('Key field name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The source table key field name.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_key_field',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_table_weight' => array(
+			'label'					=> $t('Table weight'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where on the form to display the table (relative to other form elements).'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '-8',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_table_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
+		// submit button label
+		'fetchit7_field_submit_label' => array(
+			'label'					=> $t('Submit button label'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A label to put on the submit button on this form.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_submit_label',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		'fetchit7_field_submit_weight' => array(
+			'label'					=> $t('Submit button weight'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where on the form to display the submit button (relative to other form elements).'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '8',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_submit_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
+		// submit button redirect
+		'fetchit7_field_submit_redirect' => array(
+			'label'					=> $t('Submit button redirect'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A page URL (e.g. node/10) for Drupal to redirect the user to after a successful form submission caused by pressing this submit button.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_submit_redirect',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+				
+		// =====================================================
+		// these are fields that apply to append new record forms
+		// =====================================================
+		
+		
+	);
+	
+	return $fetchit7_instances;
+}
+
 
 /**
  * Implements hook_schema
@@ -2755,8 +3848,19 @@ function fetchit7_schema () {
 function fetchit7_uninstall () {
 	//watchdog("fetchit7 module","fetchit7_uninstall: ");
 
-	// get all the created content for the fetchit7 content types
+	//$fetchit7_node_types = fetchit7_node_info();
+	//$fetchit7_node_type_names = array_keys($fetchit7_node_types);
+	// note this has to match what is in node_info and also what is defined in this .install file
+	$fetchit7_node_type_names = array('fetchit7_content_table','fetchit7_content_param','fetchit7_content_egrid','fetchit7_content_appnd');
+	//$fetchit7_node_type_names = array('fetchit7_content_table','fetchit7_content_param');
+	
+	
+	//----------------------------------------------------------------------
+	// delete all the created content nodes for the fetchit7 content types
+	//----------------------------------------------------------------------
 	$sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
+	
+	/*
 	$result = db_query($sql, array(':type' => 'fetchit7_content_table'));
 	$nids = array();
 	foreach ($result as $row) {
@@ -2772,27 +3876,53 @@ function fetchit7_uninstall () {
 	}
 	// delete these nodes
 	node_delete_multiple($nids);
+	*/
+	foreach ($fetchit7_node_type_names as $fetchit7_node_type_name) {
+		$result = db_query($sql, array(':type' => $fetchit7_node_type_name));
+		$nids = array();
+		foreach ($result as $row) {
+			$nids[] = $row->nid;
+		}
+		// delete these nodes
+		node_delete_multiple($nids);
+	}
 	
+	
+	//----------------------------------------------------------------------
 	// loop over the fetchit7 fields and delete their instances, data and the fields themselves
+	//----------------------------------------------------------------------
 	foreach (array_keys(_fetchit7_installed_fields()) as $field) {
 		field_delete_field($field);
 	}
 	
+	//----------------------------------------------------------------------
 	// loop over any remaining field instances attached to the content types (like the body field)
 	//   and delete them individually
-	$instances = field_info_instances('node','fetchit7_content_table');
-	foreach ($instances as $instance_name => $instance) {
-		field_delete_instance($instance);
-	}
-	$instances = field_info_instances('node','fetchit7_content_param');
-	foreach ($instances as $instance_name => $instance) {
-		field_delete_instance($instance);
+	//----------------------------------------------------------------------
+	//$instances = field_info_instances('node','fetchit7_content_table');
+	//foreach ($instances as $instance_name => $instance) {
+	//	field_delete_instance($instance);
+	//}
+	//$instances = field_info_instances('node','fetchit7_content_param');
+	//foreach ($instances as $instance_name => $instance) {
+	//	field_delete_instance($instance);
+	//}
+	foreach ($fetchit7_node_type_names as $fetchit7_node_type_name) {
+		$instances = field_info_instances('node',$fetchit7_node_type_name);
+		foreach ($instances as $instance_name => $instance) {
+			field_delete_instance($instance);
+		}
 	}
 	
+	//----------------------------------------------------------------------
 	// delete the content types
-	node_type_delete('fetchit7_content_table');
-	node_type_delete('fetchit7_content_param');
-	
+	//----------------------------------------------------------------------
+	//node_type_delete('fetchit7_content_table');
+	//node_type_delete('fetchit7_content_param');
+	foreach ($fetchit7_node_type_names as $fetchit7_node_type_name) {
+		node_type_delete($fetchit7_node_type_name);
+	}	
+
 	// purge all field information
 	field_purge_batch(1000);
 

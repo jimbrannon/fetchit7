@@ -550,6 +550,34 @@ function fetchit7_node_info() {
 			'module'			=> 'fetchit7',
 			'orig_type'		=> 'fetchit7_content_param',
 		),
+		'fetchit7_content_egrid' => array(
+			'name'				=> t('fetchit7 editable grid content type'),
+			'base'				=> 'node_content', // should this be fetchit7_content_param?
+			'description'	=> t('Use this fetchit7 content to create an editable grid form connected to a database table'),
+			'help'				=> t('Enter all the information necessary to create an editable grid form connected to a database server'),
+			'custom'			=> FALSE,
+			'modified'		=> FALSE,
+			'locked'			=> FALSE,
+			'disabled'		=> FALSE,
+			'has_title'		=> TRUE,
+			'title_label'	=> 'Content Title',
+			'module'			=> 'fetchit7',
+			'orig_type'		=> 'fetchit7_content_egrid',
+		),
+		'fetchit7_content_appnd' => array(
+			'name'				=> t('fetchit7 append new record content type'),
+			'base'				=> 'node_content', // should this be fetchit7_content_param?
+			'description'	=> t('Use this fetchit7 content to create an append new record form connected to a database table'),
+			'help'				=> t('Enter all the information necessary to create an append new record form connected to a database server'),
+			'custom'			=> FALSE,
+			'modified'		=> FALSE,
+			'locked'			=> FALSE,
+			'disabled'		=> FALSE,
+			'has_title'		=> TRUE,
+			'title_label'	=> 'Content Title',
+			'module'			=> 'fetchit7',
+			'orig_type'		=> 'fetchit7_content_appnd',
+		),
 	);
 	
 	return $fetchit7_content_types;
