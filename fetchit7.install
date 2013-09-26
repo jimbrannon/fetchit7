@@ -1100,7 +1100,7 @@ function _fetchit7_content_table_installed_instances () {
 				),
 				//'weight'				=> -3,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('This parameter defines whether the form is enabled for output or not.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -1176,7 +1176,7 @@ function _fetchit7_content_table_installed_instances () {
 				'prefix'	=> 'prefix string',
 				'suffix'	=> 'suffix string',
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('The database server port number used for network connections.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -1203,7 +1203,7 @@ function _fetchit7_content_table_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('The name of the database to connect to.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -1698,7 +1698,7 @@ function _fetchit7_content_param_installed_instances () {
 				),
 				//'weight'				=> -3,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('This parameter defines whether the form is enabled for output or not.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -1774,7 +1774,7 @@ function _fetchit7_content_param_installed_instances () {
 				'prefix'	=> 'prefix string',
 				'suffix'	=> 'suffix string',
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('The database server port number used for network connections.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -1801,7 +1801,7 @@ function _fetchit7_content_param_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('The name of the database to connect to.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -2033,7 +2033,7 @@ function _fetchit7_content_param_installed_instances () {
 				),
 				//'weight'				=> -3,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('This parameter defines whether titles are displayed on every parameter control on the form.  The form can get messy (too busy) with too many titles.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -2103,7 +2103,7 @@ function _fetchit7_content_param_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('The parameter name. fetchit7 will create a control for each parameter name specified here.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -2184,7 +2184,7 @@ function _fetchit7_content_param_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('The type of input control to use for entering data for this parameter: [textbox, dropdown_single, dropdown_multiple, radio_buttons, checkboxes, checkbox, date_popup, date_select, datetime_select]'),
 			'default_value'	=> array(
 				0								=> array(
@@ -2211,7 +2211,7 @@ function _fetchit7_content_param_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('The input control weight is an integer -20 to 20 that determines the order in which multiple controls are displayed when NOT in a table (rows = 0). Lower numbers float to the top.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -2238,7 +2238,7 @@ function _fetchit7_content_param_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('Whether this parameter control is enabled for input. Enter true or false.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -2265,7 +2265,7 @@ function _fetchit7_content_param_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('Whether this parameter control requires an input value to be selected/entered before submitting the form.'),
 			'default_value'	=> array(
 				0								=> array(
@@ -2454,7 +2454,7 @@ function _fetchit7_content_param_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('The name of the database table (data output table) into which the entered or selected values will be stored'),
 			'default_value'	=> array(
 				0								=> array(
@@ -2481,7 +2481,7 @@ function _fetchit7_content_param_installed_instances () {
 				'text_processing'	=> '0',
 				'user_register_form'	=> FALSE,
 			),
-			'required'			=> TRUE,
+			'required'			=> FALSE,
 			'description'		=> $t('[CURRENTLY LOCKED AT DEFAULT VALUE] The name of the key field in the data output table (default = stored)'),
 			'default_value'	=> array(
 				0								=> array(

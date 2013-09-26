@@ -329,7 +329,7 @@ function fetchit7_table_form($form, &$form_state) {
 function fetchit7_table_form_validate ($form, &$form_state) {
 	// get the form nid 
 	$nid = $form['nid']['#value'];
-	debug($nid,'fetchit7_table_form_validate the nid is ');
+	//debug($nid,'fetchit7_table_form_validate the nid is ');
 	// get the table type
 	$record_select = $form['record_select']['#value'];
 	// check out the table for errors
@@ -382,7 +382,7 @@ function fetchit7_table_form_validate ($form, &$form_state) {
  */
 function fetchit7_table_form_submit ($form, &$form_state) {
 	$nid = $form['nid']['#value'];
-	debug($nid,'fetchit7_table_form_submit the nid is ');
+	//debug($nid,'fetchit7_table_form_submit the nid is ');
 	$record_select = $form['record_select']['#value'];
 	$db_type = $form['db_type']['#value'];
 	$db_handle = $form['db_handle']['#value'];
@@ -478,7 +478,17 @@ function fetchit7_table_form_submit ($form, &$form_state) {
 	}
 	
 	// reset the text
-	//drupal_set_message(t('Successfully submitted changes.'),'status');
+	drupal_set_message(t('Successfully submitted changes.'),'status');
+}
+
+function theme_fetchit7_table_form($variables) {
+	$form = $variables['form'];
+	$form_id = $form['form_id']['#value'];
+	$output  = '<div class="'.$form_id.'_table">';
+	$output .= drupal_render($form['table']);
+	$output .= '</div>';
+	$output .= drupal_render_children($form);
+	return $output;
 }
 
 
@@ -1187,6 +1197,7 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 		}
 	}
 
+	drupal_set_message(t('Successfully submitted changes.'),'status');
 }
 
 
@@ -1199,12 +1210,42 @@ function theme_fetchit7_param_form($variables) {
 	//the drupal way is to do all this in a theme preprocessor function ... move it later ...
 	$table_row_count = $form_id = $form['table_rows']['#value'];
 	//figure out the formatting
+	$output  = '<div class="'.$form_id.'_params">';
 	if ($table_row_count) {
 		//figure out the table structure
 		$param_count = $form['param_count']['#value'];
-		$table_column_count =  intval( ($param_count-1) / $table_row_count) + 1; 
+		$table_column_count =  intval( ($param_count-1) / $table_row_count) + 1;
+		
+		$header = array();
+		for ($col_ndx = 0; $col_ndx < $table_column_count; $col_ndx++) {
+				// TODO: need to add column header labels to parameter input form inputs
+				$header[] = "Column $col_ndx";
+		}
+		$rows = array();
+		for ($row_ndx = 0; $row_ndx < $table_row_count; $row_ndx++) {
+			$row = array();
+			for ($col_ndx = 0; $col_ndx < $table_column_count; $col_ndx++) {
+				// numbering goes down the columns first
+				$p_ndx = $row_ndx + $col_ndx * $table_row_count;
+				if ($p_ndx < $param_count) {
+					$element_name = fetchit_make_element_name($nid,0,$p_ndx);
+					$row[] = drupal_render($form['elements'][$element_name]);
+				} else {
+					$sillyform[$p_ndx] = array('#type' => 'item','#title' => 'Empty Cell','#markup' => "I am an empty cell.",);
+					$row[] = drupal_render($sillyform[$p_ndx]);
+				}
+			}
+			$rows[] = $row;
+		}
+		$form['table'] = array(
+			'#theme' => 'table',
+			'#header' => $header,
+			'#rows' => $rows,
+		);
+
+		/* 
 		// create the header row		
-		$output  = '<table id="'.$form_id.'" class="sticky-enabled">';
+		$output .= '<table id="'.$form_id.'" class="sticky-enabled">';
 	  $output .= '<thead>';
 	  $output .= '  <tr>';
 		for ($c=0;$c<$table_column_count;++$c) {
@@ -1229,80 +1270,14 @@ function theme_fetchit7_param_form($variables) {
 		}
 	  $output .= '</tbody>';
 		$output .= '</table>';
+		*/
 	} else {
-		$output = '';
+		$output .= drupal_render($form['elements']);
 	}
-	
+	$output .= '</div>';
 	$output .= drupal_render_children($form);
+
 	return $output;
-}
-
-function theme_fetchit7_table_form($variables) {
-	$form = $variables['form'];
-	$nid = $form['nid']['#value'];
-	debug($nid, "theme_fetchit7_table_form.  hi, jim.  the nid is");
-	$output = drupal_render_children($form);
-	return $output;
-}
-
-//===================================
-// testing functions...
-//===================================
-
-/**
-  * Form builder.  Display fetchit7 content.
-  * 
-  * @ingroup forms
-  * @see system_settings_form().
-  */
-function fetchit7_xxx_form($form, &$form_state, $arg1, $arg2) {
-	// form builder function
-	$form_id = $form_state['build_info']['form_id'];
-	// text element
-	$myform['fetchit7_xxx_text'] = array(
-		'#type' => 'textfield',
-		//'#default_value' => variable_get('fetchit7_xxx_text','xxx_default_value'),
-		'#default_value' => $form_id,
-		'#title' => t('This is the form id'),
-		'#size' => 30,
-		'#maxlength' => 60,
-		'#required' => TRUE,
-	);
-	
-	$active = array(0 => t('False'), 1 => t('True'));
-	$form['fetchit7_xxx_radios'] = array(
-		'#type' => 'radios',
-    '#title' => $form_id,
-    '#default_value' => 0,
-    '#options' => $active,
-    '#description' => "arg1 = $arg1    arg2 = $arg2",
-    //'#access' => $admin,
-  );
-	
-	//$form['#submit'][] = 'fetchit7_xxx_form_submit';
-	//return system_settings_form($form);
-	return $form;
-}
-
-/**
- * Process form validation
- */
-function fetchit7_xxx_form_validate ($form, &$form_state) {
-	// pop a debug message
-	//watchdog("fetchit7 module","entered fetchit7_xxx_form_validate");
-	debug(true,'hello from fetchit7_xxx_form_validate');
-}
-
-/**
- * Process form submission
- */
-function fetchit7_xxx_form_submit ($form, &$form_state) {
-	// pop a log message
-	//watchdog("fetchit7 module","entered fetchit7_xxx_form_submit");
-	debug(true,'hello from fetchit7_xxx_form_submit');
-	// reset the text
-	if(!strlen(trim($string = $form_state['values']['fetchit7_xxx_text']))) $string = 'xxx_default_value';
-	variable_set('fetchit7_xxx_text',$string);
 }
 
 

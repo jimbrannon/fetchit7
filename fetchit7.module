@@ -80,6 +80,17 @@ function fetchit7_menu() {
 		'file path' => drupal_get_path('module', 'system'),
 	);
 
+	$items['admin/config/fetchit7/hiddencontent'] = array(
+		'title' => 'Preview fetchit7 non-displayed content',
+		'description' => 'These are the fetchit7 content that have not been designated as block or page output.',
+		'position' => 'right',
+		'weight' => 0,
+		'page callback' => 'system_admin_menu_block_page',
+		'access arguments' => array('administer site configuration'),
+		'file' => 'system.admin.inc',
+		'file path' => drupal_get_path('module', 'system'),
+	);
+
 	$items['admin/config/fetchit7/backupcontent'] = array(
 		'title' => 'Backup fetchit7 content',
 		'description' => 'Exports all fetchit7 content to database tables (one per type).',
@@ -106,19 +117,6 @@ function fetchit7_menu() {
 		'file path' => drupal_get_path('module', 'fetchit7'),
 	);
 
-	$items['admin/config/fetchit7/testform'] = array(
-		'title'							=> 'fetchit7 content test',
-		'description'				=> 'temporary menu item to allow testing fetchit7 forms content.',
-		'position'					=> 'right',
-		'weight'						=> 10,
-		'page callback'			=> 'drupal_get_form',
-		'page arguments'		=> array('fetchit7_table_form_13'),
-		'access arguments'	=> array('administer site configuration'),
-		'type'							=> MENU_NORMAL_ITEM,
-		'file'							=> 'fetchit7.forms.inc',
-		'file path'					=> drupal_get_path('module', 'fetchit7'),
-	);
-	
 	//=====================================================
 	// last create all the automated menu items
 	// this is the "magic" that keeps the site functional
@@ -158,7 +156,7 @@ function fetchit7_menu() {
 				'position'					=> 'right',
 				'weight'						=> 10 + $nid,
 				'page callback'			=> 'drupal_get_form',
-				'page arguments'		=> array($formid,$nid),
+				'page arguments'		=> array($formid),
 				'access arguments'	=> array('administer site configuration'),
 				'type'							=> MENU_NORMAL_ITEM,
 				'file'							=> 'fetchit7.forms.inc',
@@ -172,7 +170,7 @@ function fetchit7_menu() {
 				'position'					=> 'right',
 				'weight'						=> 10 + $nid,
 				'page callback'			=> 'drupal_get_form',
-				'page arguments'		=> array($formid,$nid),
+				'page arguments'		=> array($formid),
 				// the implemented page should be viewable by anyone
 				//'access arguments'	=> array('administer site configuration'),
 				'type'							=> MENU_NORMAL_ITEM,
@@ -208,7 +206,7 @@ function fetchit7_menu() {
 				'position'					=> 'right',
 				'weight'						=> 10 + $nid,
 				'page callback'			=> 'drupal_get_form',
-				'page arguments'		=> array($formid,$nid),
+				'page arguments'		=> array($formid),
 				'access arguments'	=> array('administer site configuration'),
 				'type'							=> MENU_NORMAL_ITEM,
 				'file'							=> 'fetchit7.forms.inc',
@@ -222,7 +220,7 @@ function fetchit7_menu() {
 				'position'					=> 'right',
 				'weight'						=> 10 + $nid,
 				'page callback'			=> 'drupal_get_form',
-				'page arguments'		=> array($formid,$nid),
+				'page arguments'		=> array($formid),
 				// the implemented page should be viewable by anyone
 				//'access arguments'	=> array('administer site configuration'),
 				'type'							=> MENU_NORMAL_ITEM,
@@ -258,7 +256,7 @@ function fetchit7_menu() {
 				'position'					=> 'right',
 				'weight'						=> 10 + $nid,
 				'page callback'			=> 'drupal_get_form',
-				'page arguments'		=> array($formid,$nid),
+				'page arguments'		=> array($formid),
 				'access arguments'	=> array('administer site configuration'),
 				'type'							=> MENU_NORMAL_ITEM,
 				'file'							=> 'fetchit7.forms.inc',
@@ -276,7 +274,7 @@ function fetchit7_menu() {
 			//	'position'					=> 'right',
 			//	'weight'						=> 10 + $nid,
 			//	'page callback'			=> 'drupal_get_form',
-			//	'page arguments'		=> array($formid,$nid),
+			//	'page arguments'		=> array($formid),
 			//	//'access arguments'	=> array('administer site configuration'),
 			//	'type'							=> MENU_NORMAL_ITEM,
 			//	'file'							=> 'fetchit7.forms.inc',
@@ -311,7 +309,7 @@ function fetchit7_menu() {
 				'position'					=> 'right',
 				'weight'						=> 10 + $nid,
 				'page callback'			=> 'drupal_get_form',
-				'page arguments'		=> array($formid,$nid),
+				'page arguments'		=> array($formid),
 				'access arguments'	=> array('administer site configuration'),
 				'type'							=> MENU_NORMAL_ITEM,
 				'file'							=> 'fetchit7.forms.inc',
@@ -329,7 +327,7 @@ function fetchit7_menu() {
 			//	'position'					=> 'right',
 			//	'weight'						=> 10 + $nid,
 			//	'page callback'			=> 'drupal_get_form',
-			//	'page arguments'		=> array($formid,$nid),
+			//	'page arguments'		=> array($formid),
 			//	//'access arguments'	=> array('administer site configuration'),
 			//	'type'							=> MENU_NORMAL_ITEM,
 			//	'file'							=> 'fetchit7.forms.inc',
@@ -395,7 +393,7 @@ function fetchit7_block_info() {
 			//	'position'					=> 'right',
 			//	'weight'						=> 10 + $nid,
 			//	'page callback'			=> 'drupal_get_form',
-			//	'page arguments'		=> array($formid,$nid),
+			//	'page arguments'		=> array($formid),
 			//	'access arguments'	=> array('administer site configuration'),
 			//	'type'							=> MENU_NORMAL_ITEM,
 			//	'file'							=> 'fetchit7.forms.inc',
@@ -503,7 +501,7 @@ function fetchit7_block_info() {
 function fetchit7_block_view($delta = '') {
 	include_once(drupal_get_path('module', 'fetchit7').'/fetchit7.forms.inc');
 	$nid = (int) substr($delta, 21);
-	$form = drupal_get_form($delta,$nid);
+	$form = drupal_get_form($delta);
 	$output = array(
 		'subject' => NULL,
 		'content' => $form,
@@ -572,10 +570,6 @@ function fetchit7_node_info() {
 
   $forms = array();
 	watchdog('fetchit7','fetchit7_forms: '.$form_id);
-	// this is just a test form
-  if (substr($form_id, 0, 18) == 'fetchit7_xxx_form_') {
-    $forms[$form_id] = array('callback' => 'fetchit7_xxx_form');
-  }
 	// this is the html table form
   if (substr($form_id, 0, 20) == 'fetchit7_table_form_') {
     $forms[$form_id] = array('callback' => 'fetchit7_table_form');
@@ -583,11 +577,6 @@ function fetchit7_node_info() {
 	// this is the parameter input form
   if (substr($form_id, 0, 20) == 'fetchit7_param_form_') {
     $forms[$form_id] = array('callback' => 'fetchit7_param_form');
-  }
-	// these are elements on the param input form
-	// don't need this anymore...
-  if (substr($form_id, 0, 17) == 'fetchit7_element_') {
-    $forms[$form_id] = array('callback' => 'fetchit7_param_element_form');
   }
   return $forms;
 }
