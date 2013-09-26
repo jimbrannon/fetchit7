@@ -130,15 +130,111 @@ function fetchit7_menu() {
 	//=====================================================
 	// TODO: should I remove the old automatically created menu items first?  hmmm....
 	// get all the nids for HTML table content in pages
+	
+	$fetchit7_node_types = fetchit7_node_info();
+	$fetchit7_node_type_names = array_keys($fetchit7_node_types);
+	//debug($fetchit7_node_type_names,'$fetchit7_node_type_names');
+
+	foreach ($fetchit7_node_type_names as $fetchit7_node_type_name) {
+		//debug($fetchit7_node_type_name,'$fetchit7_node_type_name');
+		$node_type_token = substr($fetchit7_node_type_name, 17, 5);
+		//debug($node_type_token,'$node_type_token');
+
+		// page content
+		$query = new EntityFieldQuery();
+		$query
+			->entityCondition('entity_type', 'node')
+			->entityCondition('bundle', $fetchit7_node_type_name);
+		$query->fieldCondition('fetchit7_field_enabled', 'value', TRUE);
+		$query->fieldCondition('fetchit7_field_location', 'value', 'page');
+		$result = $query->execute();
+		//debug($result,'$result');
+		if (isset($result['node'])) {
+			$nids = array_keys($result['node']);
+			//debug($nids,'$nids');
+			$menu_urlbase_example = 'admin/config/fetchit7/pagecontent/';
+			// TODO: get the base URL for fetchit7_content_table page content
+			$menu_urlbase_implemented = 'admin/config/fetchit7/pagecontent/'; //temporary
+			foreach ($nids as $nid) {
+				$mynode = node_load($nid);
+				$title = $mynode->title;
+				$formid = 'fetchit7_'.$node_type_token.'_form_X' . $nid;
+				$menu_url = $menu_urlbase_example . $formid;
+				$items[$menu_url] = array(
+					'title'							=> $title,
+					'description'				=> $title.' - fetchit7 form '.$formid,
+					'position'					=> 'right',
+					'weight'						=> 10 + $nid,
+					'page callback'			=> 'drupal_get_form',
+					'page arguments'		=> array($formid),
+					'access arguments'	=> array('administer site configuration'),
+					'type'							=> MENU_NORMAL_ITEM,
+					'file'							=> 'fetchit7.forms.inc',
+					'file path'					=> drupal_get_path('module', 'fetchit7'),
+				);
+				$formid = 'fetchit7_'.$node_type_token.'_form_I' . $nid;
+				$menu_url = $menu_urlbase_implemented . $formid;
+				$items[$menu_url] = array(
+					'title'							=> $title,
+					'description'				=> $title.' = fetchit7 form '.$formid,
+					'position'					=> 'right',
+					'weight'						=> 10 + $nid,
+					'page callback'			=> 'drupal_get_form',
+					'page arguments'		=> array($formid),
+					// the implemented page should be viewable by anyone
+					//'access arguments'	=> array('administer site configuration'),
+					'type'							=> MENU_NORMAL_ITEM,
+					'file'							=> 'fetchit7.forms.inc',
+					'file path'					=> drupal_get_path('module', 'fetchit7'),
+				);
+			}
+		}
+
+		// block content
+		$query = new EntityFieldQuery();
+		$query
+			->entityCondition('entity_type', 'node')
+			->entityCondition('bundle', $fetchit7_node_type_name);
+			//->propertyCondition('status', 1)
+			//->propertyOrderBy('created', 'DESC');
+		$query->fieldCondition('fetchit7_field_enabled', 'value', TRUE);
+		$query->fieldCondition('fetchit7_field_location', 'value', 'block');
+		//$query->range(0,10);
+		$result = $query->execute();
+		//debug($result,'$result');
+		if (isset($result['node'])) {
+			$nids = array_keys($result['node']);
+			//debug($nids,'$nids');
+			$menu_urlbase_example = 'admin/config/fetchit7/blockcontent/';
+			$menu_urlbase_implemented = 'admin/config/fetchit7/blockcontent/'; //temporary
+			foreach ($nids as $nid) {
+				$mynode = node_load($nid);
+				$title = $mynode->title;
+				$formid = 'fetchit7_'.$node_type_token.'_form_X' . $nid;
+				$menu_url = $menu_urlbase_example . $formid;
+				$items[$menu_url] = array(
+					'title'							=> $title,
+					'description'				=> $title.' = fetchit7 form '.$formid,
+					'position'					=> 'right',
+					'weight'						=> 10 + $nid,
+					'page callback'			=> 'drupal_get_form',
+					'page arguments'		=> array($formid),
+					'access arguments'	=> array('administer site configuration'),
+					'type'							=> MENU_NORMAL_ITEM,
+					'file'							=> 'fetchit7.forms.inc',
+					'file path'					=> drupal_get_path('module', 'fetchit7'),
+				);
+			}
+		}
+	}
+
+	/*		
 	$query = new EntityFieldQuery();
 	$query
 		->entityCondition('entity_type', 'node')
 		->entityCondition('bundle', 'fetchit7_content_table');
-		//->propertyCondition('status', 1)
-		//->propertyOrderBy('created', 'DESC');
 	$query->fieldCondition('fetchit7_field_enabled', 'value', TRUE);
 	$query->fieldCondition('fetchit7_field_location', 'value', 'page');
-	//$query->range(0,10);
 	$result = $query->execute();
 	if (isset($result['node'])) {
 		$nids = array_keys($result['node']);
@@ -179,6 +275,7 @@ function fetchit7_menu() {
 			);
 		}
 	}
+
 	// get all the nids for parameter input content in pages
 	$query = new EntityFieldQuery();
 	$query
@@ -335,7 +432,8 @@ function fetchit7_menu() {
 			//);
 		}
 	}
-
+	*/
+	
 	return $items;
 }
 
@@ -364,7 +462,43 @@ function fetchit7_block_info() {
 	// the normal IDs will have a prefix
 	//   (before the nid) of I (for Implemented)
 	//=====================================================
-	// get all the nids for enabled HTML table content to be displayed in blocks
+	$blocks = array();
+	$fetchit7_node_types = fetchit7_node_info();
+	$fetchit7_node_type_names = array_keys($fetchit7_node_types);
+	//debug($fetchit7_node_type_names,'fetchit7_block_info $fetchit7_node_type_names');
+	foreach ($fetchit7_node_type_names as $fetchit7_node_type_name) {
+		//debug($fetchit7_node_type_name,'fetchit7_block_info $fetchit7_node_type_name');
+		$node_type_token = substr($fetchit7_node_type_name, 17, 5);
+		$query = new EntityFieldQuery();
+		$query
+			->entityCondition('entity_type', 'node')
+			->entityCondition('bundle', $fetchit7_node_type_name);
+		$query->fieldCondition('fetchit7_field_enabled', 'value', TRUE);
+		$query->fieldCondition('fetchit7_field_location', 'value', 'block');
+		//debug($query,'fetchit7_block_info $query');
+		//$query->range(0,10);
+		$result = $query->execute();
+		//debug($result,'fetchit7_block_info $result');
+		if (isset($result['node'])) {
+			$nids = array_keys($result['node']);
+			//$menu_urlbase_example = 'admin/config/fetchit7/blockcontent/';
+			//$menu_urlbase_implemented = 'admin/config/fetchit7/blockcontent/'; //temporary
+			foreach ($nids as $nid) {
+				$formid = 'fetchit7_'.$node_type_token.'_form_I' . $nid;
+				// use fetchit7_xxxxx_form_Iyyyy as the unique delta for the block schema
+				// where xxxxx is the content type short name (table, param, etc.)
+				// yyyy is the $nid 
+				// TODO: add name to the info so its easier to find the content you want
+				$blocks[$formid] = array(
+					'info' => $formid,
+					'cache' => DRUPAL_NO_CACHE,
+				);
+			}
+		}
+	}
+	
+	/*
+	// get all the nids for content to be displayed in blocks
 	$query = new EntityFieldQuery();
 	$query
 		->entityCondition('entity_type', 'node')
@@ -465,7 +599,8 @@ function fetchit7_block_info() {
 			);
 		}
 	}
-		
+	*/
+	
 	return $blocks;
 }
 
@@ -606,6 +741,14 @@ function fetchit7_node_info() {
   if (substr($form_id, 0, 20) == 'fetchit7_param_form_') {
     $forms[$form_id] = array('callback' => 'fetchit7_param_form');
   }
+	// this is the editable grid form
+  if (substr($form_id, 0, 20) == 'fetchit7_egrid_form_') {
+    $forms[$form_id] = array('callback' => 'fetchit7_egrid_form');
+  }
+	// this is the append new record form
+  if (substr($form_id, 0, 20) == 'fetchit7_appnd_form_') {
+    $forms[$form_id] = array('callback' => 'fetchit7_appnd_form');
+  }
   return $forms;
 }
 
@@ -618,6 +761,12 @@ function fetchit7_theme() {
 				'render element' => 'form',
 		),
 		'fetchit7_param_form' => array(
+				'render element' => 'form',
+		),
+		'fetchit7_egrid_form' => array(
+				'render element' => 'form',
+		),
+		'fetchit7_appnd_form' => array(
 				'render element' => 'form',
 		),
 	);

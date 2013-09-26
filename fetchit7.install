@@ -208,6 +208,14 @@ function fetchit7_install () {
 	foreach (_fetchit7_content_param_installed_instances() as $instance) {
 		field_create_instance($instance);
 	}	
+	// link the fields to the fetchit7_content_param content type via "instances"
+	foreach (_fetchit7_content_egrid_installed_instances() as $instance) {
+		field_create_instance($instance);
+	}	
+	// link the fields to the fetchit7_content_param content type via "instances"
+	foreach (_fetchit7_content_appnd_installed_instances() as $instance) {
+		field_create_instance($instance);
+	}	
 		
 }
 
