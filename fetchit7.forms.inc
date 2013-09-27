@@ -2627,10 +2627,14 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 				break;
 			default: //everything else
 				$tmp_val_str = $form_state['values']['elements'][$element_name];
+				debug($tmp_val_str,'$tmp_val_str');
 				//if (!strlen(trim($tmp_val_str))) break;
 				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]['#value']);
+				debug($val_str,'$val_str');
 				if (strlen($param_data_uid)) $val_str .= ",".fetchit_make_val_str($user_uid,"integer");
+				debug($val_str,'$val_str');
 				$query .= "$val_str)";
+				debug($query,'$query');
 				$result = fetchit_run_query($db_type,$db_handle,$query);
 		}
 	}
@@ -4286,11 +4290,15 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 			} 
 		}
 	}
+
 	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
 		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
 	} else {
 		$required = FALSE;
 	}
+	// avoid setting this to true - essentially disables the checkbox
+	$required = FALSE;
+	
 	if (strlen(trim($db_value))) {
 		$default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
 	} else {
@@ -4979,12 +4987,11 @@ function expand_date_fetchit($element) {
  *   
  */
 function fetchit_make_val_str($val,$field_type) {
-	//debug($val,'$val');
-	//debug($field_type,'$field_type');
+	debug($val,'$val');
+	debug($field_type,'$field_type');
 	switch (strtolower(trim($field_type))) {
 		case 'bool': // a boolean from a pg database
 		case 'boolean': // a generic type
-			return filter_var($val, FILTER_VALIDATE_BOOLEAN);		
 			switch (strtolower(trim($val))) {
 		        case "":
 		        	return "NULL";
