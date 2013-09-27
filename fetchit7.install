@@ -651,6 +651,7 @@ function _fetchit7_installed_fields () {
 			'cardinality'			=> '1',
 		),
 
+
 		// =====================================================
 		// these are fields that apply to html tables only
 		// =====================================================
@@ -776,6 +777,20 @@ function _fetchit7_installed_fields () {
 			//		),
 			//),
 		),
+		// column headers
+		'fetchit7_field_par_tbl_headers' => array(
+			'label'						=> $t('Table column headers'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_tbl_headers',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+	
 		// parameter field names
 		'fetchit7_field_par_fld_name' => array(
 			'label'						=> $t('Parameter names'),
@@ -1455,6 +1470,35 @@ function _fetchit7_content_table_installed_instances () {
 			'bundle'				=> $content_name,
 			//'deleted'				=> '0',
 		),
+		// table column headers (to use in place of field names)
+		// fetchit7_field_par_tbl_headers
+		'fetchit7_field_par_tbl_headers' => array(
+			'label'					=> $t('Parameter table column headers'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The table column headers.  Use these instead of the field names.  Enter as many as needed.  Leave blank to use the table field names.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_tbl_headers',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+				
 		// submit button label
 		'fetchit7_field_submit_label' => array(
 			'label'					=> $t('Submit button label'),
@@ -1930,6 +1974,49 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		'fetchit7_field_table_weight' => array(
+			'label'					=> $t('Table weight'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('This parameter tells fetchit7 where on the form to display the table (relative to other form elements).'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '-8',
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_table_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
+
 		// submit button label
 		'fetchit7_field_submit_label' => array(
 			'label'					=> $t('Submit button label'),
@@ -2097,6 +2184,34 @@ function _fetchit7_content_param_installed_instances () {
 			'bundle'				=> $content_name,
 			//'deleted'				=> '0',
 		),
+		// fetchit7_field_par_tbl_headers
+		'fetchit7_field_par_tbl_headers' => array(
+			'label'					=> $t('Table column headers'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The table column headers.  Only applies when table rows > 0.  Enter as many as needed.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_tbl_headers',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+				
 		// parameter field name
 		'fetchit7_field_par_fld_name' => array(
 			'label'					=> $t('Parameter name'),
