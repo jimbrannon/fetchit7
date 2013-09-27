@@ -2176,7 +2176,9 @@ function fetchit7_param_form($form, &$form_state) {
 	
 	// parameter table_rows should be a single integer value
 	$table_rows = fetchit7_content_field_fetcher($nid,'fetchit7_field_par_tbl_rows','value');
+	//debug($table_rows,'param_form $table_rows');
 	$form['table_rows'] = array('#type' => 'value','#value' => $table_rows);
+	//debug($form['table_rows'],'param_form $form[table_rows]');
 
 	// parameter table_headers should be an array of text values
 	// warning: d7 does not return empty strings at all
@@ -2525,10 +2527,11 @@ function fetchit7_param_form($form, &$form_state) {
 
 	$submit_button_flag = TRUE;
 	if ($submit_button_flag) {
-	  $form['actions'] = array(
-	    '#tree' => FALSE,
-	    '#type' => 'actions',
-	  );
+	  //$form['actions'] = array(
+	  //  '#tree' => FALSE,
+	  //  '#type' => 'actions',
+	  //);
+		//debug($submit_weight,'$submit_weight');
 		$form['actions']['submit'] = array(
 			'#type' => 'submit',
 			'#value' => $submit_label,
@@ -2662,12 +2665,15 @@ function theme_fetchit7_param_form($variables) {
 	$form = $variables['form'];
 	$nid = $form['nid']['#value'];
 	$form_id = $form['form_id']['#value'];
-	//debug($nid, "theme_fetchit7_param_form.  hi, jim.  the nid is");
-	//debug($form['form_id']['#value'], "theme_fetchit7_param_form.  the form_id is");
-	//the drupal way is to do all this in a theme preprocessor function ... move it later ...
-	$table_row_count = $form_id = $form['table_rows']['#value'];
+	//the drupal way is to do all the non display related preprocessing in a theme preprocessor function ... move it there later ...
+	$table_row_count = $form['table_rows']['#value'];
+	//debug($table_row_count,'$table_row_count');
+	$table_weight = $form['table_weight']['#value'];
+	//debug($table_weight,'$table_weight');
 	//figure out the formatting
 	$output  = '<div class="'.$form_id.'_params">';
+	//$output  = '';
+	
 	if ($table_row_count) {
 		//figure out the table structure
 		$param_count = $form['param_count']['#value'];
@@ -2698,45 +2704,21 @@ function theme_fetchit7_param_form($variables) {
 			}
 			$rows[] = $row;
 		}
+		//debug($table_weight,'$table_weight');
 		$form['table'] = array(
 			'#theme' => 'table',
 			'#header' => $header,
 			'#rows' => $rows,
+			'#weight' => $table_weight,
+			'#empty' => "Empty table.",
 		);
-
-		/* 
-		// create the header row		
-		$output .= '<table id="'.$form_id.'" class="sticky-enabled">';
-	  $output .= '<thead>';
-	  $output .= '  <tr>';
-		for ($c=0;$c<$table_column_count;++$c) {
-			$param_index = $c * $table_row_count + 0;
-			$param_name = $form['param_names'][$param_index]['#value'];
-		  $output .= '    <th>'.$param_name.'</th>';
-		}
-		$grp_ndx = 0;
-	  $output .= '  </tr>';
-	  $output .= '</thead>';
-	  $output .= '<tbody>';
-		for ($r=0;$r<$table_row_count;++$r) {
-		  $output .= '    <tr class="row'.$r.'">';
-			for ($c=0;$c<$table_column_count;++$c) {
-				$param_index = $c * $table_row_count + $r;
-				$element_name = fetchit_make_element_name($nid,$grp_ndx,$param_index);
-				$output .= '    <td>'.drupal_render($form['elements'][$element_name]).'</td>';
-				//$param_name = $form['param_names'][$param_index]['#value'];
-				//$output .= '    <td>'.$param_name.'</td>';
-			}
-		  $output .= '    </tr>';
-		}
-	  $output .= '</tbody>';
-		$output .= '</table>';
-		*/
+		$output .= drupal_render($form['table']);
 	} else {
 		$output .= drupal_render($form['elements']);
 	}
-	$output .= '</div>';
+	//$output .= drupal_render($form['actions']['submit']);
 	$output .= drupal_render_children($form);
+	$output .= '</div>';
 
 	return $output;
 }
@@ -4169,7 +4151,6 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 	//debug($required,'textbox $required');
 	//debug($disabled,'textbox $disabled');
 	//debug($weight,'textbox $weight');
-
 	if ($showtitles) {
 		$title=$user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR];
 		$description=$user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR];
@@ -4190,7 +4171,7 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 			'#default_value' => $default,
 			'#required' => $required,
 			'#disabled' => $disabled,
-			'#weight' => $weight,
+			//'#weight' => $weight,
 		);
 	}
 
