@@ -2196,7 +2196,7 @@ function fetchit7_param_form($form, &$form_state) {
 	$param_names_raw = array_map('trim',fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_name','values')); //should return an array
 	$param_names = array();
   $foundone = FALSE;
-  foreach ($param_names as $param_name) {
+  foreach ($param_names_raw as $param_name) {
     if (strlen($param_name)) {
     	$param_names[] = $param_name;
       $foundone = TRUE;
@@ -2427,7 +2427,8 @@ function fetchit7_param_form($form, &$form_state) {
 				}
 				$j++;
 			}
-			if (strlen(trim($data_tbl_field_type))) {  // if we have a type, then an index field was found, and then we can continue building the parameter input control
+			//debug($data_tbl_ndx_type,'fetchit7_param_form $data_tbl_ndx_type');
+			if (strlen(trim($data_tbl_ndx_type))) {  // if we have a type, then an index field was found, and then we can continue building the parameter input control
 				$grp_ndx = 0;
 				$element_name = fetchit_make_element_name($nid,$grp_ndx,$param_count);
 				
@@ -2599,7 +2600,7 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 				$tmp_val_str .= $form_state['values']['elements'][$element_name]['month'];
 				$tmp_val_str .= "-";
 				$tmp_val_str .= $form_state['values']['elements'][$element_name]['day'];
-				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]);
+				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]['#value']);
 				if (strlen(trim($param_data_uid))) {
 					global $user;
 					$user_uid = $user->uid;
@@ -2666,7 +2667,8 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 			default: //everything else until we get another that is not a string
 				$tmp_val_str = $form_state['values']['elements'][$element_name];
 				if (!strlen(trim($tmp_val_str))) break;
-				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]);
+				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]['#value']);
+				//debug($form,'$form');
 				if (strlen(trim($param_data_uid))) {
 					global $user;
 					$user_uid = $user->uid;
@@ -4178,35 +4180,46 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 
 
 function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$showtitles,$db_value) {
-	// process the required attribute
-	if (strlen($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR])) {
-		$required = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR], FILTER_VALIDATE_BOOLEAN);
-		// put some random string as the default for now since it is *required* - i.e. no empty strings allowed
-		if ($required) $default = "valid value required here";
-	} else {
-		$required = FALSE;
-	}
+		$default = '';
+	
 	// process the value stored in the output table already for this parameter/user 
-	if (strlen($db_value)) {
-		$default = $db_value;
+	// convert whatever it is to a string...this is a text box, after all!
+	if (isset($db_value)) {
+		$default = print_r($db_value,TRUE);
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$default = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
+	
+	// now overwrite it with the user entered value - even if blank - which it now might be if the param function did its job
+	// unless it has a special special value
+	switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+		case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+		case FETCHIT7_FIELD_DEFAULT_FIRST: //does not really mean anything in this context
+		case FETCHIT7_FIELD_DEFAULT_ALL: //does not really mean anything in this context
+			// leave it set to the at the db value
+			break;
+		case FETCHIT7_FIELD_DEFAULT_NONE:
+			$default = '';
+			break;
+		default:
+			$default = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR];
 	}
-	// now see if the control is enabled or disabled
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]))) {
-		$disabled = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]), FILTER_VALIDATE_BOOLEAN);
-	} else {
-		$disabled = FALSE;
-	}
-	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+
+	// process the required attribute - should be boolean already
+	$required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
+	
+	// process the disabled attribute - should be boolean already
+	$disabled = $user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR];
+	
+	// the weight attribute - controls rendering order on the form - should be an integer already
+	$weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+	
 	//debug($default,'textbox $default');
 	//debug($required,'textbox $required');
 	//debug($disabled,'textbox $disabled');
 	//debug($weight,'textbox $weight');
+
 	if ($showtitles) {
-		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
-		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+		$title=$user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR];
+		$description=$user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR];
 		$form = array(
 			'#title' =>$title,
 			'#type' => 'textfield',
@@ -5023,6 +5036,8 @@ function expand_date_fetchit($element) {
 }
 
 function fetchit_make_val_str($val,$field_type) {
+	//debug($val,'$val');
+	//debug($field_type,'$field_type');
 	switch (strtolower(trim($field_type))) {
 		case 'bool': // a boolean from a pg database
 		case 'boolean': // a generic type

@@ -2637,11 +2637,11 @@ function _fetchit7_content_param_installed_instances () {
 			'description'		=> $t('The name of the parameter data output table drupal userid integer field.  Leave name blank to not use.  Adds a WHERE clause to the DELETE and INSERT queries.  Default = drupal_userid.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'true',
+					'value'					=> 'drupal_userid',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_data_uid',
-			'entity_type'		=> 'drupal_userid',
+			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
 				
