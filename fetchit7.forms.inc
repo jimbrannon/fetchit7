@@ -2558,13 +2558,9 @@ function fetchit7_param_form_validate ($form, &$form_state) {
  * Process form submission
  */
 function fetchit7_param_form_submit ($form, &$form_state) {
-	//debug($form_state,'form_state');
-	//$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	//debug($string,'Hello from the all important parameter input form submit function. From here it appears the param_count is:');
 	$nid = $form['nid']['#value'];
 	$db_type = $form['db_type']['#value'];
 	$db_handle = $form['db_handle']['#value'];
-	//debug($db_handle,'fetchit7_param_form_submit $db_handle');
 	$param_count = $form['param_count']['#value'];
 	for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
 		$param_data_table =	$form['param_data_table'][$param_ndx]['#value'];
@@ -2574,25 +2570,18 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 		//clear out the existing records
 		$result = fetchit_remove_records($db_handle,$db_type,$param_data_table,$param_data_uid);
 		//add the new record(s)
-		//$fld_names = F_DR_DATA_TBL_NDX_FLD;
 		$fld_names = $param_data_ndx;
-		$val_str = "0";
-		if (strlen(trim($param_data_uid))) {
-			//$fld_names .= ','.F_DR_DATA_TBL_UID_FLD;	
+		if (strlen($param_data_uid)) {
 			$fld_names .= ','.$param_data_uid;	
-			$val_str = "$param_ndx,13";
+			global $user;
+			$user_uid = $user->uid;
 		}
 		$query = "INSERT INTO $param_data_table ( $fld_names ) VALUES (";
-		//debug($query);
 		// here is the tricky part
 		// depending on what kind of control it is, there could be one or multiple or no values to store
 		$row_ndx = 0;
 		$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
-		//debug($element_name);
 		$control_type = $form['elements'][$element_name]['#type'];
-		//debug($form['elements'][$element_name]);
-		//debug($form_state['values']);
-		//debug($control_type,'$control_type');
 		switch ($control_type) {
 			case 'date': // the weird drupal core date element - an array of three values
 				$tmp_val_str = $form_state['values']['elements'][$element_name]['year'];
@@ -2601,16 +2590,8 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 				$tmp_val_str .= "-";
 				$tmp_val_str .= $form_state['values']['elements'][$element_name]['day'];
 				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]['#value']);
-				if (strlen(trim($param_data_uid))) {
-					global $user;
-					$user_uid = $user->uid;
-					$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
-				}
+				if (strlen($param_data_uid)) $val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 				$query .= "$val_str)";
-					//debug($control_type,'$control_type');
-					//debug($db_type,'$db_type');
-					//debug($db_handle,'$db_handle');
-					//debug($query,'$query');
 				$result = fetchit_run_query($db_type,$db_handle,$query);
 				break;
 			case 'select':
@@ -2618,67 +2599,34 @@ function fetchit7_param_form_submit ($form, &$form_state) {
 				if ($multiple) {
 					$values = $form_state['values']['elements'][$element_name];
 					foreach ($values as $value) {
-						$val_str = fetchit_make_val_str($value,$param_type);
-						if (strlen(trim($param_data_uid))) {
-							global $user;
-							$user_uid = $user->uid;
-							$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
-						}
+						$val_str = fetchit_make_val_str($value,$form['field_types'][$param_ndx]['#value']);
+						if (strlen($param_data_uid)) $val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 						$qry = $query.$val_str.")";
-						//debug($control_type,'$control_type');
-						//debug($db_type,'$db_type');
-						//debug($db_handle,'$db_handle');
-						//debug($qry,'$qry');
 						$result = fetchit_run_query($db_type,$db_handle,$qry);
 					}
 				} else {
 					$value = $form_state['values']['elements'][$element_name];
-					$val_str = fetchit_make_val_str($value,$param_type);
-					if (strlen(trim($param_data_uid))) {
-						global $user;
-						$user_uid = $user->uid;
-						$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
-					}
+					$val_str = fetchit_make_val_str($value,$form['field_types'][$param_ndx]['#value']);
+					if (strlen($param_data_uid)) $val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 					$query .= "$val_str)";
-					//debug($control_type,'$control_type');
-					//debug($db_type,'$db_type');
-					//debug($db_handle,'$db_handle');
-					//debug($query,'$query');
 					$result = fetchit_run_query($db_type,$db_handle,$query);
 				}
 				break;
 			case 'checkboxes':
 				$values = array_filter($form_state['values']['elements'][$element_name]);
 				foreach ($values as $value) {
-					$val_str = fetchit_make_val_str($value,$param_type);
-					if (strlen(trim($param_data_uid))) {
-						global $user;
-						$user_uid = $user->uid;
-						$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
-					}
+					$val_str = fetchit_make_val_str($value,$form['field_types'][$param_ndx]['#value']);
+					if (strlen($param_data_uid)) $val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 					$qry = $query.$val_str.")";
-					//debug($control_type,'$control_type');
-					//debug($db_type,'$db_type');
-					//debug($db_handle,'$db_handle');
-					//debug($qry,'$qry');
 					$result = fetchit_run_query($db_type,$db_handle,$qry);
 				}
 				break;
-			default: //everything else until we get another that is not a string
+			default: //everything else
 				$tmp_val_str = $form_state['values']['elements'][$element_name];
-				if (!strlen(trim($tmp_val_str))) break;
+				//if (!strlen(trim($tmp_val_str))) break;
 				$val_str = fetchit_make_val_str($tmp_val_str,$form['field_types'][$param_ndx]['#value']);
-				//debug($form,'$form');
-				if (strlen(trim($param_data_uid))) {
-					global $user;
-					$user_uid = $user->uid;
-					$val_str .= ",".fetchit_make_val_str($user_uid,"integer");
-				}
+				if (strlen($param_data_uid)) $val_str .= ",".fetchit_make_val_str($user_uid,"integer");
 				$query .= "$val_str)";
-					//debug($control_type,'$control_type');
-					//debug($db_type,'$db_type');
-					//debug($db_handle,'$db_handle');
-					//debug($query,'$query');
 				$result = fetchit_run_query($db_type,$db_handle,$query);
 		}
 	}
@@ -5035,12 +4983,22 @@ function expand_date_fetchit($element) {
   }
 }
 
+/*
+ * creates the correct string out of the boolean variable value $val
+ * to put inside VALUES() of a SQL INSERT statement
+ * should be universal - only tested for pgSQL though
+ * 
+ * $val is a boolean typed variable
+ * $field_type is a string
+ *   
+ */
 function fetchit_make_val_str($val,$field_type) {
 	//debug($val,'$val');
 	//debug($field_type,'$field_type');
 	switch (strtolower(trim($field_type))) {
 		case 'bool': // a boolean from a pg database
 		case 'boolean': // a generic type
+			return filter_var($val, FILTER_VALIDATE_BOOLEAN);		
 			switch (strtolower(trim($val))) {
 		        case "":
 		        	return "NULL";
@@ -5109,6 +5067,292 @@ function fetchit_make_val_str($val,$field_type) {
 			}
 	}
 }
+
+/*
+ * creates the correct string out of the boolean variable value $val
+ * to put inside VALUES() of a SQL INSERT statement
+ * when the target field is of type $field_type
+ * default is that nulls coming in map to nulls going out
+ * should be universal - only tested for pgSQL though
+ * 
+ * $val is a boolean typed variable
+ * $field_type is a string
+ * returns a string with the necessary delimiters
+ */
+function fetchit7_boolean_to_sql_values_str( $val , $field_type = 'boolean', $nulls = TRUE ) {
+	if (isset($val)) { // it likely will be by this point
+		$boolval = (bool) $val; // just to be safe
+		switch ($boolval) {
+			case TRUE:
+				switch (strtolower(trim($field_type))) {
+					case 'bool': // a boolean from a pg database
+					case 'boolean': // a generic type
+						return "TRUE";
+					case 'int2': // a small integer from a pg database
+					case 'int4': // an integer from a pg database
+					case 'int8': // a long integer from a pg database
+					case 'integer': // a generic type
+						return "1";
+					case 'numeric': // a "numeric" real number field from a pg database
+					case 'float4': // a single precision real number field from a pg database
+					case 'float8': // a double precision real number field from a pg database
+					case 'real': // a generic type
+						return "1";
+					case 'text':  // a text field from a pg database
+					case 'varchar': // a varchar field from a pg database
+					case 'bpchar': // a bpchar field from a pg database
+						return "'TRUE'";
+					case 'date': // a date field from a pg database
+						return "DATE '1'";
+					case 'time': // a time field from a pg database
+					case 'timetz': // a time field with timezone from a pg database
+						return "TIME '1'";
+					case 'timestamp': // a timestamp field from a pg database
+					case 'timestamptz': // a timestamp field with timezone from a pg database
+						return "TIMESTAMP '1'";
+					default: // an unanticipated field type
+						return "'1'";
+				}
+			case FALSE:
+			default:
+				switch (strtolower(trim($field_type))) {
+					case 'bool': // a boolean from a pg database
+					case 'boolean': // a generic type
+						return "FALSE";
+					case 'int2': // a small integer from a pg database
+					case 'int4': // an integer from a pg database
+					case 'int8': // a long integer from a pg database
+					case 'integer': // a generic type
+						return "0";
+					case 'numeric': // a "numeric" real number field from a pg database
+					case 'float4': // a single precision real number field from a pg database
+					case 'float8': // a double precision real number field from a pg database
+					case 'real': // a generic type
+						return "0";
+					case 'text':  // a text field from a pg database
+					case 'varchar': // a varchar field from a pg database
+					case 'bpchar': // a bpchar field from a pg database
+						return "'FALSE'";
+					case 'date': // a date field from a pg database
+						return "DATE '0'";
+					case 'time': // a time field from a pg database
+					case 'timetz': // a time field with timezone from a pg database
+						return "TIME '0'";
+					case 'timestamp': // a timestamp field from a pg database
+					case 'timestamptz': // a timestamp field with timezone from a pg database
+						return "TIMESTAMP '0'";
+					default: // an unanticipated field type
+						return "'0'";
+				}
+		}
+	} else {
+		if ($nulls) {
+			switch (strtolower(trim($field_type))) {
+				case 'bool': // a boolean from a pg database
+				case 'boolean': // a generic type
+					return "NULL";
+				case 'int2': // a small integer from a pg database
+				case 'int4': // an integer from a pg database
+				case 'int8': // a long integer from a pg database
+				case 'integer': // a generic type
+					return "NULL";
+				case 'numeric': // a "numeric" real number field from a pg database
+				case 'float4': // a single precision real number field from a pg database
+				case 'float8': // a double precision real number field from a pg database
+				case 'real': // a generic type
+					return "NULL";
+				case 'text':  // a text field from a pg database
+				case 'varchar': // a varchar field from a pg database
+				case 'bpchar': // a bpchar field from a pg database
+					return "NULL";
+				case 'date': // a date field from a pg database
+					return "NULL";
+				case 'time': // a time field from a pg database
+				case 'timetz': // a time field with timezone from a pg database
+					return "NULL";
+				case 'timestamp': // a timestamp field from a pg database
+				case 'timestamptz': // a timestamp field with timezone from a pg database
+					return "NULL";
+				default: // an unanticipated field type
+					return "NULL";
+			}
+		} else {
+			switch (strtolower(trim($field_type))) {
+				case 'bool': // a boolean from a pg database
+				case 'boolean': // a generic type
+					return "FALSE";
+				case 'int2': // a small integer from a pg database
+				case 'int4': // an integer from a pg database
+				case 'int8': // a long integer from a pg database
+				case 'integer': // a generic type
+					return "0";
+				case 'numeric': // a "numeric" real number field from a pg database
+				case 'float4': // a single precision real number field from a pg database
+				case 'float8': // a double precision real number field from a pg database
+				case 'real': // a generic type
+					return "0";
+				case 'text':  // a text field from a pg database
+				case 'varchar': // a varchar field from a pg database
+				case 'bpchar': // a bpchar field from a pg database
+					return "'FALSE'";
+				case 'date': // a date field from a pg database
+					return "DATE '0'";
+				case 'time': // a time field from a pg database
+				case 'timetz': // a time field with timezone from a pg database
+					return "TIME '0'";
+				case 'timestamp': // a timestamp field from a pg database
+				case 'timestamptz': // a timestamp field with timezone from a pg database
+					return "TIMESTAMP '0'";
+				default: // an unanticipated field type
+					return "'0'";
+			}
+		}
+	}		
+}
+
+/*
+ * creates the correct string out of an integer variable value $val
+ * to put inside VALUES() of a SQL INSERT statement
+ * when the target field is of type $field_type
+ * default is that nulls coming in map to nulls going out
+ * should be universal - only tested for pgSQL though
+ * 
+ * $val is a integer typed variable
+ * $field_type is a string
+ * returns a string with the necessary delimiters
+ */
+function fetchit7_integer_to_sql_values_str( $val , $field_type = 'integer', $nulls = TRUE ) {
+	//debug($val,'$val');
+	//debug($field_type,'$field_type');
+	if (isset($val)) { // it likely will be by this point
+		$intval = (int) $val; // just to be safe
+		switch ($intval) {
+			case 0:
+				switch (strtolower(trim($field_type))) {
+					case 'bool': // a boolean from a pg database
+					case 'boolean': // a generic type
+						return "FALSE";
+					case 'int2': // a small integer from a pg database
+					case 'int4': // an integer from a pg database
+					case 'int8': // a long integer from a pg database
+					case 'integer': // a generic type
+						return "0";
+					case 'numeric': // a "numeric" real number field from a pg database
+					case 'float4': // a single precision real number field from a pg database
+					case 'float8': // a double precision real number field from a pg database
+					case 'real': // a generic type
+						return "0";
+					case 'text':  // a text field from a pg database
+					case 'varchar': // a varchar field from a pg database
+					case 'bpchar': // a bpchar field from a pg database
+						return "'0'";
+					case 'date': // a date field from a pg database
+						return "DATE '0'";
+					case 'time': // a time field from a pg database
+					case 'timetz': // a time field with timezone from a pg database
+						return "TIME '0'";
+					case 'timestamp': // a timestamp field from a pg database
+					case 'timestamptz': // a timestamp field with timezone from a pg database
+						return "TIMESTAMP '0'";
+					default: // an unanticipated field type
+						return "'0'";
+				}
+			default:
+				switch (strtolower(trim($field_type))) {
+					case 'bool': // a boolean from a pg database
+					case 'boolean': // a generic type
+						return "TRUE";
+					case 'int2': // a small integer from a pg database
+					case 'int4': // an integer from a pg database
+					case 'int8': // a long integer from a pg database
+					case 'integer': // a generic type
+						return print_r($intval,TRUE);
+					case 'numeric': // a "numeric" real number field from a pg database
+					case 'float4': // a single precision real number field from a pg database
+					case 'float8': // a double precision real number field from a pg database
+					case 'real': // a generic type
+						return print_r($intval,TRUE);
+					case 'text':  // a text field from a pg database
+					case 'varchar': // a varchar field from a pg database
+					case 'bpchar': // a bpchar field from a pg database
+						return "'".print_r($intval,TRUE)."'";
+					case 'date': // a date field from a pg database
+						return "DATE '".print_r($intval,TRUE)."'";
+					case 'time': // a time field from a pg database
+					case 'timetz': // a time field with timezone from a pg database
+						return "TIME '".print_r($intval,TRUE)."'";
+					case 'timestamp': // a timestamp field from a pg database
+					case 'timestamptz': // a timestamp field with timezone from a pg database
+						return "TIMESTAMP '".print_r($intval,TRUE)."'";
+					default: // an unanticipated field type
+						return "'".print_r($intval,TRUE)."'";
+				}
+		}
+	} else {
+		if ($nulls) {
+			switch (strtolower(trim($field_type))) {
+				case 'bool': // a boolean from a pg database
+				case 'boolean': // a generic type
+					return "NULL";
+				case 'int2': // a small integer from a pg database
+				case 'int4': // an integer from a pg database
+				case 'int8': // a long integer from a pg database
+				case 'integer': // a generic type
+					return "NULL";
+				case 'numeric': // a "numeric" real number field from a pg database
+				case 'float4': // a single precision real number field from a pg database
+				case 'float8': // a double precision real number field from a pg database
+				case 'real': // a generic type
+					return "NULL";
+				case 'text':  // a text field from a pg database
+				case 'varchar': // a varchar field from a pg database
+				case 'bpchar': // a bpchar field from a pg database
+					return "NULL";
+				case 'date': // a date field from a pg database
+					return "NULL";
+				case 'time': // a time field from a pg database
+				case 'timetz': // a time field with timezone from a pg database
+					return "NULL";
+				case 'timestamp': // a timestamp field from a pg database
+				case 'timestamptz': // a timestamp field with timezone from a pg database
+					return "NULL";
+				default: // an unanticipated field type
+					return "NULL";
+			}
+		} else {
+			switch (strtolower(trim($field_type))) {
+				case 'bool': // a boolean from a pg database
+				case 'boolean': // a generic type
+					return "FALSE";
+				case 'int2': // a small integer from a pg database
+				case 'int4': // an integer from a pg database
+				case 'int8': // a long integer from a pg database
+				case 'integer': // a generic type
+					return "0";
+				case 'numeric': // a "numeric" real number field from a pg database
+				case 'float4': // a single precision real number field from a pg database
+				case 'float8': // a double precision real number field from a pg database
+				case 'real': // a generic type
+					return "0";
+				case 'text':  // a text field from a pg database
+				case 'varchar': // a varchar field from a pg database
+				case 'bpchar': // a bpchar field from a pg database
+					return "'FALSE'";
+				case 'date': // a date field from a pg database
+					return "DATE '0'";
+				case 'time': // a time field from a pg database
+				case 'timetz': // a time field with timezone from a pg database
+					return "TIME '0'";
+				case 'timestamp': // a timestamp field from a pg database
+				case 'timestamptz': // a timestamp field with timezone from a pg database
+					return "TIMESTAMP '0'";
+				default: // an unanticipated field type
+					return "'0'";
+			}
+		}
+	}		
+}
+
 
 function fetchit7_get_control_list () {
 	return array( // add 1 to make array_search() easier.  subtract 1 later...
