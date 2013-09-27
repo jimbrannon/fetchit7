@@ -2235,24 +2235,9 @@ function fetchit7_param_form($form, &$form_state) {
 	// note that param names DEFINES the count of the fields
 	// we will use defaults is possible where items are missing
 	// exit gracefully with error message otherwise
-	$control_list = array( // add 1 to make array_search() easier.  subtract 1 later...
-		F_DR_CONTROL_TEXTBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_TEXTBOX,
-		F_DR_CONTROL_DATESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATESEL,
-		F_DR_CONTROL_DROPDOWN_SINGLE + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_SINGLE,
-		F_DR_CONTROL_RADIOBTN + 1 => FETCHIT7_CONTROLTYPE_NAME_RADIOBTN,
-		F_DR_CONTROL_CHECKBOXES + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOXES,
-		F_DR_CONTROL_DROPDOWN_MULTI + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_MULTI,
-		F_DR_CONTROL_CHECKBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOX,
-		F_DR_CONTROL_DATETIMESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATETIMESEL,
-		F_DR_CONTROL_POPUPDATE + 1 => FETCHIT7_CONTROLTYPE_NAME_POPUPDATE,
-	);
-	$control_list_string = '';
-	$count = 0;
-	foreach ($control_list as $control_string) {
-		if ($count) $control_list_string .= ', ';
-		$control_list_string .= $control_string;
-		++$count;
-	}
+	$control_list = fetchit7_get_control_list();
+	$control_list_string = fetchit7_get_control_list_string();
+
 	$user_field_data = array();
 	$field_index = 0;
 	// even though the fetchit2 does this too...do some data preprocessing 
@@ -2359,9 +2344,12 @@ function fetchit7_param_form($form, &$form_state) {
 		}
 					
 		//$param_list_def F_DR_FIELD_DEFAULT_STR
-		//default string of '' is OK
 		if ($field_index < count($param_list_def)) {
-			$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = $param_list_def[$field_index];
+			if (strlen($param_list_def[$field_index])) {
+				$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = $param_list_def[$field_index];
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+			}
 		} else {
 			$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
 		}
@@ -2399,7 +2387,7 @@ function fetchit7_param_form($form, &$form_state) {
 			if (strlen($param_data_key[$field_index])) {
 				$user_field_data[$field_index][F_DR_FIELD_DATA_UID_STR] = $param_data_uid[$field_index];
 			} else {
-				$user_field_data[$field_index][F_DR_FIELD_DATA_KEY_STR] = '';
+				$user_field_data[$field_index][F_DR_FIELD_DATA_UID_STR] = '';
 			}
 		} else {
 			$user_field_data[$field_index][F_DR_FIELD_DATA_UID_STR] = '';
@@ -2430,11 +2418,11 @@ function fetchit7_param_form($form, &$form_state) {
 			$data_tbl_field_names = fetchit_get_field_names($db_type,$data_tbl_db_object);
 			$data_tbl_field_types = fetchit_get_field_types($db_type,$data_tbl_db_object);
 			$j=0;
-			//find the index field (named MUST BE F_DR_DATA_TBL_NDX_FLD) and get it's field type
-			$data_tbl_field_type = '';
+			//find the index field and get its type
+			$data_tbl_ndx_type = '';
 			foreach ($data_tbl_field_names as $data_tbl_field_name) {
 				if ($data_tbl_field_name == $data_ndx) {
-					$data_tbl_field_type = $data_tbl_field_types[$j];
+					$data_tbl_ndx_type = $data_tbl_field_types[$j];
 					break;
 				}
 				$j++;
@@ -2442,6 +2430,7 @@ function fetchit7_param_form($form, &$form_state) {
 			if (strlen(trim($data_tbl_field_type))) {  // if we have a type, then an index field was found, and then we can continue building the parameter input control
 				$grp_ndx = 0;
 				$element_name = fetchit_make_element_name($nid,$grp_ndx,$param_count);
+				
 				// set a default value to pass into the element generator
 				// this value is used unless the user specified a default value in the configuration
 				// get the last entered value from the selection table
@@ -2465,7 +2454,7 @@ function fetchit7_param_form($form, &$form_state) {
 				// add everything else to the form we might need in the theme, validate, or submit functions
 				$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
 				$form['param_indices'][$param_count] = array('#type' => 'value','#value' => $i);
-				$form['field_types'][$param_count] = array('#type' => 'value','#value' => $data_tbl_field_type);
+				$form['field_types'][$param_count] = array('#type' => 'value','#value' => $data_tbl_ndx_type);
 				$form['param_names'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_NAME_STR]);
 				$form['param_types'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]);
 				$form['param_titles'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_TITLE_STR]);
@@ -2480,7 +2469,7 @@ function fetchit7_param_form($form, &$form_state) {
 				// stack these up in the array. "How" they are to be displayed will be handled by the theme function
 				$form['elements'][$element_name] = fetchit7_param_element_form(
 					$param_name,
-					$data_tbl_field_type,
+					$data_tbl_ndx_type,
 					$db_handle,
 					$i+1,
 					$user_field_data,
@@ -4189,14 +4178,16 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 
 
 function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$showtitles,$db_value) {
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
-		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
-		// put some random string as the default
+	// process the required attribute
+	if (strlen($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR])) {
+		$required = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR], FILTER_VALIDATE_BOOLEAN);
+		// put some random string as the default for now since it is *required* - i.e. no empty strings allowed
 		if ($required) $default = "valid value required here";
 	} else {
 		$required = FALSE;
 	}
-	if (strlen(trim($db_value))) {
+	// process the value stored in the output table already for this parameter/user 
+	if (strlen($db_value)) {
 		$default = $db_value;
 	}
 	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
@@ -5102,4 +5093,30 @@ function fetchit_make_val_str($val,$field_type) {
 				return "'".$val."'";
 			}
 	}
+}
+
+function fetchit7_get_control_list () {
+	return array( // add 1 to make array_search() easier.  subtract 1 later...
+		F_DR_CONTROL_TEXTBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_TEXTBOX,
+		F_DR_CONTROL_DATESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATESEL,
+		F_DR_CONTROL_DROPDOWN_SINGLE + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_SINGLE,
+		F_DR_CONTROL_RADIOBTN + 1 => FETCHIT7_CONTROLTYPE_NAME_RADIOBTN,
+		F_DR_CONTROL_CHECKBOXES + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOXES,
+		F_DR_CONTROL_DROPDOWN_MULTI + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_MULTI,
+		F_DR_CONTROL_CHECKBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOX,
+		F_DR_CONTROL_DATETIMESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATETIMESEL,
+		F_DR_CONTROL_POPUPDATE + 1 => FETCHIT7_CONTROLTYPE_NAME_POPUPDATE,
+	);
+}
+
+function fetchit7_get_control_list_string () {
+	$control_list = fetchit7_get_control_list();
+	$control_list_string = '';
+	$count = 0;
+	foreach ($control_list as $control_string) {
+		if ($count) $control_list_string .= ', ';
+		$control_list_string .= $control_string;
+		++$count;
+	}
+	return $control_list_string;
 }
