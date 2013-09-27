@@ -4136,6 +4136,7 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 			// leave it set to the at the db value
 			break;
 		case FETCHIT7_FIELD_DEFAULT_NONE:
+		case FETCHIT7_FIELD_DEFAULT_BLANK:
 			$default = '';
 			break;
 		default:
@@ -4192,16 +4193,20 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 		}
 	} else {
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
-		if(strlen(trim($list_tbl))) {
-			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
-			if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+		if(strlen($list_tbl)) {
+			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
+			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
+			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+			$options = array();
+			//if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+			if(!$options = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
 				return $form;
 			}
 		} else {
 			return $form;
 		}
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
+	if (strlen($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR])) {
 		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
 		$keys = array_keys($options);
 		if (count($keys)) {
@@ -4277,10 +4282,12 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 		}
 	} else {
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
-		if(strlen(trim($list_tbl))) {
-			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+		if(strlen($list_tbl)) {
+			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
+			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
+			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
 			$options_tmp = array();
-			if($options_tmp = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+			if($options_tmp = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
 				$i=0;
 				foreach ($options_tmp as $key=>$val) {
 					$options[$i]=$val;
@@ -4356,10 +4363,12 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 		}
 	} else {
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
-		if(strlen(trim($list_tbl))) {
-			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+		if(strlen($list_tbl)) {
+			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
+			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
+			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
 			$options = array();
-			if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+			if(!$options = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
 				return $form;
 			}
 		} else {
@@ -4437,10 +4446,12 @@ function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_ha
 		}
 	} else {
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
-		if(strlen(trim($list_tbl))) {
-			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+		if(strlen($list_tbl)) {
+			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
+			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
+			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
 			$options_tmp = array();
-			if($options_tmp = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+			if($options_tmp = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
 				$i=0;
 				foreach ($options_tmp as $key=>$val) {
 					$options[$i]=$val;
@@ -4516,10 +4527,12 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 		}
 	} else {
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
-		if(strlen(trim($list_tbl))) {
-			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+		if(strlen($list_tbl)) {
+			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
+			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
+			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
 			$options = array();
-			if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+			if(!$options = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
 				return $form;
 			}
 		} else {
@@ -4600,9 +4613,12 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 	} else {
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
 		if(strlen(trim($list_tbl))) {
-			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
+			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
+			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
 			$options = array();
-			if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+			//if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+			if(!$options = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
 				return $form;
 			}
 		} else {
@@ -4677,10 +4693,12 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 		}
 	} else {
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
-		if(strlen(trim($list_tbl))) {
-			$list_uid = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+		if(strlen($list_tbl)) {
+			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
+			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
+			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
 			$options_tmp = array();
-			if($options_tmp = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
+			if($options_tmp = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
 				$i=0;
 				foreach ($options_tmp as $key=>$val) {
 					$options[$i]=$val;
@@ -4928,6 +4946,30 @@ function fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid) {
 	return $options;
 }
 
+function fetchit7_get_options_list($db_handle,$list_tbl,$list_key_fld,$list_dsp_fld,$list_uid_fld,$nid) {
+	$db_type = trim(fetchit7_content_field_fetcher($nid,'db_type','value'));
+	if(strlen($db_type)) {
+		switch ($db_type) {
+			case FETCHIT7_DBTYPE_NAME_PGSQL:
+				$db_query = "SELECT $list_key_fld,$list_dsp_fld FROM $list_tbl";
+				if (strlen($list_uid_fld)) {
+					global $user;
+					$db_query .= " WHERE $list_uid_fld = " .$user->uid; 
+				} 
+				$options = array();
+				if ($db_object = pg_query($db_handle,$db_query)) {
+						while ($row = pg_fetch_object($db_object)) {
+							$options[$row->$list_key_fld]=$row->$list_dsp_fld;
+						}
+				}
+				break;
+			case FETCHIT7_DBTYPE_NAME_MYSQL:
+			case FETCHIT7_DBTYPE_NAME_MSSQL:
+			default:
+		}
+	}
+	return $options;
+}
 
 
 /**
