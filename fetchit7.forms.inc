@@ -2306,91 +2306,107 @@ function fetchit7_param_form($form, &$form_state) {
 					
 		//$param_required
 		//default of required = true is OK
-		if ($param_index < count($param_required)) {
-			$user_field_data[$param_index][F_DR_FIELD_REQUIRED_STR] = filter_var($param_required[$param_index], FILTER_VALIDATE_BOOLEAN);
+		if ($field_index < count($param_required)) {
+			$user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = filter_var($param_required[$field_index], FILTER_VALIDATE_BOOLEAN);
 		} else {
-			$user_field_data[$param_index][F_DR_FIELD_REQUIRED_STR] = TRUE;
+			$user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = TRUE;
 		}
 					
 		//$param_str parameter string
 		//title default of '' is OK
-		if ($param_index < count($param_str)) {
-			$user_field_data[$param_index][F_DR_FIELD_PARAMETER_STR] = trim($param_str[$param_index]);
+		if ($field_index < count($param_str)) {
+			$user_field_data[$field_index][F_DR_FIELD_PARAMETER_STR] = $param_str[$field_index];
 		} else {
-			$user_field_data[$param_index][F_DR_FIELD_PARAMETER_STR] = '';
+			$user_field_data[$field_index][F_DR_FIELD_PARAMETER_STR] = '';
 		}
 		
 		//$param_list_tbl F_DR_FIELD_LIST_TBL_STR
 		//table name default of '' is OK
-		if ($param_index < count($param_list_tbl)) {
-			$user_field_data[$param_index][F_DR_FIELD_LIST_TBL_STR] = trim($param_list_tbl[$param_index]);
+		if ($field_index < count($param_list_tbl)) {
+			$user_field_data[$field_index][F_DR_FIELD_LIST_TBL_STR] = $param_list_tbl[$field_index];
 		} else {
-			$user_field_data[$param_index][F_DR_FIELD_LIST_TBL_STR] = '';
+			$user_field_data[$field_index][F_DR_FIELD_LIST_TBL_STR] = '';
 		}
 
 		//$param_list_key
-		if ($param_index < count($param_list_tbl)) {
-			$user_field_data[$param_index][FETCHIT7_FIELD_LIST_NDX_STR] = trim($param_list_key[$param_index]);
+		if ($field_index < count($param_list_key)) {
+			if (strlen($param_list_key[$field_index])) {
+				$user_field_data[$field_index][FETCHIT7_FIELD_LIST_NDX_STR] = $param_list_key[$field_index];
+			} else {
+				$user_field_data[$field_index][FETCHIT7_FIELD_LIST_NDX_STR] = F_DR_LIST_TBL_NDX_FLD;
+			}
 		} else {
-			$user_field_data[$param_index][FETCHIT7_FIELD_LIST_NDX_STR] = F_DR_LIST_TBL_NDX_FLD;
+			$user_field_data[$field_index][FETCHIT7_FIELD_LIST_NDX_STR] = F_DR_LIST_TBL_NDX_FLD;
 		}
 					
 		//$param_list_dsp
-		if ($param_index < count($param_list_tbl)) {
-			$user_field_data[$param_index][FETCHIT7_FIELD_LIST_DSP_STR] = trim($param_list_dsp[$param_index]);
+		if ($field_index < count($param_list_dsp)) {
+			if (strlen($param_list_dsp[$field_index])) {
+				$user_field_data[$field_index][FETCHIT7_FIELD_LIST_DSP_STR] = $param_list_dsp[$field_index];
+			} else {
+				$user_field_data[$field_index][FETCHIT7_FIELD_LIST_DSP_STR] = F_DR_LIST_TBL_DSP_FLD;
+			}
 		} else {
-			$user_field_data[$param_index][FETCHIT7_FIELD_LIST_DSP_STR] = F_DR_LIST_TBL_DSP_FLD;
+			$user_field_data[$field_index][FETCHIT7_FIELD_LIST_DSP_STR] = F_DR_LIST_TBL_DSP_FLD;
 		}
 					
 		//$param_list_uid F_DR_FIELD_LIST_UID_STR
 		// uid field name - blank of not used - default of blank is OK (usually the items in a parameter selection list are not user specific)
-		if ($param_index < count($param_list_uid)) {
-			$user_field_data[$param_index][F_DR_FIELD_LIST_UID_STR] = trim($param_list_uid[$param_index]);
+		if ($field_index < count($param_list_uid)) {
+			$user_field_data[$field_index][F_DR_FIELD_LIST_UID_STR] = $param_list_uid[$field_index];
 		} else {
-			$user_field_data[$param_index][F_DR_FIELD_LIST_UID_STR] = '';
+			$user_field_data[$field_index][F_DR_FIELD_LIST_UID_STR] = '';
 		}
 					
 		//$param_list_def F_DR_FIELD_DEFAULT_STR
 		//default string of '' is OK
-		if ($param_index < count($param_list_def)) {
-			$user_field_data[$param_index][F_DR_FIELD_DEFAULT_STR] = trim($param_list_def[$param_index]);
+		if ($field_index < count($param_list_def)) {
+			$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = $param_list_def[$field_index];
 		} else {
-			$user_field_data[$param_index][F_DR_FIELD_DEFAULT_STR] = '';
+			$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
 		}
 				
 		//$param_data_tbl F_DR_FIELD_DATA_TBL_STR
 		// this is required
-		if ($param_index < count($param_data_tbl)) {
-			if (strlen(trim($param_data_tbl[$param_index]))) {
-				$user_field_data[$param_index][F_DR_FIELD_DATA_TBL_STR] = trim($param_data_tbl[$param_index]);
+		if ($field_index < count($param_data_tbl)) {
+			if (strlen($param_data_tbl[$field_index])) {
+				$user_field_data[$field_index][F_DR_FIELD_DATA_TBL_STR] = $param_data_tbl[$field_index];
 			} else {
 				// can't have a default here, too many complications
-				drupal_set_message("Parameter $param_index data selection table missing.  There must be as many data selection tables specified as there are parameter names. Please contact the site administrator.",'error');
+				drupal_set_message("Parameter $field_index data selection table missing.  There must be as many data selection tables specified as there are parameter names. Please contact the site administrator.",'error');
 				return;
 			}
 		} else {
 			// can't have a default here, too many complications
-			drupal_set_message("Parameter $param_index data selection table missing.  There must be as many data selection tables specified as there are parameter names. Please contact the site administrator.",'error');
+			drupal_set_message("Parameter $field_index data selection table missing.  There must be as many data selection tables specified as there are parameter names. Please contact the site administrator.",'error');
 			return;
 		}
 					
 		//$param_data_key - we must have a key name - use stored as the default
-		if ($param_index < count($param_list_tbl)) {
-			$user_field_data[$param_index][F_DR_FIELD_DATA_KEY_STR] = trim($param_list_key[$param_index]);
+		if ($field_index < count($param_data_key)) {
+			if (strlen($param_data_key[$field_index])) {
+				$user_field_data[$field_index][F_DR_FIELD_DATA_KEY_STR] = $param_data_key[$field_index];
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_DATA_KEY_STR] = F_DR_DATA_TBL_NDX_FLD;
+			}
 		} else {
-			$user_field_data[$param_index][F_DR_FIELD_DATA_KEY_STR] = F_DR_DATA_TBL_NDX_FLD;
+			$user_field_data[$field_index][F_DR_FIELD_DATA_KEY_STR] = F_DR_DATA_TBL_NDX_FLD;
 		}
 					
 		//$param_data_uid F_DR_FIELD_DATA_UID_STR
-		// used in submit function code, it is the uid field name - the default is to have it defined, since that is the most common
-		if ($param_index < count($param_data_uid)) {
-			$user_field_data[$param_index][F_DR_FIELD_DATA_UID_STR] = trim($param_data_uid[$param_index]);
+		// used in submit function code, it is the uid field name
+		if ($field_index < count($param_data_uid)) {
+			if (strlen($param_data_key[$field_index])) {
+				$user_field_data[$field_index][F_DR_FIELD_DATA_UID_STR] = $param_data_uid[$field_index];
+			} else {
+				$user_field_data[$field_index][F_DR_FIELD_DATA_KEY_STR] = '';
+			}
 		} else {
-			$user_field_data[$param_index][F_DR_FIELD_DATA_UID_STR] = F_DR_DATA_TBL_UID_FLD;
+			$user_field_data[$field_index][F_DR_FIELD_DATA_UID_STR] = '';
 		}
-		++$param_index;
+		++$field_index;
 	}
-	$field_count = $param_index;
+	$field_count = $field_index;
 	
 	// loop through the user entered fields and make a table of parameter input control elements
 	// render each control element then put the rendered elements into an unrendered table
