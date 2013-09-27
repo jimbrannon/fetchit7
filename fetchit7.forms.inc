@@ -2182,7 +2182,8 @@ function fetchit7_param_form($form, &$form_state) {
 	// warning: d7 does not return empty strings at all
 	// if someone put spaces as a placeholder, trim them to an empty string
 	$table_headers = array_map('trim',fetchit7_content_field_fetcher($nid,'fetchit7_field_par_tbl_headers','values')); //should return an array
-
+	$form['table_headers'] = array('#type' => 'value','#value' => $table_headers);
+	
 	// fetchit7_content_field_fetcher() returns the type of the underlying field, 
 	// So these should all be arrays of string values entered by the user
 	//    used these because they are the only multiple valued multiple control form type available in D7 core
@@ -2671,11 +2672,15 @@ function theme_fetchit7_param_form($variables) {
 		//figure out the table structure
 		$param_count = $form['param_count']['#value'];
 		$table_column_count =  intval( ($param_count-1) / $table_row_count) + 1;
-		
+		$table_headers = $form['table_headers']['#value'];
+		$table_headers_count = count($table_headers);
 		$header = array();
 		for ($col_ndx = 0; $col_ndx < $table_column_count; $col_ndx++) {
-				// TODO: need to add column header labels to parameter input form inputs
-				$header[] = "Column $col_ndx";
+			if ($col_ndx<$table_headers_count) {
+				$header[] = $table_headers[$col_ndx];
+			} else {
+				$header[] = '';
+			}
 		}
 		$rows = array();
 		for ($row_ndx = 0; $row_ndx < $table_row_count; $row_ndx++) {
