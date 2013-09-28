@@ -4978,26 +4978,38 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 
 function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$db_value) {
 	$form = array();
-	/*
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
-		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
-		// use the system date as a default
+
+	// process the required attribute - should be boolean already
+	$required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
+	
+	// process the disabled attribute - should be boolean already
+	$disabled = $user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR];
+	
+	// the weight attribute - controls rendering order on the form - should be an integer already
+	$weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+
+	// figure out the default value
+	// start with today's date if it is required
+	// use the system date as a default
+	if ($required) {
 		$default = array(
-			'month' => format_date(time(),'custom','n'),
-			'day' => format_date(time(),'custom','j'),
-			'year' => format_date(time(),'custom','Y'),
+			'month' => date('n'),
+			'day' => date('j'),
+			'year' => date('Y'),
 		);
-	} else {
-		$required = FALSE;
 	}
-	if (strlen(trim($db_value))) {
+	
+	// 
+	if (strlen($db_value)) {
 		$default = array(
-			'month' => format_date(strtotime($db_value),'custom','n'),
-			'day' => format_date(strtotime($db_value),'custom','j'),
-			'year' => format_date(strtotime($db_value),'custom','Y'),
+			'month' => date('n',strtotime($db_value)),
+			'day' => date('j',strtotime($db_value)),
+			'year' => date('Y',strtotime($db_value)),
 		);
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+
+	
+	if (strlen($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR])) {
 		$entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
 		dpm(strtotime($entered));
 		$default = array(
@@ -5006,18 +5018,31 @@ function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$
 			'year' => format_date(strtotime($entered),'custom','Y'),
 		);
 	}
-	 */
-	// now see if the control is enabled or disabled
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
-		$disabled = TRUE;
-	} else {
-		$disabled = FALSE;
+
+	// then set up the defaults based on the string they typed into the defaults attribute box
+	switch ($userdate = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+		case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+			// over write defaults with the value they entered last time
+			$default = array(
+				'month' => date('n',strtotime($db_value)),
+				'day' => date('j',strtotime($db_value)),
+				'year' => date('Y',strtotime($db_value)),
+			);
+			break;
+		case FETCHIT7_FIELD_DEFAULT_NONE:
+		case FETCHIT7_FIELD_DEFAULT_BLANK:
+		case FETCHIT7_FIELD_DEFAULT_FIRST:
+		case FETCHIT7_FIELD_DEFAULT_ALL:
+		case '':
+			break;
+		default:
+			$default = array(
+				'month' => date('n',strtotime($userdate)),
+				'day' => date('j',strtotime($userdate)),
+				'year' => date('Y',strtotime($userdate)),
+			);
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
-		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	} else {
-		$weight = $user_field_ndx;
-	}
+
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
