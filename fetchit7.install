@@ -2436,7 +2436,7 @@ function _fetchit7_content_param_installed_instances () {
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '40',
 				),
 				//'weight'				=> -3,
 			),
@@ -2517,7 +2517,7 @@ function _fetchit7_content_param_installed_instances () {
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '10',
+					'size'					=> '20',
 				),
 				//'weight'				=> -3,
 			),
@@ -2544,7 +2544,7 @@ function _fetchit7_content_param_installed_instances () {
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '20',
+					'size'					=> '40',
 				),
 				//'weight'				=> -3,
 			),
@@ -2571,7 +2571,7 @@ function _fetchit7_content_param_installed_instances () {
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '30',
+					'size'					=> '40',
 				),
 				//'weight'				=> -3,
 			),
@@ -2625,7 +2625,7 @@ function _fetchit7_content_param_installed_instances () {
 				'module'				=> 'text',
 				'active'				=> TRUE,
 				'settings'			=> array (
-					'size'					=> '10',
+					'size'					=> '20',
 				),
 				//'weight'				=> -3,
 			),

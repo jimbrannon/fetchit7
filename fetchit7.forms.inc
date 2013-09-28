@@ -3385,7 +3385,7 @@ function fetchit_set_existing_selection_single($db_handle,$db_type,$record_selec
 								$fldstr .= ",$user_uid_field";
 							}
 							
-							$qry = "INSERT INTO $record_select_table($fldstr) VALUES(".pg_escape_string($val);
+							$qry = "INSERT INTO $record_select_table ($fldstr) VALUES (".pg_escape_string($val);
 							if (strlen(trim($user_uid_field))) {
 								global $user;
 								$user_uid = $user->uid;
@@ -3458,7 +3458,7 @@ function fetchit_set_existing_selection_multiple($db_handle,$db_type,$record_sel
 								$fldstr .= ",$user_uid_field";
 							}
 							foreach ($vals as $val) {
-								$qry = "INSERT INTO $record_select_table($fldstr) VALUES(".pg_escape_string($val);
+								$qry = "INSERT INTO $record_select_table ($fldstr) VALUES (".pg_escape_string($val);
 								if (strlen(trim($user_uid_field))) {
 									global $user;
 									$user_uid = $user->uid;
@@ -4119,7 +4119,9 @@ function fetchit7_param_element_form ($field_name,$field_type,$db_handle,$user_f
 
 
 function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$showtitles,$db_value) {
-		$default = '';
+	// $db_value is a scalar, NOT an array
+
+	$default = '';
 	
 	// process the value stored in the output table already for this parameter/user 
 	// convert whatever it is to a string...this is a text box, after all!
@@ -4184,21 +4186,27 @@ function fetchit_get_textbox_element($user_field_data,$user_field_ndx,$size,$sho
 }
 
 function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_values) {
+	//note that $db_values should be an array
+
 	$form = array();
+
+	// create the $options array containing the selectable items
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		// create it from a specially formatted input string in the input list table name
+		// note in this case the key is a string, and therefore the output table has to be able to handle it, though make_val() will try to cast it as best it can
 		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$options = array();
 		foreach($vals as $val) {
 			$options[$val]=$val;
 		}
 	} else {
+		// create it from a table in the database
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
 		if(strlen($list_tbl)) {
 			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
 			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
 			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
 			$options = array();
-			//if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
 			if(!$options = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
 				return $form;
 			}
@@ -4206,40 +4214,48 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 			return $form;
 		}
 	}
-	if (strlen($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR])) {
-		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
-		$keys = array_keys($options);
-		if (count($keys)) {
-			$defaults = array($keys[0]);
-		} else {
+
+	// process the required attribute - should be boolean already
+	$required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
+	
+	// process the disabled attribute - should be boolean already
+	$disabled = $user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR];
+	
+	// the weight attribute - controls rendering order on the form - should be an integer already
+	$weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+
+	// figure out the default values to be selected
+	// start with a default selection based on whether the control requires a value or not
+	if ($required) {
+		$options_keys = array_keys($options);
+		$defaults = array($options_keys[0]);
+	} else {
+		$defaults = array();
+	}
+	// then set up the defaults based on the string they typed into the defaults attribute box
+	switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+		case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+			// over write defaults with the values they entered last time
+			$defaults = $db_values;
+			break;
+		case FETCHIT7_FIELD_DEFAULT_FIRST:
+			$options_keys = array_keys($options);
+			$defaults = array($options_keys[0]);
+			break;
+		case FETCHIT7_FIELD_DEFAULT_ALL:
+			$defaults = array_keys($options);
+			break;
+		case FETCHIT7_FIELD_DEFAULT_NONE:
+		case FETCHIT7_FIELD_DEFAULT_BLANK:
 			$defaults = array();
-		}
-	} else {
-		$defaults = array();
-		$required = FALSE;
+			break;
+		case '':
+			// to me this means user does not care - that means leave it set as is
+			break;
+		default:
+			$default = explode(',',$user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
 	}
-	// over write defaults with the values they entered last time
-	if ($db_values) {
-		$defaults = array();
-		foreach ($db_values as $db_value) {
-			$defaults[] = $db_value;
-		}
-	}
-	// finally over write defaults with user entered values if they put anything 
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$defaults = explode(',',$user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
-	}
-	// now see if the control is enabled or disabled
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
-		$disabled = TRUE;
-	} else {
-		$disabled = FALSE;
-	}
-	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	//debug($defaults,'checkboxes $defaults');
-	//debug($required,'checkboxes $required');
-	//debug($disabled,'checkboxes $disabled');
-	//debug($weight,'checkboxes $weight');
+
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -4268,62 +4284,100 @@ function fetchit_get_checkboxes_element($user_field_data,$user_field_ndx,$db_han
 }
 
 function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
+	//note that $db_value should be a scalar, not an array
+
 	$form = array();
+	
+	// create the $options array containing the selectable items
+	//here is a beginning options array
 	$options = array();
 	$options[0] = "false";
-	$options[1] = "true";
+	$options[1] = "true"; // this is the string that would be displayed next to the checkbox, except that we using the option to put the control title there
+	
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		// create it from a specially formatted input string in the input list table name
+		// note in this case the key is a 0,1 integer value
 		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
-		$i=0;
-		foreach($vals as $val) {
-			$options[$i]=$val;
-			$i++;
-			if($i>1)break;
+		switch (count($vals)) {
+			case 0:
+				$options[0]='false';
+				$options[1]='true';
+				break;
+			case 1:
+				$options[0]=$vals[0];
+				$options[1]=$vals[0];
+				break;
+			case 2:
+			default:
+				$options[0]=$vals[0];
+				$options[1]=$vals[1];
 		}
 	} else {
+		// create it from a table in the database
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
 		if(strlen($list_tbl)) {
 			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
 			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
 			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
-			$options_tmp = array();
-			if($options_tmp = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
-				$i=0;
-				foreach ($options_tmp as $key=>$val) {
-					$options[$i]=$val;
-					$i++;
-					if($i>1)break;
-				}
-			} 
+			$options_tmp = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid);
+			switch (count($options_tmp)) {
+				case 0:
+					$options[0]='false';
+					$options[1]='true';
+					break;
+				case 1:
+					$options[0]=$options_tmp[0];
+					$options[1]=$options_tmp[0];
+					break;
+				case 2:
+				default:
+					$options[0]=$options_tmp[0];
+					$options[1]=$options_tmp[1];
+			}
 		}
 	}
 
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
-		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
-	} else {
-		$required = FALSE;
-	}
-	// avoid setting this to true - essentially disables the checkbox
+	// process the required attribute - should be boolean already
+	$required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
+	// avoid setting this to true because it essentially disables the checkbox
 	$required = FALSE;
 	
-	if (strlen(trim($db_value))) {
-		$default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
+	// process the disabled attribute - should be boolean already
+	$disabled = $user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR];
+	
+	// the weight attribute - controls rendering order on the form - should be an integer already
+	$weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+
+	// set up the beginning default based on the required flag
+	if ($required) {
+		$default = 1;
 	} else {
 		$default = 0;
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$default = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]), FILTER_VALIDATE_BOOLEAN);
+	
+	// then set up the default based on the string they typed into the defaults attribute box
+	switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+		case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+			// over write defaults with the values they entered last time
+			$default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
+			break;
+		case FETCHIT7_FIELD_DEFAULT_TRUE:
+		case FETCHIT7_FIELD_DEFAULT_FIRST:
+		case FETCHIT7_FIELD_DEFAULT_ALL:
+			$default = 1;
+			break;
+		case FETCHIT7_FIELD_DEFAULT_NONE:
+		case FETCHIT7_FIELD_DEFAULT_BLANK:
+		case FETCHIT7_FIELD_DEFAULT_FALSE:
+			$default = 0;
+			break;
+		case '':
+			// to me this means user does not care - that means leave it set as is
+			break;
+		default:
+			$default = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR], FILTER_VALIDATE_BOOLEAN);
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
-		$disabled = TRUE;
-	} else {
-		$disabled = FALSE;
-	}
-	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
-		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	} else {
-		$weight = $user_field_ndx;
-	}
+
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -4354,8 +4408,15 @@ function fetchit_get_checkbox_element_bool($user_field_data,$user_field_ndx,$db_
 }
 
 function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
+	//debug($db_value,'fetchit_get_select_element $db_value');
+	// note that $db_value is a scalar, NOT an array
+
 	$form=array();
+
+	// create the $options array containing the selectable items
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		// create it from a specially formatted input string in the input list table name
+		// note in this case the key is a string, and therefore the output table has to be able to handle it, though make_val() will try to cast it as best it can
 		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$options = array();
 		foreach($vals as $val) {
@@ -4375,33 +4436,55 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 			return $form;
 		}
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
-		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
-		foreach($options as $key=>$val) { // set defaults array to the first value in the list
-			$default = array($key);
+	
+	// process the required attribute - should be boolean already
+	$required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
+	
+	// process the disabled attribute - should be boolean already
+	$disabled = $user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR];
+	
+	// the weight attribute - controls rendering order on the form - should be an integer already
+	$weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+
+	// figure out the default values to be selected
+	// start with a default selection based on whether the control requires a value or not
+	if ($required) {
+		$options_keys = array_keys($options);
+		$default = $options_keys[0];
+		$empty_value = '';
+	} else {
+		$options_keys = array_keys($options);
+		$default = $options_keys[0];
+		$empty_value = '';
+	}
+	// then set up the defaults based on the string they typed into the defaults attribute box
+	switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+		case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+			// over write defaults with the value they entered last time
+			$default = $db_value;
 			break;
-		}
-	} else {
-		$defaults = array();
-		$required = FALSE;
+		case FETCHIT7_FIELD_DEFAULT_NONE:
+		case FETCHIT7_FIELD_DEFAULT_BLANK:
+			$default = '';
+			break;
+		case FETCHIT7_FIELD_DEFAULT_FIRST:
+		case FETCHIT7_FIELD_DEFAULT_ALL:
+			$options_keys = array_keys($options);
+			$default = $options_keys[0];
+			break;
+		case '':
+			$default = '';
+			break;
+		default:
+			$userdefault = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR];
+			$options_keys = array_keys($options);
+			if (in_array($userdefault, $options_keys)) {
+				$default = $userdefault;
+			} else {
+				$default = '';
+			}
 	}
-	if (strlen(trim($db_value))) {
-		$default = $db_value;
-	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$default = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR];
-	}
-	// now see if the control is enabled or disabled
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
-		$disabled = TRUE;
-	} else {
-		$disabled = FALSE;
-	}
-	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	//debug($default,'select $default');
-	//debug($required,'select $required');
-	//debug($disabled,'select $disabled');
-	//debug($weight,'select $weight');
+	//debug($default,'fetchit_get_select_element $default');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -4415,6 +4498,7 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 			'#disabled' => $disabled,
 			'#description' => $description,
 			'#weight' => $weight,
+			'#empty_value' => $empty_value,
 		);
 	} else {
 		$form = array(
@@ -4425,6 +4509,7 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 			'#default_value' => $default,
 			'#disabled' => $disabled,
 			'#weight' => $weight,
+			'#empty_value' => $empty_value,
 		);
 	}
 
@@ -4432,145 +4517,104 @@ function fetchit_get_select_element($user_field_data,$user_field_ndx,$db_handle,
 }
 
 function fetchit_get_select_element_bool($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
-	$form = array();
+	// create the $options array containing the selectable items
+	//here is a beginning options array
 	$options = array();
 	$options[0] = "false";
 	$options[1] = "true";
+	
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		// create it from a specially formatted input string in the input list table name
+		// note in this case the key is a 0,1 integer value
 		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
-		$i=0;
-		foreach($vals as $val) {
-			$options[$i]=$val;
-			$i++;
-			if($i>1)break;
+		switch (count($vals)) {
+			case 0:
+				$options[0]=0;
+				$options[1]=1;
+				break;
+			case 1:
+				$options[0]=$vals[0];
+				$options[1]=1;
+				break;
+			case 2:
+			default:
+				$options[0]=$vals[0];
+				$options[1]=$vals[1];
 		}
 	} else {
+		// create it from a table in the database
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
 		if(strlen($list_tbl)) {
 			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
 			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
 			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
-			$options_tmp = array();
-			if($options_tmp = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
-				$i=0;
-				foreach ($options_tmp as $key=>$val) {
-					$options[$i]=$val;
-					$i++;
-					if($i>1)break;
-				}
+			$options_tmp = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid);
+			switch (count($options_tmp)) {
+				case 0:
+					$options[0]=0;
+					$options[1]=1;
+					break;
+				case 1:
+					$options[0]=$options_tmp[0];
+					$options[1]=1;
+					break;
+				case 2:
+				default:
+					$options[0]=$options_tmp[0];
+					$options[1]=$options_tmp[1];
 			}
 		}
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
-		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
-	} else {
-		$required = FALSE;
-	}
-	if (strlen(trim($db_value))) {
-		$default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
-	} else {
-		$default = 0;
-	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$default = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]),FILTER_VALIDATE_BOOLEAN);
-	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
-		$disabled = TRUE;
-	} else {
-		$disabled = FALSE;
-	}
-	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
-		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	} else {
-		$weight = $user_field_ndx;
-	}
-	//debug($default,'selectboolean $default');
-	//debug($required,'selectboolean $required');
-	//debug($disabled,'selectboolean $disabled');
-	//debug($weight,'selectboolean $weight');
-	if ($showtitles) {
-		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
-		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-		$form = array(
-			'#title' => $title,
-			'#type' => 'select',
-			'#options' => $options,
-			'#multiple' => FALSE,
-			'#required' => $required,
-			'#default_value' => $default,
-			'#disabled' => $disabled,
-			'#description' => $description,
-			'#weight' => $weight,
-		);
-	} else {
-		$form = array(
-			'#type' => 'select',
-			'#options' => $options,
-			'#multiple' => FALSE,
-			'#required' => $required,
-			'#default_value' => $default,
-			'#disabled' => $disabled,
-			'#weight' => $weight,
-		);
-	}
+	
+	// process the required attribute - should be boolean already
+	$required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
+	
+	// process the disabled attribute - should be boolean already
+	$disabled = $user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR];
+	
+	// the weight attribute - controls rendering order on the form - should be an integer already
+	$weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
 
-	return $form;
-}
-
-function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_values) {
-	$form = array();
-	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
-		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
-		$options = array();
-		foreach($vals as $val) {
-			$options[$val]=$val;
-		}
+	// figure out the default values to be selected
+	// start with a default selection based on whether the control requires a value or not
+	if ($required) {
+		$options_keys = array_keys($options);
+		$default = '';
+		$empty_value = '';
 	} else {
-		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
-		if(strlen($list_tbl)) {
-			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
-			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
-			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
-			$options = array();
-			if(!$options = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
-				return $form;
-			}
-		} else {
-			return $form;
-		}
+		$options_keys = array_keys($options);
+		$default = '';
+		$empty_value = '';
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
-		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
-		foreach($options as $key=>$val) { // set defaults array to the first value in the list
-			$defaults = array($key);
+	// then set up the defaults based on the string they typed into the defaults attribute box
+	switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+		case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+			// over write defaults with the value they entered last time
+			$default = $db_value;
 			break;
-		}
-	} else {
-		$defaults = array();
-		$required = FALSE;
+		case FETCHIT7_FIELD_DEFAULT_NONE:
+		case FETCHIT7_FIELD_DEFAULT_BLANK:
+			$default = '';
+			break;
+		case FETCHIT7_FIELD_DEFAULT_FIRST:
+		case FETCHIT7_FIELD_DEFAULT_ALL:
+			$options_keys = array_keys($options);
+			$default = $options_keys[0];
+			break;
+		case '':
+			$default = '';
+			break;
+		default:
+			// since we know the keys are 0 and 1 in this specialized select control, go ahead and do the conversion
+			$userdefault = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR], FILTER_VALIDATE_BOOLEAN);
+			$options_keys = array_keys($options);
+			if (in_array($userdefault, $options_keys)) {
+				$default = $userdefault;
+			} else {
+				$default = '';
+			}
 	}
-	// over write defaults with the values they entered last time
-	if ($db_values) {
-		$defaults = array();
-		foreach ($db_values as $db_value) {
-			$defaults[] = $db_value;
-		}
-	}
-	// finally over write defaults with preset values if they are in the configuration 
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$defaults = explode(',',$user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
-	}
-	// now see if the control is enabled or disabled
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
-		$disabled = TRUE;
-	} else {
-		$disabled = FALSE;
-	}
-	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	//debug($default,'selectmultiple $default');
-	//debug($required,'selectmultiple $required');
-	//debug($disabled,'selectmultiple $disabled');
-	//debug($weight,'selectmultiple $weight');
+	
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -4578,33 +4622,39 @@ function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db
 			'#title' =>$title,
 			'#type' => 'select',
 			'#options' => $options,
-			'#multiple' => TRUE,
+			'#multiple' => FALSE,
 			'#required' => $required,
-			'#default_value' => $defaults,
-			'#attributes' => array('size'=>5),
+			'#default_value' => $default,
 			'#disabled' => $disabled,
 			'#description' => $description,
 			'#weight' => $weight,
+			'#empty_value' => $empty_value,
 		);
 	} else {
 		$form = array(
 			'#type' => 'select',
 			'#options' => $options,
-			'#multiple' => TRUE,
+			'#multiple' => FALSE,
 			'#required' => $required,
-			'#default_value' => $defaults,
-			'#attributes' => array('size'=>5),
+			'#default_value' => $default,
 			'#disabled' => $disabled,
 			'#weight' => $weight,
+			'#empty_value' => $empty_value,
 		);
 	}
 
 	return $form;
 }
 
-function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
+function fetchit_get_selectmultiple_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_values) {
+	//note that $db_values should be an array
+	
 	$form=array();
+
+	// create the $options array containing the selectable items
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		// create it from a specially formatted input string in the input list table name
+		// note in this case the key is a string, and therefore the output table has to be able to handle it, though make_val() will try to cast it as best it can
 		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
 		$options = array();
 		foreach($vals as $val) {
@@ -4612,12 +4662,11 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 		}
 	} else {
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
-		if(strlen(trim($list_tbl))) {
+		if(strlen($list_tbl)) {
 			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
 			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
 			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
 			$options = array();
-			//if(!$options = fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid)) {
 			if(!$options = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
 				return $form;
 			}
@@ -4625,32 +4674,160 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 			return $form;
 		}
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
-		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
-		foreach($options as $key=>$val) { // set defaults array to the first value in the list
-			$defaults = array($key);
+	
+	// process the required attribute - should be boolean already
+	$required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
+	
+	// process the disabled attribute - should be boolean already
+	$disabled = $user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR];
+	
+	// the weight attribute - controls rendering order on the form - should be an integer already
+	$weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+
+	// figure out the default values to be selected
+	// start with a default selection based on whether the control requires a value or not
+	if ($required) {
+		$options_keys = array_keys($options);
+		$defaults = array('');
+		$empty_value = '';
+	} else {
+		$options_keys = array_keys($options);
+		$defaults = array('');
+		$empty_value = '';
+	}
+	// then set up the defaults based on the string they typed into the defaults attribute box
+	switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+		case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+			// over write defaults with the value they entered last time
+			$defaults = $db_values;
 			break;
+		case FETCHIT7_FIELD_DEFAULT_NONE:
+		case FETCHIT7_FIELD_DEFAULT_BLANK:
+			$defaults = array('');
+			break;
+		case FETCHIT7_FIELD_DEFAULT_FIRST:
+			$options_keys = array_keys($options);
+			$defaults = array($options_keys[0]);
+			break;
+		case FETCHIT7_FIELD_DEFAULT_ALL:
+			$options_keys = array_keys($options);
+			$defaults = $options_keys;
+			break;
+		case '':
+			$defaults = array('');
+			break;
+		default:
+			$userdefaults = explode(',',$user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
+			if (count($userdefaults)) {
+				$default = $userdefaults;
+			} else {
+				$defaults = array('');
+			}
+	}
+
+	if ($showtitles) {
+		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
+		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
+		$form = array(
+			'#title' =>$title,
+			'#type' => 'select',
+			'#options' => $options,
+			'#multiple' => FALSE,
+			'#required' => $required,
+			'#default_value' => $default,
+			'#disabled' => $disabled,
+			'#description' => $description,
+			'#weight' => $weight,
+			'#empty_value' => $empty_value,
+		);
+	} else {
+		$form = array(
+			'#type' => 'select',
+			'#options' => $options,
+			'#multiple' => FALSE,
+			'#required' => $required,
+			'#default_value' => $default,
+			'#disabled' => $disabled,
+			'#weight' => $weight,
+			'#empty_value' => $empty_value,
+		);
+	}
+
+	return $form;
+}
+
+function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
+	// note that $db_value is a scalar, NOT an array
+
+	$form=array();
+
+	// create the $options array containing the selectable items
+	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		// create it from a specially formatted input string in the input list table name
+		// note in this case the key is a string, and therefore the output table has to be able to handle it, though make_val() will try to cast it as best it can
+		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
+		$options = array();
+		foreach($vals as $val) {
+			$options[$val]=$val;
 		}
 	} else {
-		$required = FALSE;
+		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
+		if(strlen($list_tbl)) {
+			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
+			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
+			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
+			$options = array();
+			if(!$options = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
+				return $form;
+			}
+		} else {
+			return $form;
+		}
 	}
-	if (strlen(trim($db_value))) {
-		$default = $db_value;
-	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$default = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR];
-	}
-	// now see if the control is enabled or disabled
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
-		$disabled = TRUE;
+	
+	// process the required attribute - should be boolean already
+	$required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
+	
+	// process the disabled attribute - should be boolean already
+	$disabled = $user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR];
+	
+	// the weight attribute - controls rendering order on the form - should be an integer already
+	$weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+
+	// figure out the default values to be selected
+	// start with a default selection based on whether the control requires a value or not
+	if ($required) {
+		$options_keys = array_keys($options);
+		$default = $options_keys[0];
 	} else {
-		$disabled = FALSE;
+		$options_keys = array_keys($options);
+		$default = $options_keys[0];
 	}
-	$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	//debug($default,'radios $default');
-	//debug($required,'radios $required');
-	//debug($disabled,'radios $disabled');
-	//debug($weight,'radios $weight');
+	// then set up the defaults based on the string they typed into the defaults attribute box
+	switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+		case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+			// over write defaults with the value they entered last time
+			$default = $db_value;
+			break;
+		case FETCHIT7_FIELD_DEFAULT_NONE:
+		case FETCHIT7_FIELD_DEFAULT_BLANK:
+		case FETCHIT7_FIELD_DEFAULT_FIRST:
+		case FETCHIT7_FIELD_DEFAULT_ALL:
+		case '':
+			$options_keys = array_keys($options);
+			$default = $options_keys[0];
+			break;
+		default:
+			$userdefault = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR];
+			$options_keys = array_keys($options);
+			if (in_array($userdefault, $options_keys)) {
+				$default = $userdefault;
+			} else {
+			$options_keys = array_keys($options);
+			$default = $options_keys[0];
+			}
+	}
+	//debug($default,'fetchit_get_select_element $default');
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -4679,63 +4856,98 @@ function fetchit_get_radios_element($user_field_data,$user_field_ndx,$db_handle,
 }
 
 function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_handle,$nid,$showtitles,$db_value) {
-	$form = array();
+	// create the $options array containing the selectable items
+	//here is a beginning options array
 	$options = array();
 	$options[0] = "false";
 	$options[1] = "true";
+	
 	if (substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],0,1)==F_DR_LIST_TBL_SPECIAL_CHAR) {
+		// create it from a specially formatted input string in the input list table name
+		// note in this case the key is a 0,1 integer value
 		$vals = explode(",",substr($user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR],1));
-		$i=0;
-		foreach($vals as $val) {
-			$options[$i]=$val;
-			$i++;
-			if($i>1)break;
+		switch (count($vals)) {
+			case 0:
+				$options[0]=0;
+				$options[1]=1;
+				break;
+			case 1:
+				$options[0]=$vals[0];
+				$options[1]=1;
+				break;
+			case 2:
+			default:
+				$options[0]=$vals[0];
+				$options[1]=$vals[1];
 		}
 	} else {
+		// create it from a table in the database
 		$list_tbl = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_TBL_STR];
 		if(strlen($list_tbl)) {
 			$list_key_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_NDX_STR];
 			$list_dsp_fld = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_LIST_DSP_STR];
 			$list_uid_fld = $user_field_data[$user_field_ndx][F_DR_FIELD_LIST_UID_STR];
-			$options_tmp = array();
-			if($options_tmp = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid)) {
-				$i=0;
-				foreach ($options_tmp as $key=>$val) {
-					$options[$i]=$val;
-					$i++;
-					if($i>1)break;
-				}
+			$options_tmp = fetchit7_get_options_list($db_handle, $list_tbl, $list_key_fld, $list_dsp_fld, $list_uid_fld, $nid);
+			switch (count($options_tmp)) {
+				case 0:
+					$options[0]=0;
+					$options[1]=1;
+					break;
+				case 1:
+					$options[0]=$options_tmp[0];
+					$options[1]=1;
+					break;
+				case 2:
+				default:
+					$options[0]=$options_tmp[0];
+					$options[1]=$options_tmp[1];
 			}
 		}
 	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]))) {
-		$required = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]), FILTER_VALIDATE_BOOLEAN);
+	
+	// process the required attribute - should be boolean already
+	$required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
+	
+	// process the disabled attribute - should be boolean already
+	$disabled = $user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR];
+	
+	// the weight attribute - controls rendering order on the form - should be an integer already
+	$weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
+
+	// figure out the default values to be selected
+	// start with a default selection based on whether the control requires a value or not
+	if ($required) {
+		$options_keys = array_keys($options);
+		$default = $options_keys[0];
 	} else {
-		$required = FALSE;
+		$options_keys = array_keys($options);
+		$default = $options_keys[0];
 	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR]) {
-		$required = TRUE;
-	} else {
-		$required = FALSE;
+	// then set up the defaults based on the string they typed into the defaults attribute box
+	switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+		case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+			// over write defaults with the value they entered last time
+			$default = $db_value;
+			break;
+		case FETCHIT7_FIELD_DEFAULT_NONE:
+		case FETCHIT7_FIELD_DEFAULT_BLANK:
+		case FETCHIT7_FIELD_DEFAULT_FIRST:
+		case FETCHIT7_FIELD_DEFAULT_ALL:
+		case '':
+			$options_keys = array_keys($options);
+			$default = $options_keys[0];
+			break;
+		default:
+			// since we know the keys are 0 and 1 in this specialized select control, go ahead and do the conversion
+			$userdefault = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR], FILTER_VALIDATE_BOOLEAN);
+			$options_keys = array_keys($options);
+			if (in_array($userdefault, $options_keys)) {
+				$default = $userdefault;
+			} else {
+				$default = $options_keys[0];
+			}
 	}
-	if (strlen(trim($db_value))) {
-		$default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
-	} else {
-		$default = 0;
-	}
-	if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-		$default = filter_var(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]), FILTER_VALIDATE_BOOLEAN);
-	}
-	if ($user_field_data[$user_field_ndx][F_DR_FIELD_DISABLED_STR]) {
-		$disabled = TRUE;
-	} else {
-		$disabled = FALSE;
-	}
-	if (strlen(trim($user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR]))) {
-		$weight = (int) $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
-	} else {
-		$weight = $user_field_ndx;
-	}
+	
 	if ($showtitles) {
 		$title=t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
 		$description=t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
@@ -4762,6 +4974,7 @@ function fetchit_get_radios_element_bool($user_field_data,$user_field_ndx,$db_ha
 
 	return $form;
 }
+
 
 function fetchit_get_date_element($user_field_data,$user_field_ndx,$showtitles,$db_value) {
 	$form = array();
@@ -4947,6 +5160,7 @@ function fetchit_get_options_list($db_handle,$list_tbl,$list_uid,$nid) {
 }
 
 function fetchit7_get_options_list($db_handle,$list_tbl,$list_key_fld,$list_dsp_fld,$list_uid_fld,$nid) {
+	$options = array();
 	$db_type = trim(fetchit7_content_field_fetcher($nid,'db_type','value'));
 	if(strlen($db_type)) {
 		switch ($db_type) {
