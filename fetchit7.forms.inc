@@ -110,7 +110,7 @@ function fetchit7_table_form($form, &$form_state) {
 
 	// HTML empty table message - a text string
 	// if someone put spaces as a placeholder, trim them to an empty string
-	$table_empty_message = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_par_tbl_emptymsg','values')); //should return a string
+	$table_empty_message = trim(fetchit7_content_field_fetcher($nid,'fetchit7_field_table_emptymsg','values')); //should return a string
 	$form['table_empty_message'] = array('#type' => 'value','#value' => $table_empty_message);
 
 	// get submit button label 

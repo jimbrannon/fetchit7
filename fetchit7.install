@@ -478,6 +478,19 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '1',
 		),
+		// table empty message
+		'fetchit7_field_table_emptymsg' => array(
+			'label'						=> $t('Empty table warning message'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_table_emptymsg',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
 		// table weight
 		'fetchit7_field_table_weight' => array(
 			'label'						=> $t('Table weight'),
@@ -1598,7 +1611,35 @@ automatically added, but specifying a label here will cause a button to be added
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// fetchit7_field_table_emptymsg
+		'fetchit7_field_table_emptymsg' => array(
+			'label'					=> $t('Empty table warning message'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A warning message to the user to put inside the table display if the query that fills it returns no records.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_table_emptymsg',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
 				
+		
 		// =====================================================
 		// these are fields that apply to html tables
 		// =====================================================
