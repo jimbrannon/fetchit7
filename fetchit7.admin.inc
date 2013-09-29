@@ -478,6 +478,8 @@ function fetchit7_admin_restorecontent_submit ($form, $form_state) {
 			return FALSE;
 	}
 	$newrecords = fetchit7_content_backuptable_restore($content_type,$tablename);
+	// rebuild the menus so the restored content types show up in the fetchit7 admin preview menus
+	menu_rebuild();
 	drupal_set_message(t("Successfully restored $newrecords records of type $content_type from table $tablename."),'status');
 }
 

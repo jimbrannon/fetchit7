@@ -196,6 +196,27 @@ function fetchit7_install () {
 	// $body_instance['type'] = 'text_summary_or_trimmed';
 	// field_update_instance($body_instance);
 	
+	// change the publishing and promoting options 
+	// see https://drupal.org/node/1169864
+	// and http://drupal.stackexchange.com/questions/74068/how-do-i-set-the-options-for-a-programatically-created-content-type?rq=1
+	//variable_set('node_options_fetchit7_content_table', array('promote','status')); // this turns on promoting and publishing
+	variable_set('node_options_fetchit7_content_table', array()); // this turns off promoting and publishing
+	variable_set('node_options_fetchit7_content_param', array()); // this turns off promoting and publishing 
+	variable_set('node_options_fetchit7_content_egrid', array()); // this turns off promoting and publishing 
+	variable_set('node_options_fetchit7_content_appnd', array()); // this turns off promoting and publishing 
+	
+	// change the preview setting
+	variable_set('node_preview_fetchit7_content_table', 0); // turns preview off
+	variable_set('node_preview_fetchit7_content_param', 0); // turns preview off
+	variable_set('node_preview_fetchit7_content_egrid', 0); // turns preview off
+	variable_set('node_preview_fetchit7_content_appnd', 0); // turns preview off
+	
+	// change the display settings
+	variable_set('node_submitted_fetchit7_content_table', 0); // turns off display author and date
+	variable_set('node_submitted_fetchit7_content_param', 0); // turns off display author and date
+	variable_set('node_submitted_fetchit7_content_table', 0); // turns off display author and date
+	variable_set('node_submitted_fetchit7_content_table', 0); // tturns off display author and date
+							 
 	//create the various fields to be used by the fetchit7 content types
 	foreach (_fetchit7_installed_fields() as $field) {
 		field_create_field($field);
