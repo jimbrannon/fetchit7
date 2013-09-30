@@ -812,12 +812,12 @@ function _fetchit7_installed_fields () {
 			//),
 		),
 		// column headers
-		'fetchit7_field_par_tbl_headers' => array(
+		'fetchit7_field_table_headers' => array(
 			'label'						=> $t('Table column headers'),
 			'settings'				=> array (
 					'max_length'	=> '60',
 			),
-			'field_name'			=> 'fetchit7_field_par_tbl_headers',
+			'field_name'			=> 'fetchit7_field_table_headers',
 			'type'						=> 'text',
 			'module'					=> 'text',
 			'active'					=> '1',
@@ -1505,9 +1505,9 @@ function _fetchit7_content_table_installed_instances () {
 			//'deleted'				=> '0',
 		),
 		// table column headers (to use in place of field names)
-		// fetchit7_field_par_tbl_headers
-		'fetchit7_field_par_tbl_headers' => array(
-			'label'					=> $t('Parameter table column headers'),
+		// fetchit7_field_table_headers
+		'fetchit7_field_table_headers' => array(
+			'label'					=> $t('Table column headers'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -1528,7 +1528,7 @@ function _fetchit7_content_table_installed_instances () {
 					'value'					=> '',
 				),
 			),
-			'field_name'		=> 'fetchit7_field_par_tbl_headers',
+			'field_name'		=> 'fetchit7_field_table_headers',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
@@ -2036,6 +2036,7 @@ function _fetchit7_content_param_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// table weight
 		'fetchit7_field_table_weight' => array(
 			'label'					=> $t('Table weight'),
 			'type'					=> 'list_integer',
@@ -2246,9 +2247,9 @@ function _fetchit7_content_param_installed_instances () {
 			'bundle'				=> $content_name,
 			//'deleted'				=> '0',
 		),
-		// fetchit7_field_par_tbl_headers
-		'fetchit7_field_par_tbl_headers' => array(
-			'label'					=> $t('Table column headers'),
+		// fetchit7_field_table_headers
+		'fetchit7_field_table_headers' => array(
+			'label'					=> $t('Parameter table column headers'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -2269,7 +2270,7 @@ function _fetchit7_content_param_installed_instances () {
 					'value'					=> '',
 				),
 			),
-			'field_name'		=> 'fetchit7_field_par_tbl_headers',
+			'field_name'		=> 'fetchit7_field_table_headers',
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
@@ -3108,6 +3109,7 @@ function _fetchit7_content_egrid_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// table weight
 		'fetchit7_field_table_weight' => array(
 			'label'					=> $t('Table weight'),
 			'type'					=> 'list_integer',
@@ -3177,6 +3179,7 @@ function _fetchit7_content_egrid_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// submit button weight
 		'fetchit7_field_submit_weight' => array(
 			'label'					=> $t('Submit button weight'),
 			'type'					=> 'list_integer',
@@ -3246,12 +3249,507 @@ function _fetchit7_content_egrid_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// table column headers (to use in place of field names)
+		// fetchit7_field_table_headers
+		'fetchit7_field_table_headers' => array(
+			'label'					=> $t('Table column headers'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The table column headers.  Use these instead of the field names.  Enter as many as needed.  Leave blank to use the table field names.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_table_headers',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// fetchit7_field_table_emptymsg
+		'fetchit7_field_table_emptymsg' => array(
+			'label'					=> $t('Empty table warning message'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A warning message to the user to put inside the table display if the query that fills it returns no records.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_table_emptymsg',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+
+		// show titles
+		'fetchit7_field_par_shw_ttl' => array(
+			'label'					=> $t('Show titles'),
+			'widget'				=> array(
+				'type'					=> 'options_onoff',
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'display_label'	=> TRUE,
+				),
+				//'weight'				=> -3,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('This parameter defines whether titles are displayed on every parameter control on the form.  The form can get messy (too busy) with too many titles.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '1',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_shw_ttl',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//Parameter table row count
+		'fetchit7_field_par_tbl_rows' => array(
+			'label'					=> $t('Parameter table row count'),
+			'type'					=> 'list_integer',
+			'widget'				=> array(
+				'type'					=> 'options_select', // dropdown list
+				//'type'					=> 'options_buttons', // radio buttons or check boxes
+				'module'				=> 'options',
+				'settings'			=> array (),
+				//'weight'				=> -3,
+			),
+			'required'			=> TRUE,
+			'description'		=> $t('Number of rows in the table of parameter input controls.  Enter 0 to output controls in a stack ordered by weight (NOT a table).'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 3,
+				),
+			),
+			//'settings'			=> array (
+			//	'user_register_form' => FALSE,
+			//),
+			//'display'				=> array (
+			//	'default'				=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'list_default',
+			//		'settings'			=> array (),
+			//		'module'				=> 'list',
+			//		'weight'				=> 1,
+			//	),
+			//	'teaser'			=> array (
+			//		'label'					=> 'above',
+			//		'type'					=> 'hidden',
+			//		'settings'			=> array (),
+			//		'weight'				=> 0,
+			//	),
+			//),
+			//'id'						=> 28,
+			//'field_id'			=> 10,
+			'field_name'		=> 'fetchit7_field_par_tbl_rows',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+			//'deleted'				=> '0',
+		),
+		// fetchit7_field_table_headers
+		'fetchit7_field_table_headers' => array(
+			'label'					=> $t('Parameter table column headers'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The table column headers.  Only applies when table rows > 0.  Enter as many as needed.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_table_headers',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
 				
-		// =====================================================
-		// these are fields that apply to editable grids
-		// =====================================================
-		
-		
+		// parameter field name
+		'fetchit7_field_par_fld_name' => array(
+			'label'					=> $t('Parameter name'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The parameter name. fetchit7 will create a control for each parameter name specified here.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_name',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// parameter field title
+		'fetchit7_field_par_fld_title' => array(
+			'label'					=> $t('Parameter input control title.'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A title to put above the parameter input control.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_title',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// parameter field description
+		'fetchit7_field_par_fld_desc' => array(
+			'label'					=> $t('Parameter description'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '60',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('A description to put below the parameter input control.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_desc',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// Parameter input control type
+		'fetchit7_field_par_fld_type' => array(
+			'label'					=> $t('Parameter input control type'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '20',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The type of input control to use for entering data for this parameter: [textbox, dropdown_single, dropdown_multiple, radio_buttons, checkboxes, checkbox, date_popup, date_select, datetime_select]'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'textbox',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_type',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// Parameter input control weight
+		'fetchit7_field_par_fld_weight' => array(
+			'label'					=> $t('Parameter input control weight'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> 5,
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The input control weight is an integer -20 to 20 that determines the order in which multiple controls are displayed when NOT in a table (rows = 0). Lower numbers float to the top.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '0',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_weight',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// fetchit7_field_par_fld_enabled
+		'fetchit7_field_par_fld_enabled' => array(
+			'label'					=> $t('Parameter input control enabled'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '10',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Whether this parameter control is enabled for input. Enter true or false.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'true',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_enabled',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// fetchit7_field_par_fld_required
+		'fetchit7_field_par_fld_required' => array(
+			'label'					=> $t('Parameter input value required'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '10',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Whether this parameter control requires an input value to be selected/entered before submitting the form.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'false',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_required',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		// fetchit7_field_par_fld_parstr
+		'fetchit7_field_par_fld_parstr' => array(
+			'label'					=> $t('Additional parameters string'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '30',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('This string allows additional input control parameters to be entered for some controls.  Name:Value pairs (each pair separated by a semicolon).  Example: size:15;size:15'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_parstr',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table
+		'fetchit7_field_par_fld_list_tbl' => array(
+			'label'					=> $t('Parameter input list table'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '40',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the database table containing the list of allowed parameter values to be input into the control'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_tbl',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table key field
+		'fetchit7_field_par_fld_list_key' => array(
+			'label'					=> $t('Parameter input list table key field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '20',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('[CURRENTLY LOCKED TO DEFAULT VALUE] The name of the key field (default = stored) in the database table containing the list of allowed parameter values.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'stored',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_key',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table display field
+		'fetchit7_field_par_fld_list_dsp' => array(
+			'label'					=> $t('Parameter input list table display field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '20',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('[CURRENTLY LOCKED TO DEFAULT VALUE] The name of the display field (default = displayed) in the database table containing the list of allowed parameter values'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'displayed',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_dsp',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table uid field
+		'fetchit7_field_par_fld_list_uid' => array(
+			'label'					=> $t('Parameter input list table uid field'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '20',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The name of the parameter input list table drupal userid integer field.  Leave name blank to not use.  Adds a WHERE clause to the select query.  Default = blank.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_uid',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
+		//parameter field value list table key field default value
+		'fetchit7_field_par_fld_list_def' => array(
+			'label'					=> $t('Parameter default value'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '40',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('The default value for the input control.  It might be a default text value to put in the text box, or a selection in the parameter input list.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_list_def',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
 	);
 	
 	return $fetchit7_instances;
