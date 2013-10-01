@@ -100,10 +100,11 @@ function fetchit7_table_form($form, &$form_state) {
   // get drupal user id (uid) field name
   $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
   $form['user_uid_field'] = array('#type' => 'value', '#value' => $user_uid_field);
-
+	//debug($user_uid_field,'$user_uid_field');
   // get key field name
   $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
   $form['key_field'] = array('#type' => 'value', '#value' => $key_field);
+	//debug($key_field,'$key_field');
 
   // get table weight value
   $table_weight = trim(fetchit7_content_field_fetcher($nid, 'table_weight', 'value'));
@@ -118,7 +119,7 @@ function fetchit7_table_form($form, &$form_state) {
 
   // HTML empty table message - a text string
   // if someone put spaces as a placeholder, trim them to an empty string
-  $table_empty_message = trim(fetchit7_content_field_fetcher($nid, '', 'value'));
+  $table_empty_message = trim(fetchit7_content_field_fetcher($nid, 'fetchit7_field_table_emptymsg', 'value'));
   //should return a string
   $form['table_empty_message'] = array('#type' => 'value', '#value' => $table_empty_message);
 
@@ -200,13 +201,17 @@ function fetchit7_table_form($form, &$form_state) {
       $uid_field_ndx = $field_ndx + 1;
       $form['uid_field_ndx'] = array('#type' => 'value', '#value' => $uid_field_ndx);
     }
+		//debug($field_ndx,'$field_ndx');
+		//debug($field_names[$field_ndx],'$field_names[$field_ndx]');
+		//debug($key_field,'$key_field');
     if ($field_names[$field_ndx] == $key_field) {
       // save it as a 1-based field index but do not create an output table column
       $key_field_ndx = $field_ndx + 1;
       $form['key_field_ndx'] = array('#type' => 'value', '#value' => $key_field_ndx);
     }
   }
-
+	//debug($uid_field_ndx,'$uid_field_ndx');
+	//debug($key_field_ndx,'$key_field_ndx');
   // create the render arrays for each case
   switch ($table_selection_type) {
     case 'copy_single':
