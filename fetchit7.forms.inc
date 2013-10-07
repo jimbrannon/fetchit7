@@ -1344,6 +1344,11 @@ function fetchit7_egrid_form($form, &$form_state) {
   $submit_redirect = trim(fetchit7_content_field_fetcher($nid, 'fetchit7_field_submit_redirect', 'value'));
   $form['submit_redirect'] = array('#type' => 'value', '#value' => $submit_redirect);
 
+  // table attributes
+  // showtitles should be a single boolean value
+  $showtitles = fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_shw_ttl', 'value');
+  $form['showtitles'] = array('#type' => 'value', '#value' => $showtitles);
+
   // get the source data into a data object
   if ($table_rows) {
     if (!($db_data_object = fetchit_get_data_object($db_type, $db_handle, $view_name, $user_uid_field, $table_rows))) {
@@ -1376,8 +1381,6 @@ function fetchit7_egrid_form($form, &$form_state) {
   }
   $form['field_types'] = array('#type' => 'value', '#value' => $field_types);
 
-  $showtitles = true;
-
   // check that the key and uid fields are in the table
   // no key field means no delete query
   $key_field_found = FALSE;
@@ -1390,7 +1393,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       $key_field_index = $field_index;
     }
     if ($field_names[$field_index] == $user_uid_field) {
-      $key_field_found = TRUE;
+      $uid_field_found = TRUE;
       $uid_field_index = $field_index;
     }
   }
@@ -1804,7 +1807,7 @@ function theme_fetchit7_egrid_form($variables) {
   $table_weight = $form['table_weight']['#value'];
   //debug($table_weight,'$table_weight');
   //figure out the formatting
-  $output = '<div class="' . $form_id . '_params">';
+  $output = '<div class="' . $form_id . '_egrid">';
   //$output  = '';
 
   if ($table_row_count) {
@@ -2170,6 +2173,7 @@ function fetchit_get_db_handle($nid) {
         }
         // create the pg connection
         $db_string = "host=$db_host port=$db_port user=$db_login password=$db_password dbname=$db_name";
+				//debug($db_string,'$db_string');
         $db_handle = pg_connect($db_string);
         break;
       case FETCHIT7_DBTYPE_NAME_MYSQL:
@@ -2744,12 +2748,13 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if (strlen(trim($db_value))) {
           $default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
         }
-        if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
-          $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
-        }
-        else {
-          $weight = $user_field_ndx - 1;
-        }
+        //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+        //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
+        //}
+        //else {
+        //  $weight = $user_field_ndx - 1;
+        //}
+        $weight = 0;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
@@ -2801,7 +2806,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         }
       }
       else {// create the default input control element for integers - a text box
-        $parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+        //$parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+        $parameter_string = '';
         $size_string = fetchit_parse_parameter_string('size', $parameter_string);
         if (strlen(trim($size_string))) {
           $size = (int)$size_string;
@@ -2812,12 +2818,13 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if (strlen(trim($db_value))) {
           $default = (int)$db_value;
         }
-        if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
-          $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
-        }
-        else {
-          $weight = $user_field_ndx - 1;
-        }
+        //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+        //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
+        //}
+        //else {
+        //  $weight = $user_field_ndx - 1;
+        //}
+        $weight = 0;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
@@ -2868,7 +2875,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         }
       }
       else {// create the default input control element for reals - a text box
-        $parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+        //$parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+        $parameter_string = '';
         $size_string = fetchit_parse_parameter_string('size', $parameter_string);
         if (strlen(trim($size_string))) {
           $size = (int)$size_string;
@@ -2877,12 +2885,13 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = 9;
         }
         $default = $db_value;
-        if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
-          $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
-        }
-        else {
-          $weight = $user_field_ndx - 1;
-        }
+        //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+        //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
+        //}
+        //else {
+        //  $weight = $user_field_ndx - 1;
+        //}
+        $weight = 0;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
@@ -2935,12 +2944,13 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if (strlen(trim($db_value))) {
           $default = array('month' => format_date(strtotime($db_value), 'custom', 'n', 0), 'day' => format_date(strtotime($db_value), 'custom', 'j', 0), 'year' => format_date(strtotime($db_value), 'custom', 'Y', 0), );
         }
-        if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
-          $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
-        }
-        else {
-          $weight = $user_field_ndx - 1;
-        }
+        //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+        //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
+        //}
+        //else {
+        //  $weight = $user_field_ndx - 1;
+        //}
+        $weight = 0;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
@@ -2995,12 +3005,13 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if (strlen(trim($db_value))) {
           $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s', 0);
         }
-        if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
-          $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
-        }
-        else {
-          $weight = $user_field_ndx - 1;
-        }
+        //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+        //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
+        //}
+        //else {
+        //  $weight = $user_field_ndx - 1;
+        //}
+        $weight = 0;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
@@ -3057,12 +3068,13 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if (strlen(trim($db_value))) {
           $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s', 0);
         }
-        if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
-          $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
-        }
-        else {
-          $weight = $user_field_ndx - 1;
-        }
+        //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+        //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
+        //}
+        //else {
+        //  $weight = $user_field_ndx - 1;
+        //}
+        $weight = 0;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
@@ -3124,7 +3136,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = 20;
         }
         $default = $db_value;
-        $weight = $user_field_ndx - 1;
+        //$weight = $user_field_ndx - 1;
+        $weight = 0;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
@@ -3164,9 +3177,11 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           default:
         }
       }
-      else {// try a text box for this unanticipated field foeld
-        $parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+      else {// try a text box for this unanticipated field type
+        //$parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+				$parameter_string = '';
         $size_string = fetchit_parse_parameter_string('size', $parameter_string);
+        $size_string = '';
         if (strlen(trim($size_string))) {
           $size = (int)$size_string;
         }
@@ -3174,12 +3189,13 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = 40;
         }
         $default = $db_value;
-        if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
-          $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
-        }
-        else {
-          $weight = $user_field_ndx - 1;
-        }
+        //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
+        //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
+        //}
+        //else {
+        //  $weight = $user_field_ndx - 1;
+        //}
+        $weight = 0;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;

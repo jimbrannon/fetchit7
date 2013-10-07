@@ -3321,7 +3321,7 @@ function _fetchit7_content_egrid_installed_instances () {
 			'description'		=> $t('This parameter defines whether titles are displayed on every parameter control on the form.  The form can get messy (too busy) with too many titles.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> '1',
+					'value'					=> '0',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_shw_ttl',
