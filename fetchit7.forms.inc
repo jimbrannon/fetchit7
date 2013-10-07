@@ -2708,6 +2708,7 @@ function fetchit_parse_parameter_string($parameter_name, $parameter_string) {
 
 //function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type,$db_handle,$user_field_ndx,$user_field_data,$nid,$showtitles,$db_value) {
 function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user_field_ndx, $user_field_data, $nid, $showtitles, $db_value) {
+	//debug($field_name.', '.$field_type,'$field_name, $field_type');
   $form = array();
   switch (strtolower(trim($field_type))) {
     case 'bool':
@@ -2875,6 +2876,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         }
       }
       else {// create the default input control element for reals - a text box
+        $default = $db_value;
         //$parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
         $parameter_string = '';
         $size_string = fetchit_parse_parameter_string('size', $parameter_string);
@@ -2882,9 +2884,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = (int)$size_string;
         }
         else {
-          $size = 9;
+          $size = strlen($default)+4;;
         }
-        $default = $db_value;
         //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
         //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
         //}
@@ -2927,7 +2928,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+              $size = strlen(date('M j, Y'))+3;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -2940,9 +2941,9 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         }
       }
       else {// the default input control element for dates - the drupal 6 core date element
-        $default = array('month' => format_date(time(), 'custom', 'n', 0), 'day' => format_date(time(), 'custom', 'j', 0), 'year' => format_date(time(), 'custom', 'Y', 0), );
+    		$default = array('month' => date('n'), 'day' => date('j'), 'year' => date('Y'), );
         if (strlen(trim($db_value))) {
-          $default = array('month' => format_date(strtotime($db_value), 'custom', 'n', 0), 'day' => format_date(strtotime($db_value), 'custom', 'j', 0), 'year' => format_date(strtotime($db_value), 'custom', 'Y', 0), );
+        	$default = array('month' => date('n', strtotime($db_value)), 'day' => date('j', strtotime($db_value)), 'year' => date('Y', strtotime($db_value)), );
         }
         //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
         //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
@@ -2981,13 +2982,14 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
             return fetchit_get_date_popup_element($user_field_data, $user_field_ndx - 1, $date_format, $year_range, $showtitles, $db_value);
           case F_DR_CONTROL_DATESEL:
           case F_DR_CONTROL_TEXTBOX:
+            $date_format = 'g:i A';
             $parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
             $size_string = fetchit_parse_parameter_string('size', $parameter_string);
             if (strlen(trim($size_string))) {
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+            	$size = strlen(date($date_format))+3;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3000,10 +3002,10 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         }
       }
       else {// the default input control element for times - the drupal 6 date module api element, date_select formatted to only show hours and minutes
-        $default = format_date(time(), 'custom', 'Y-m-d H:i:s');
         $date_format = 'g:i A';
+      	$default = date($date_format);
         if (strlen(trim($db_value))) {
-          $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s', 0);
+          $default = date($date_format,strtotime($db_value));
         }
         //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
         //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
@@ -3012,15 +3014,17 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         //  $weight = $user_field_ndx - 1;
         //}
         $weight = 0;
+				$size = strlen($default)+3;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
-          $form = array('#type' => 'date_select', '#title' => $title, '#description' => $description, '#date_format' => $date_format, '#default_value' => $default, '#date_label_position' => 'none', //'none' 'within' 'above'
-          '#weight' => $weight, );
-        }
-        else {
-          $form = array('#type' => 'date_select', '#date_format' => $date_format, '#default_value' => $default, '#date_label_position' => 'none', //'none' 'within' 'above'
-          '#weight' => $weight, );
+          //$form = array('#type' => 'date_select', '#title' => $title, '#description' => $description, '#date_format' => $date_format, '#default_value' => $default, '#date_label_position' => 'none', //'none' 'within' 'above'
+          //'#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+        } else {
+          //$form = array('#type' => 'date_select', '#date_format' => $date_format, '#default_value' => $default, '#date_label_position' => 'none', //'none' 'within' 'above'
+          //'#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
         }
         return $form;
       }
@@ -3048,7 +3052,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+	            $date_format = 'M j, Y g:i A';
+            	$size = strlen(date($date_format))+3;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3063,10 +3068,10 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
       }
       else {// the default input control element for timestamps - the drupal 6 date module api element, date_select formatted to show months, days, years, hours and minutes
         $date_format = 'M j, Y g:i A';
-        $default = format_date(time(), 'custom', 'Y-m-d H:i:s');
+    		$default = date($date_format);
         $year_range = '-15:+15';
         if (strlen(trim($db_value))) {
-          $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s', 0);
+          $default = date($date_format,strtotime($db_value));
         }
         //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
         //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
@@ -3075,15 +3080,17 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         //  $weight = $user_field_ndx - 1;
         //}
         $weight = 0;
+				$size = strlen($default)+3;
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
-          $form = array('#type' => 'date_select', '#title' => $title, '#description' => $description, '#date_format' => $date_format, '#date_label_position' => 'none', //'none' 'within' 'above'
-          '#date_year_range' => $year_range, '#default_value' => $default, '#weight' => $weight, );
-        }
-        else {
-          $form = array('#type' => 'date_select', '#date_format' => $date_format, '#date_label_position' => 'none', //'none' 'within' 'above'
-          '#date_year_range' => $year_range, '#default_value' => $default, '#weight' => $weight, );
+          //$form = array('#type' => 'date_select', '#title' => $title, '#description' => $description, '#date_format' => $date_format, '#date_label_position' => 'none', //'none' 'within' 'above'
+          //'#date_year_range' => $year_range, '#default_value' => $default, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+        } else {
+          //$form = array('#type' => 'date_select', '#date_format' => $date_format, '#date_label_position' => 'none', //'none' 'within' 'above'
+          //'#date_year_range' => $year_range, '#default_value' => $default, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
         }
         return $form;
       }
@@ -3142,8 +3149,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $title = $field_name;
           $description = $field_type;
           $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
-        }
-        else {
+        } else {
           $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
         }
         return $form;
