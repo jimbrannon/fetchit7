@@ -1709,15 +1709,18 @@ function fetchit7_egrid_form($form, &$form_state) {
   // the theme function will render them individually in a stack or in a table, whichever the user specified via table_rows
   for ($r = 0; $r < $row_count; $r++) {
     for ($i = 0; $i < $field_count; $i++) {
+     	$enabled = TRUE; // this is a default enabled flag in case there is no user input configuration for this field
       $element_name = fetchit_make_element_name($nid, $r, $i);
       if ($field_names[$i] == $key_field) {
-        $form['elements'][$element_name] = array('#markup' => 'KEY FIELD');
+      	$enabled = FALSE; // this is a default enabled flag in case there is no user input configuration for this field
+        //$form['elements'][$element_name] = array('#markup' => 'KEY FIELD');
       }
-      else {
+//      else {
         if ($field_names[$i] == $user_uid_field) {
-          $form['elements'][$element_name] = array('#markup' => 'UID FIELD');
+	      	$enabled = FALSE; // this is a default enabled flag in case there is no user input configuration for this field
+          //$form['elements'][$element_name] = array('#markup' => 'UID FIELD');
         }
-        else {
+//        else {
           // set a default value to pass into the element generator
           // this value is used unless the user specified a default value in the configuration
           // get the last entered value from the selection table
@@ -1725,18 +1728,23 @@ function fetchit7_egrid_form($form, &$form_state) {
           switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
             case F_DR_CONTROL_CHECKBOXES:
             case F_DR_CONTROL_DROPDOWN_MULTI:
-              $db_value = array(0);
+              $db_value = array(fetchit_get_data($db_type,$db_data_object,$r,$i));
               break;
             case F_DR_CONTROL_DROPDOWN_SINGLE:
             case F_DR_CONTROL_RADIOBTN:
-            case F_DR_CONTROL_TEXTBOX:
             case F_DR_CONTROL_CHECKBOX:
+              $db_value = fetchit_get_data($db_type,$db_data_object,$r,$i);
+              break;
+            case F_DR_CONTROL_TEXTBOX:
+              $db_value = fetchit_get_data($db_type,$db_data_object,$r,$i);
+              break;
             case F_DR_CONTROL_DATESEL:
             case F_DR_CONTROL_DATETIMESEL:
             case F_DR_CONTROL_POPUPDATE:
-              $db_value = 0;
+              $db_value = fetchit_get_data($db_type,$db_data_object,$r,$i);
               break;
             default:
+              $db_value = fetchit_get_data($db_type,$db_data_object,$r,$i);
           }
           // add everything else to the form we might need in the theme, validate, or submit functions
           //$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
@@ -1760,10 +1768,10 @@ function fetchit7_egrid_form($form, &$form_state) {
           else {
             $user_field_ndx = 0;
           }
-          $form['elements'][$element_name] = fetchit7_param_element_form($field_names[$i], $field_types[$i], $db_handle, $user_field_ndx, $user_field_data, $nid, $showtitles, $db_value);
+          $form['elements'][$element_name] = fetchit7_param_element_form($field_names[$i], $field_types[$i], $db_handle, $user_field_ndx, $user_field_data, $nid, $showtitles, $db_value, $enabled);
         }
-      }
-    }
+//      }
+//    }
   }
 
   $submit_button_flag = TRUE;
@@ -2707,7 +2715,7 @@ function fetchit_parse_parameter_string($parameter_name, $parameter_string) {
 }
 
 //function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type,$db_handle,$user_field_ndx,$user_field_data,$nid,$showtitles,$db_value) {
-function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user_field_ndx, $user_field_data, $nid, $showtitles, $db_value) {
+function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user_field_ndx, $user_field_data, $nid, $showtitles, $db_value, $enabled=TRUE) {
 	//debug($field_name.', '.$field_type,'$field_name, $field_type');
   $form = array();
   switch (strtolower(trim($field_type))) {
@@ -2748,6 +2756,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
       else {// create the default input control element for booleans - a single check box
         if (strlen(trim($db_value))) {
           $default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
+        } else {
+        	$default = 0;
         }
         //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
         //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
@@ -2759,11 +2769,11 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
-          $form = array('#type' => 'checkbox', '#title' => $title, '#description' => $description, '#default_value' => $default, '#return_value' => 1, '#disabled' => FALSE, '#required' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'checkbox', '#title' => $title, '#description' => $description, '#default_value' => $default, '#return_value' => 1, '#disabled' => !$enabled, '#required' => FALSE, '#weight' => $weight, );
         }
         else {
           $title = $field_name;
-          $form = array('#type' => 'checkbox', '#title' => $title, '#default_value' => $default, '#return_value' => 1, '#disabled' => FALSE, '#required' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'checkbox', '#title' => $title, '#default_value' => $default, '#return_value' => 1, '#disabled' => !$enabled, '#required' => FALSE, '#weight' => $weight, );
         }
         return $form;
       }
@@ -2818,6 +2828,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         }
         if (strlen(trim($db_value))) {
           $default = (int)$db_value;
+        } else {
+        	$default = '';
         }
         //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
         //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
@@ -2829,10 +2841,10 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
-          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         }
         else {
-          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         }
         return $form;
       }
@@ -2896,10 +2908,10 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
-          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         }
         else {
-          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         }
         return $form;
       }
@@ -2956,11 +2968,11 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $title = $field_name;
           $description = $field_type;
           $form = array('#type' => 'date', // this is the drupal 6 core date element, default is today's date, returns an associative array with 'year' 'month' and 'day' elements
-          '#title' => $title, '#description' => $description, '#required' => FALSE, '#disabled' => FALSE, '#default_value' => $default, '#weight' => $weight, );
+          '#title' => $title, '#description' => $description, '#required' => FALSE, '#disabled' => !$enabled, '#default_value' => $default, '#weight' => $weight, );
         }
         else {
           $form = array('#type' => 'date', // this is the drupal 6 core date element, default is today's date, returns an associative array with 'year' 'month' and 'day' elements
-          '#required' => FALSE, '#disabled' => FALSE, '#default_value' => $default, '#weight' => $weight, );
+          '#required' => FALSE, '#disabled' => !$enabled, '#default_value' => $default, '#weight' => $weight, );
         }
         return $form;
       }
@@ -3020,11 +3032,11 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $description = $field_type;
           //$form = array('#type' => 'date_select', '#title' => $title, '#description' => $description, '#date_format' => $date_format, '#default_value' => $default, '#date_label_position' => 'none', //'none' 'within' 'above'
           //'#weight' => $weight, );
-          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         } else {
           //$form = array('#type' => 'date_select', '#date_format' => $date_format, '#default_value' => $default, '#date_label_position' => 'none', //'none' 'within' 'above'
           //'#weight' => $weight, );
-          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         }
         return $form;
       }
@@ -3086,11 +3098,11 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $description = $field_type;
           //$form = array('#type' => 'date_select', '#title' => $title, '#description' => $description, '#date_format' => $date_format, '#date_label_position' => 'none', //'none' 'within' 'above'
           //'#date_year_range' => $year_range, '#default_value' => $default, '#weight' => $weight, );
-          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         } else {
           //$form = array('#type' => 'date_select', '#date_format' => $date_format, '#date_label_position' => 'none', //'none' 'within' 'above'
           //'#date_year_range' => $year_range, '#default_value' => $default, '#weight' => $weight, );
-          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         }
         return $form;
       }
@@ -3148,9 +3160,9 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
-          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         } else {
-          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#default_value' => $default, '#size' => $size, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         }
         return $form;
       }
@@ -3205,10 +3217,10 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
-          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#size' => $size, '#default_value' => $default, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#title' => $title, '#description' => $description, '#size' => $size, '#default_value' => $default, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         }
         else {
-          $form = array('#type' => 'textfield', '#size' => $size, '#default_value' => $default, '#required' => FALSE, '#disabled' => FALSE, '#weight' => $weight, );
+          $form = array('#type' => 'textfield', '#size' => $size, '#default_value' => $default, '#required' => FALSE, '#disabled' => !$enabled, '#weight' => $weight, );
         }
         return $form;
       }
