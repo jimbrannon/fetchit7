@@ -1296,10 +1296,16 @@ function fetchit7_egrid_form($form, &$form_state) {
   }
 
   // get drupal user id (uid) field name
+  // IMPORTANT: knowing the uid field is critical to the query,
+  //		but unlike parameter input forms, it is not used to control display
+  //		that will be up to the user to decide using the enabled and hidden fields
   $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
   $form['user_uid_field'] = array('#type' => 'value', '#value' => $user_uid_field);
 
   // get key field name
+  // IMPORTANT: knowing the key field can be critical for some functions,
+  //		but unlike parameter input forms, it is not used to control display
+  //		that will be up to the user to decide using the enabled and hidden fields
   $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
   $form['key_field'] = array('#type' => 'value', '#value' => $key_field);
 
@@ -1308,14 +1314,17 @@ function fetchit7_egrid_form($form, &$form_state) {
   $form['table_weight'] = array('#type' => 'value', '#value' => $table_weight);
 
   // parameter table_rows should be a single integer value
+  // NOTE: this is a ambiguous idea on the editable grid, so either
+  //    1. don't collect this value
+  //		2. use it as a page size on a paged table display
+  //		3. use it as a maximum table size, by restricting the records returned in the view (IMPLEMENTED)
   $table_rows = fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_tbl_rows', 'value');
-  //debug($table_rows,'param_form $table_rows');
   $form['table_rows'] = array('#type' => 'value', '#value' => $table_rows);
-  //debug($form['table_rows'],'param_form $form[table_rows]');
 
   // parameter table_headers should be an array of text values
   // warning: d7 does not return empty strings at all
   // but if someone put spaces as a placeholder, trim them to an empty string
+  // IMPORTANT: apply these in order to the table columns AS DISPLAYED (i.e. skipping hidden columns)
   $table_headers = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_table_headers', 'values'));
   //should return an array
   $form['table_headers'] = array('#type' => 'value', '#value' => $table_headers);
@@ -1466,9 +1475,11 @@ function fetchit7_egrid_form($form, &$form_state) {
   // weights are integers, but leave these input values as strings until later
   $param_weights = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_weight', 'values'));
   //should return an array
-  //debug($param_weights,'$param_weights');
   // boolean, but leave these input values as strings until later, also can deal with default values then
   $param_enabled = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_enabled', 'values'));
+  //should return an array
+  // boolean, but leave these input values as strings until later, also can deal with default values then
+  $param_hidden = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_hidden', 'values'));
   //should return an array
   // boolean, but leave these input values as strings until later, also can deal with default values then
   $param_required = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_required', 'values'));
