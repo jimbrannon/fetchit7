@@ -890,7 +890,6 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '-1',
 		),
-
 		// parameter field enabled
 		'fetchit7_field_par_fld_enabled' => array(
 			'label'						=> $t('Parameter input control enabled'),
@@ -898,6 +897,19 @@ function _fetchit7_installed_fields () {
 					'max_length'	=> '60',
 			),
 			'field_name'			=> 'fetchit7_field_par_fld_enabled',
+			'type'						=> 'text',
+			'module'					=> 'text',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '-1',
+		),
+		// parameter field hidden
+		'fetchit7_field_par_fld_hidden' => array(
+			'label'						=> $t('Parameter input control hidden'),
+			'settings'				=> array (
+					'max_length'	=> '60',
+			),
+			'field_name'			=> 'fetchit7_field_par_fld_hidden',
 			'type'						=> 'text',
 			'module'					=> 'text',
 			'active'					=> '1',
