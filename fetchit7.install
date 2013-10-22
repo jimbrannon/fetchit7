@@ -3573,6 +3573,33 @@ function _fetchit7_content_egrid_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		// fetchit7_field_par_fld_hidden
+		'fetchit7_field_par_fld_hidden' => array(
+			'label'					=> $t('Parameter input control hidden'),
+			'widget'				=> array(
+				'type'					=> 'text_textfield',
+				'module'				=> 'text',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'size'					=> '10',
+				),
+				//'weight'				=> -3,
+			),
+			'settings'			=> array (
+				'text_processing'	=> '0',
+				'user_register_form'	=> FALSE,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Whether this parameter control is hidden for input. Enter true or false.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> 'true',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_par_fld_hidden',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
 		// fetchit7_field_par_fld_required
 		'fetchit7_field_par_fld_required' => array(
 			'label'					=> $t('Parameter input value required'),
