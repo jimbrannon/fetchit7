@@ -2796,7 +2796,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				//'weight'				=> -3,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('This parameter tells fetchit7 where to display the form: none, page, block'),
+			'description'		=> $t('Tells fetchit7 where to display the form: none, page, block'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'block',
@@ -2819,7 +2819,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				//'weight'				=> -3,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('This parameter defines whether the form is enabled for output or not.'),
+			'description'		=> $t('Defines whether the form is enabled for output or not.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '1',
@@ -2922,7 +2922,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The name of the database to connect to.'),
+			'description'		=> $t('The name of the database containing the data to display.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -3057,7 +3057,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('Database source data table/view name'),
+			'description'		=> $t('The name of the table (can not be a view/query) containing the data to edit in this editable grid.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -3133,7 +3133,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				//'weight'				=> -3,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('This parameter tells fetchit7 where on the form to display the table (relative to other form elements).'),
+			'description'		=> $t('Tells fetchit7 where on the form to display the table (relative to other form elements).'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '-8',
@@ -3203,7 +3203,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				//'weight'				=> -3,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('This parameter tells fetchit7 where on the form to display the submit button (relative to other form elements).'),
+			'description'		=> $t('Tells fetchit7 where on the form to display the submit button (relative to other form elements).'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '8',
@@ -3279,7 +3279,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The table column headers.  Use these instead of the field names.  Enter as many as needed.  Leave blank to use the table field names.'),
+			'description'		=> $t('The table column headers.  Use these instead of the source table field names.  Enter as many as there are fields displayed (i.e. skip hidden fields).'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -3330,7 +3330,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				//'weight'				=> -3,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('This parameter defines whether titles are displayed on every parameter control on the form.  The form can get messy (too busy) with too many titles.'),
+			'description'		=> $t('Defines whether titles are displayed on every parameter control on the form.  The form can get messy (too busy) with too many titles.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '0',
@@ -3352,7 +3352,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				//'weight'				=> -3,
 			),
 			'required'			=> TRUE,
-			'description'		=> $t('Number of rows in the table of parameter input controls.  Enter 0 to output controls in a stack ordered by weight (NOT a table).'),
+			'description'		=> $t('Number of rows in the table.  Enter 0 to output a single record of controls in a stack (NOT a table).'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 3,
@@ -3383,37 +3383,9 @@ function _fetchit7_content_egrid_installed_instances () {
 			'bundle'				=> $content_name,
 			//'deleted'				=> '0',
 		),
-		// fetchit7_field_table_headers
-		'fetchit7_field_table_headers' => array(
-			'label'					=> $t('Parameter table column headers'),
-			'widget'				=> array(
-				'type'					=> 'text_textfield',
-				'module'				=> 'text',
-				'active'				=> TRUE,
-				'settings'			=> array (
-					'size'					=> '30',
-				),
-				//'weight'				=> -3,
-			),
-			'settings'			=> array (
-				'text_processing'	=> '0',
-				'user_register_form'	=> FALSE,
-			),
-			'required'			=> FALSE,
-			'description'		=> $t('The table column headers.  Only applies when table rows > 0.  Enter as many as needed.'),
-			'default_value'	=> array(
-				0								=> array(
-					'value'					=> '',
-				),
-			),
-			'field_name'		=> 'fetchit7_field_table_headers',
-			'entity_type'		=> 'node',
-			'bundle'				=> $content_name,
-		),
-				
 		// parameter field name
 		'fetchit7_field_par_fld_name' => array(
-			'label'					=> $t('Parameter name'),
+			'label'					=> $t('Field names'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3428,7 +3400,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The parameter name. fetchit7 will create a control for each parameter name specified here.'),
+			'description'		=> $t('The field names for which you are entering (over-riding) the default editable grid display type.  Otherwise fetchit7 creates a default control based on the field value and field type for fields not specified here.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -3440,7 +3412,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		// parameter field title
 		'fetchit7_field_par_fld_title' => array(
-			'label'					=> $t('Parameter input control title.'),
+			'label'					=> $t('Control titles'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3455,7 +3427,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('A title to put above the parameter input control.'),
+			'description'		=> $t('A title to put above the input control.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -3467,7 +3439,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		// parameter field description
 		'fetchit7_field_par_fld_desc' => array(
-			'label'					=> $t('Parameter description'),
+			'label'					=> $t('Control descriptions'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3482,7 +3454,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('A description to put below the parameter input control.'),
+			'description'		=> $t('A description to put below the input control.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -3494,7 +3466,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		// Parameter input control type
 		'fetchit7_field_par_fld_type' => array(
-			'label'					=> $t('Parameter input control type'),
+			'label'					=> $t('Input control types'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3509,7 +3481,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The type of input control to use for entering data for this parameter: [textbox, dropdown_single, dropdown_multiple, radio_buttons, checkboxes, checkbox, date_popup, date_select, datetime_select]'),
+			'description'		=> $t('The type of input control to use for entering data for this field: [textbox, dropdown_single, dropdown_multiple, radio_buttons, checkboxes, checkbox, date_popup, date_select, datetime_select]'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'textbox',
@@ -3521,7 +3493,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		// Parameter input control weight
 		'fetchit7_field_par_fld_weight' => array(
-			'label'					=> $t('Parameter input control weight'),
+			'label'					=> $t('Input control weights'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3548,7 +3520,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		// fetchit7_field_par_fld_enabled
 		'fetchit7_field_par_fld_enabled' => array(
-			'label'					=> $t('Parameter input control enabled'),
+			'label'					=> $t('Input control enabled'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3563,7 +3535,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('Whether this parameter control is enabled for input. Enter true or false.'),
+			'description'		=> $t('Whether the control for this field is enabled for input. Enter true or false.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'true',
@@ -3575,7 +3547,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		// fetchit7_field_par_fld_hidden
 		'fetchit7_field_par_fld_hidden' => array(
-			'label'					=> $t('Parameter input control hidden'),
+			'label'					=> $t('Input control hidden'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3590,7 +3562,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('Whether this parameter control is hidden for input. Enter true or false.'),
+			'description'		=> $t('Whether a control for this field is displayed in the editable grid. Enter true or false.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'true',
@@ -3602,7 +3574,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		// fetchit7_field_par_fld_required
 		'fetchit7_field_par_fld_required' => array(
-			'label'					=> $t('Parameter input value required'),
+			'label'					=> $t('Input value required'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3617,7 +3589,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('Whether this parameter control requires an input value to be selected/entered before submitting the form.'),
+			'description'		=> $t('Whether this control for this field requires an input value to be selected/entered before submitting the form.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'false',
@@ -3644,7 +3616,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('This string allows additional input control parameters to be entered for some controls.  Name:Value pairs (each pair separated by a semicolon).  Example: size:15;size:15'),
+			'description'		=> $t('This string allows additional input control parameters to be entered. Only for certain controls. Format is Name:Value;Name:Value (each pair separated by a semicolon).  Example: size:15;size:15'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -3656,7 +3628,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		//parameter field value list table
 		'fetchit7_field_par_fld_list_tbl' => array(
-			'label'					=> $t('Parameter input list table'),
+			'label'					=> $t('Input control list table'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3671,7 +3643,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The name of the database table containing the list of allowed parameter values to be input into the control'),
+			'description'		=> $t('The name of the database table/view containing the list of allowed values to be used in the control'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -3683,7 +3655,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		//parameter field value list table key field
 		'fetchit7_field_par_fld_list_key' => array(
-			'label'					=> $t('Parameter input list table key field'),
+			'label'					=> $t('Input control list table key field'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3698,7 +3670,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('[CURRENTLY LOCKED TO DEFAULT VALUE] The name of the key field (default = stored) in the database table containing the list of allowed parameter values.'),
+			'description'		=> $t('The name of the key field (default = stored) in the database table/view containing the list of allowed values.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'stored',
@@ -3710,7 +3682,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		//parameter field value list table display field
 		'fetchit7_field_par_fld_list_dsp' => array(
-			'label'					=> $t('Parameter input list table display field'),
+			'label'					=> $t('Input control list table display field'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3725,7 +3697,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('[CURRENTLY LOCKED TO DEFAULT VALUE] The name of the display field (default = displayed) in the database table containing the list of allowed parameter values'),
+			'description'		=> $t('The name of the display field (default = displayed) in the database table containing the list of allowed values'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> 'displayed',
@@ -3737,7 +3709,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		//parameter field value list table uid field
 		'fetchit7_field_par_fld_list_uid' => array(
-			'label'					=> $t('Parameter input list table uid field'),
+			'label'					=> $t('Input control list table uid field'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3752,7 +3724,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The name of the parameter input list table drupal userid integer field.  Leave name blank to not use.  Adds a WHERE clause to the select query.  Default = blank.'),
+			'description'		=> $t('The name of the input control list table drupal userid integer field.  Leave name blank to not use.  Adds a WHERE clause to the select query.  Default = blank.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
@@ -3764,7 +3736,7 @@ function _fetchit7_content_egrid_installed_instances () {
 		),
 		//parameter field value list table key field default value
 		'fetchit7_field_par_fld_list_def' => array(
-			'label'					=> $t('Parameter default value'),
+			'label'					=> $t('Input control default value'),
 			'widget'				=> array(
 				'type'					=> 'text_textfield',
 				'module'				=> 'text',
@@ -3779,7 +3751,7 @@ function _fetchit7_content_egrid_installed_instances () {
 				'user_register_form'	=> FALSE,
 			),
 			'required'			=> FALSE,
-			'description'		=> $t('The default value for the input control.  It might be a default text value to put in the text box, or a selection in the parameter input list.'),
+			'description'		=> $t('The default value for the input control.  It might be a default text value to put in the text box, or a selection in the list.'),
 			'default_value'	=> array(
 				0								=> array(
 					'value'					=> '',
