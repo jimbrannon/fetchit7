@@ -1552,6 +1552,8 @@ function fetchit7_egrid_form($form, &$form_state) {
     }
 
     // control types - require some more checking since they are typed into a text box
+    // default is 0, and user_control() = FALSE, which means let the field type determine the control element type
+    // (the code should have an appropriate default control element type specified for each possible database field type)
     if ($param_found) {
       if (($param_found - 1) < count($param_types)) {
         // see if the entered control type matches something we know about
@@ -1589,7 +1591,7 @@ function fetchit7_egrid_form($form, &$form_state) {
     }
 
     //$param_enabled
-    //fetchit2 uses disabled - so default of disabled = false is OK
+    //fetchit2 uses disabled - so default of false means it should be enabled (editable)
     if ($param_found) {
       if (($param_found - 1) < count($param_enabled)) {
         $enabled = filter_var($param_enabled[$param_found - 1], FILTER_VALIDATE_BOOLEAN);
@@ -1604,6 +1606,7 @@ function fetchit7_egrid_form($form, &$form_state) {
     }
 
     //$param_hidden
+    // default of false means it should be displayed
     if ($param_found) {
       if (($param_found - 1) < count($param_hidden)) {
         $hidden = filter_var($param_hidden[$param_found - 1], FILTER_VALIDATE_BOOLEAN);
@@ -1728,75 +1731,89 @@ function fetchit7_egrid_form($form, &$form_state) {
     }
   }
 
-  // loop through the table rows and fields
-  // render each control element then save the rendered control elements in form values
+  // loop through the source table rows and fields
+  // create renderable form control element constructions in the form() array for those values that will be displayed
+	// the source table field values and field types plus the the user entered
+	// values stored in user_field_data() will provide the information necessary to create the control elements
   // critical to the operation of this form are the unique form ids of the rendered control elements
-  // the theme function will render them individually in a stack or in a table, whichever the user specified via table_rows
+  // the theme function will render them individually in a stack (table_rows=0) or in a HTML table (table_rows>0)
   for ($r = 0; $r < $row_count; $r++) {
     for ($i = 0; $i < $field_count; $i++) {
-     	$enabled = TRUE; // this is a default enabled flag in case there is no user input configuration for this field
       $element_name = fetchit_make_element_name($nid, $r, $i);
-      if ($field_names[$i] == $key_field) {
-      	$enabled = FALSE; // this is a default enabled flag in case there is no user input configuration for this field
-        //$form['elements'][$element_name] = array('#markup' => 'KEY FIELD');
-      }
-//      else {
-        if ($field_names[$i] == $user_uid_field) {
-	      	$enabled = FALSE; // this is a default enabled flag in case there is no user input configuration for this field
-          //$form['elements'][$element_name] = array('#markup' => 'UID FIELD');
-        }
-//        else {
-          // set a default value to pass into the element generator
-          // this value is used unless the user specified a default value in the configuration
-          // get the last entered value from the selection table
-          // depending on the control type, this is either a single value or an array of values...
-          switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
-            case F_DR_CONTROL_CHECKBOXES:
-            case F_DR_CONTROL_DROPDOWN_MULTI:
-              $db_value = array(fetchit_get_data($db_type,$db_data_object,$r,$i));
-              break;
-            case F_DR_CONTROL_DROPDOWN_SINGLE:
-            case F_DR_CONTROL_RADIOBTN:
-            case F_DR_CONTROL_CHECKBOX:
-              $db_value = fetchit_get_data($db_type,$db_data_object,$r,$i);
-              break;
-            case F_DR_CONTROL_TEXTBOX:
-              $db_value = fetchit_get_data($db_type,$db_data_object,$r,$i);
-              break;
-            case F_DR_CONTROL_DATESEL:
-            case F_DR_CONTROL_DATETIMESEL:
-            case F_DR_CONTROL_POPUPDATE:
-              $db_value = fetchit_get_data($db_type,$db_data_object,$r,$i);
-              break;
-            default:
-              $db_value = fetchit_get_data($db_type,$db_data_object,$r,$i);
-          }
-          // add everything else to the form we might need in the theme, validate, or submit functions
-          //$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
-          //$form['param_indices'][$param_count] = array('#type' => 'value','#value' => $i);
-          //$form['field_types'][$i] = array('#type' => 'value','#value' => $data_tbl_ndx_type);
-          $form['param_names'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_NAME_STR]);
-          $form['param_types'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]);
-          $form['param_titles'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_TITLE_STR]);
-          $form['param_descriptions'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DESC_STR]);
-          $form['param_weights'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][FETCHIT7_FIELD_WEIGHT_STR]);
-          //$form['param_data_table'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DATA_TBL_STR]);
-          //$form['param_data_ndx'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DATA_KEY_STR]);
-          //$form['param_data_uid'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DATA_UID_STR]);
+     	$enabled = !$user_field_data[$i][F_DR_FIELD_DISABLED_STR];
+     	$hidden = $user_field_data[$i][FETCHIT7_FIELD_HIDDEN_STR];
 
-          // the following creates the "renderable array" of the next parameter input control (drupal form element)
-          //   to be displayed on this form ($nid)
-          // stack these up in the array. "How" they are to be displayed will be handled by the theme function
-          if ($user_control[$i]) {
-            $user_field_ndx = $i + 1;
-          }
-          else {
-            $user_field_ndx = 0;
-          }
-          $form['elements'][$element_name] = fetchit7_param_element_form($field_names[$i], $field_types[$i], $db_handle, $user_field_ndx, $user_field_data, $nid, $showtitles, $db_value, $enabled);
-        }
-//      }
-//    }
+      // set a default value to pass into the element generator
+      // this value is used unless the user specified a default value in the configuration
+      // get the last entered value from the selection table
+      // depending on the control type, this is either a single value or an array of values...
+      // but because this is an egrid, it must be an array containing a single value
+      $value = fetchit_get_data($db_type,$db_data_object,$r,$i);
+      $form['sourcetable'][$r][$i] = array('#type' => 'value', '#value' => $value); // the whole table is stored here in case it is needed
+      switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
+        case F_DR_CONTROL_CHECKBOXES:
+        case F_DR_CONTROL_DROPDOWN_MULTI:
+          $default_value = array($value);
+          break;
+        case F_DR_CONTROL_DROPDOWN_SINGLE:
+        case F_DR_CONTROL_RADIOBTN:
+        case F_DR_CONTROL_CHECKBOX:
+          $default_value = $value;
+          break;
+        case F_DR_CONTROL_TEXTBOX:
+          $default_value = $value;
+          break;
+        case F_DR_CONTROL_DATESEL:
+        case F_DR_CONTROL_DATETIMESEL:
+        case F_DR_CONTROL_POPUPDATE:
+          $default_value = $value;
+          break;
+        default:
+          $default_value = $value;
+      }
+
+      // add everything else to the form we might need in the theme, validate, or submit functions
+      //$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
+      //$form['param_indices'][$param_count] = array('#type' => 'value','#value' => $i);
+      //$form['field_types'][$i] = array('#type' => 'value','#value' => $data_tbl_ndx_type);
+      $form['param_names'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_NAME_STR]);
+      $form['param_types'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]);
+      $form['param_titles'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_TITLE_STR]);
+      $form['param_descriptions'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DESC_STR]);
+      $form['param_weights'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][FETCHIT7_FIELD_WEIGHT_STR]);
+      $form['param_disabled'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DISABLED_STR]);
+      $form['param_hidden'][$i] = array('#type' => 'value', '#value' => $user_field_data[$i][FETCHIT7_FIELD_WEIGHT_STR]);
+      //$form['param_data_table'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DATA_TBL_STR]);
+      //$form['param_data_ndx'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DATA_KEY_STR]);
+      //$form['param_data_uid'][$param_count] = array('#type' => 'value','#value' => $user_field_data[$i][F_DR_FIELD_DATA_UID_STR]);
+
+      // set the index that determines whether the user specified the control element type ($user_field_ndx>0)
+      // or not ($user_field_ndx=0)
+      // for egrid, because we set defaults above, this can be >0
+      if ($user_control[$i]) {
+        $user_field_ndx = $i + 1;
+      }
+      else {
+        $user_field_ndx = $i + 1;
+        //$user_field_ndx = 0;
+      }
+
+      // the following creates the "renderable array" of the next parameter input control (drupal form element)
+      //   to be displayed on this form ($nid)
+      // stack these up in the array. "How" they are to be displayed will be handled by the theme function
+      $form['elements'][$element_name] = 
+      	fetchit7_param_element_form(
+      		$field_names[$i],
+      		$field_types[$i], 
+      		$db_handle, 
+      		$user_field_ndx, 
+      		$user_field_data, 
+      		$nid, 
+      		$showtitles, 
+      		$default_value, 
+      		$enabled, // 
+					$hidden); // this is used to draw a special value type form element so that it's in the form 
+  	}
   }
 
   $submit_button_flag = TRUE;
@@ -1806,7 +1823,11 @@ function fetchit7_egrid_form($form, &$form_state) {
     //  '#type' => 'actions',
     //);
     //debug($submit_weight,'$submit_weight');
-    $form['actions']['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+    $form['actions']['submit'] = array(
+    	'#type' => 'submit',
+    	'#value' => $submit_label,
+    	'#weight' => $submit_weight,
+		);
   }
 
   return $form;
@@ -2740,7 +2761,7 @@ function fetchit_parse_parameter_string($parameter_name, $parameter_string) {
 }
 
 //function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type,$db_handle,$user_field_ndx,$user_field_data,$nid,$showtitles,$db_value) {
-function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user_field_ndx, $user_field_data, $nid, $showtitles, $db_value, $enabled=TRUE) {
+function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user_field_ndx, $user_field_data, $nid, $showtitles, $db_value, $enabled=TRUE, $hidden=FALSE) {
 	//debug($field_name.', '.$field_type,'$field_name, $field_type');
   $form = array();
   switch (strtolower(trim($field_type))) {
@@ -2778,7 +2799,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
             return fetchit_get_checkbox_element_bool($user_field_data, $user_field_ndx - 1, $db_handle, $nid, $showtitles, $db_value);
         }
       }
-      else {// create the default input control element for booleans - a single check box
+      else { // create the default input control element for booleans - a single check box
         if (strlen(trim($db_value))) {
           $default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
         } else {
@@ -2839,6 +2860,15 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           case F_DR_CONTROL_POPUPDATE:
           case F_DR_CONTROL_DATESEL:
           default:
+            $parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+            $size_string = fetchit_parse_parameter_string('size', $parameter_string);
+            if (strlen(trim($size_string))) {
+              $size = (int)$size_string;
+            }
+            else {
+              $size = 7;
+            }
+            return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
       }
       else {// create the default input control element for integers - a text box
@@ -2910,6 +2940,15 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           case F_DR_CONTROL_POPUPDATE:
           case F_DR_CONTROL_DATESEL:
           default:
+            $parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+            $size_string = fetchit_parse_parameter_string('size', $parameter_string);
+            if (strlen(trim($size_string))) {
+              $size = (int)$size_string;
+            }
+            else {
+              $size = 9;
+            }
+            return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
       }
       else {// create the default input control element for reals - a text box
@@ -2975,6 +3014,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           case F_DR_CONTROL_CHECKBOX:
           case F_DR_CONTROL_CHECKBOXES:
           default:
+            return fetchit_get_date_element($user_field_data, $user_field_ndx - 1, $showtitles, $db_value);
         }
       }
       else {// the default input control element for dates - the drupal 6 core date element
@@ -3036,6 +3076,9 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           case F_DR_CONTROL_CHECKBOX:
           case F_DR_CONTROL_CHECKBOXES:
           default:
+            $date_format = 'g:i A';
+            $year_range = '-15:+15';
+            return fetchit_get_date_select_element($user_field_data, $user_field_ndx - 1, $date_format, $year_range, $showtitles, $db_value);
         }
       }
       else {// the default input control element for times - the drupal 6 date module api element, date_select formatted to only show hours and minutes
@@ -3101,6 +3144,9 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           case F_DR_CONTROL_CHECKBOX:
           case F_DR_CONTROL_CHECKBOXES:
           default:
+            $date_format = 'M j, Y g:i A';
+            $year_range = '-15:+15';
+            return fetchit_get_date_select_element($user_field_data, $user_field_ndx - 1, $date_format, $year_range, $showtitles, $db_value);
         }
       }
       else {// the default input control element for timestamps - the drupal 6 date module api element, date_select formatted to show months, days, years, hours and minutes
@@ -3168,6 +3214,15 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           case F_DR_CONTROL_DATETIMESEL:
           case F_DR_CONTROL_POPUPDATE:
           default:
+            $parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+            $size_string = fetchit_parse_parameter_string('size', $parameter_string);
+            if (strlen(trim($size_string))) {
+              $size = (int)$size_string;
+            }
+            else {
+              $size = 20;
+            }
+            return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
       }
       else {// the default input control element for text fields - a text box
@@ -3218,6 +3273,15 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           case F_DR_CONTROL_DROPDOWN_MULTI:
           case F_DR_CONTROL_DATESEL:
           default:
+            $parameter_string = $user_field_data[$user_field_ndx - 1][F_DR_FIELD_PARAMETER_STR];
+            $size_string = fetchit_parse_parameter_string('size', $parameter_string);
+            if (strlen(trim($size_string))) {
+              $size = (int)$size_string;
+            }
+            else {
+              $size = 20;
+            }
+            return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
       }
       else {// try a text box for this unanticipated field type
