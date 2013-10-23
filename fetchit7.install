@@ -1046,31 +1046,26 @@ function _fetchit7_installed_fields () {
 			'locked'					=> '0',
 			'cardinality'			=> '-1',
 		),
-		
-		//'12345678901234567890123456789012'
-		//'fetchit7_field_par_tbl_rows' //integer
 
-		//'12345678901234567890123456789012'
-		// comma delimited lists in a large text field
-		//'fetchit7_field_par_fld_name'  // parameter field names
-		//'fetchit7_field_par_fld_title' // parameter field titles
-		//'fetchit7_field_par_fld_desc'  // parameter field descriptions - necessary? if so gotta be a large text field, not varchar limited to 255
-		//'fetchit7_field_par_fld_type' // parameter field types, short names
-		//'fetchit7_field_par_fld_enabled' // parameter field enabled
-		//'fetchit7_field_par_fld_required' => array(
-		//'fetchit7_field_par_fld_validate' => array(
-		//'fetchit7_field_par_fld_submit' => array(
-		//'fetchit7_field_par_fld_parstr' => array(
-				
-		//'12345678901234567890123456789012'
-		//'fetchit7_field_par_fld_list_tbl' => array(
-		//'fetchit7_field_par_fld_list_key' => array(
-		//'fetchit7_field_par_fld_list_dsp' => array(
-		//'fetchit7_field_par_fld_list_uid' => array(
-		//'fetchit7_field_par_fld_list_def' => array(
-		//'fetchit7_field_par_fld_data_tbl' => array(
-		//'fetchit7_field_par_fld_data_key' => array(
-		//'fetchit7_field_par_fld_data_uid' => array(
+		// =====================================================
+		// these are fields that apply to egrid only
+		// =====================================================
+		// add a new record
+		'fetchit7_field_egrid_append' => array(
+			'label'						=> $t('Append a new record'),
+			'settings'				=> array (
+					'allowed_values'	=> array (
+							0		=> '',
+							1		=> '',
+					),
+			),
+			'field_name'			=> 'fetchit7_field_egrid_append',
+			'type'						=> 'list_boolean',
+			'module'					=> 'list',
+			'active'					=> '1',
+			'locked'					=> '0',
+			'cardinality'			=> '1',
+		),
 		
 	);
 	
@@ -3340,6 +3335,30 @@ function _fetchit7_content_egrid_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+		//fetchit7_field_egrid_append
+		// append a new record
+		'fetchit7_field_egrid_append' => array(
+			'label'					=> $t('Append a new record'),
+			'widget'				=> array(
+				'type'					=> 'options_onoff',
+				'module'				=> 'options',
+				'active'				=> TRUE,
+				'settings'			=> array (
+					'display_label'	=> TRUE,
+				),
+				//'weight'				=> -3,
+			),
+			'required'			=> FALSE,
+			'description'		=> $t('Defines whether this form is for editing existing records or adding a new record.'),
+			'default_value'	=> array(
+				0								=> array(
+					'value'					=> '0',
+				),
+			),
+			'field_name'		=> 'fetchit7_field_egrid_append',
+			'entity_type'		=> 'node',
+			'bundle'				=> $content_name,
+		),
 		//Parameter table row count
 		'fetchit7_field_par_tbl_rows' => array(
 			'label'					=> $t('Parameter table row count'),
@@ -3761,8 +3780,9 @@ function _fetchit7_content_egrid_installed_instances () {
 			'entity_type'		=> 'node',
 			'bundle'				=> $content_name,
 		),
+
 	);
-	
+		
 	return $fetchit7_instances;
 }
 
