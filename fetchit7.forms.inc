@@ -1603,6 +1603,20 @@ function fetchit7_egrid_form($form, &$form_state) {
       $user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = FALSE;
     }
 
+    //$param_hidden
+    if ($param_found) {
+      if (($param_found - 1) < count($param_hidden)) {
+        $hidden = filter_var($param_hidden[$param_found - 1], FILTER_VALIDATE_BOOLEAN);
+        $user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR] = $hidden;
+      }
+      else {
+        $user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR] = FALSE;
+      }
+    }
+    else {
+      $user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR] = FALSE;
+    }
+
     //$param_required
     //default of required = true is OK
     if ($param_found) {

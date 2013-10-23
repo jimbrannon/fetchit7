@@ -51,7 +51,8 @@ define("F_DR_FIELD_REQUIRED_STR","required");
 define("F_DR_FIELD_VALIDATE_STR","validate");
 define("F_DR_FIELD_SUBMIT_STR","submit");
 define("F_DR_FIELD_PARAMETER_STR","input_parm");
-define("FETCHIT7_FIELD_WEIGHT_STR","weight"); //define("F_DR_DATA_TBL_NDX_FLD","stored");
+define("FETCHIT7_FIELD_WEIGHT_STR","weight");
+define("FETCHIT7_FIELD_HIDDEN_STR","hidden");
 
 // these are the array keys used for field input list table parameters
 define("F_DR_FIELD_LIST_TBL_STR","list_tbl");
