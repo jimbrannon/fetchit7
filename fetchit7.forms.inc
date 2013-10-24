@@ -3156,9 +3156,17 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         }
       }
       else {// the default input control element for dates - the drupal 6 core date element
-    		$default = array('month' => date('n'), 'day' => date('j'), 'year' => date('Y'), );
-        if (strlen(trim($db_value))) {
-        	$default = array('month' => date('n', strtotime($db_value)), 'day' => date('j', strtotime($db_value)), 'year' => date('Y', strtotime($db_value)), );
+    		$default = array(
+					'year' => (int) date('Y'),
+					'month' => (int) date('n'),
+					'day' => (int) date('j'),
+				);
+        if (isset($db_value)) {
+        	$default = array(
+        		'year' => (int) date('Y', strtotime($db_value)),
+        		'month' => (int) date('n', strtotime($db_value)),
+        		'day' => (int) date('j', strtotime($db_value)),
+					);
         }
         //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
         //  $weight = (int)$user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR];
@@ -3170,12 +3178,24 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         if ($showtitles) {
           $title = $field_name;
           $description = $field_type;
-          $form = array('#type' => 'date', // this is the drupal 6 core date element, default is today's date, returns an associative array with 'year' 'month' and 'day' elements
-          '#title' => $title, '#description' => $description, '#required' => FALSE, '#disabled' => !$enabled, '#default_value' => $default, '#weight' => $weight, );
+          $form = array(
+          	'#type' => 'date',
+          	'#title' => $title,
+          	'#description' => $description,
+          	'#required' => FALSE,
+          	'#disabled' => !$enabled,
+          	'#default_value' => $default,
+          	'#weight' => $weight,
+					);
         }
         else {
-          $form = array('#type' => 'date', // this is the drupal 6 core date element, default is today's date, returns an associative array with 'year' 'month' and 'day' elements
-          '#required' => FALSE, '#disabled' => !$enabled, '#default_value' => $default, '#weight' => $weight, );
+          $form = array(
+          	'#type' => 'date',
+          	'#required' => FALSE,
+          	'#disabled' => !$enabled,
+          	'#default_value' => $default,
+          	'#weight' => $weight,
+					);
         }
         return $form;
       }
