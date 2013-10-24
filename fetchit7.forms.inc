@@ -4233,7 +4233,7 @@ function fetchit_get_radios_element_bool($user_field_data, $user_field_ndx, $db_
 }
 
 function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles, $db_value) {
-	debug($db_value,'fetchit_get_date_element: passed in value $db_value');
+	//debug($db_value,'fetchit_get_date_element: passed in value $db_value');
   $form = array();
 
   // process the required attribute - should be boolean already
@@ -4255,7 +4255,7 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
     	'year' => (int) date('Y'),
 		);
   }
-	debug($default,'fetchit_get_date_element: today $default');
+	//debug($default,'fetchit_get_date_element: today $default');
 
   // now replace it with the passed in default value if it is set...
   if (isset($db_value)) {
@@ -4266,7 +4266,7 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
     	'year' => (int) date('Y', strtotime($db_value)),
 		);
   }
-	debug($default,'fetchit_get_date_element: passed in default $default');
+	//debug($default,'fetchit_get_date_element: passed in default $default');
 
   if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
 	  switch ($entered) {
@@ -4286,7 +4286,7 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
 				);
 	  }
   }
-	debug($default,'fetchit_get_date_element: user entered default $default');
+	//debug($default,'fetchit_get_date_element: user entered default $default');
 
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
