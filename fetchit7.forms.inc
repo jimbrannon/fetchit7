@@ -3766,6 +3766,8 @@ function fetchit_get_select_element($user_field_data, $user_field_ndx, $db_handl
     }
   }
 
+  $options_keys = array_keys($options);
+
   // process the required attribute - should be boolean already
   $required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
 
@@ -3778,51 +3780,78 @@ function fetchit_get_select_element($user_field_data, $user_field_ndx, $db_handl
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $options_keys = array_keys($options);
     $default = $options_keys[0];
     $empty_value = '';
   }
   else {
-    $options_keys = array_keys($options);
     $default = $options_keys[0];
     $empty_value = '';
   }
-  // then set up the defaults based on the string they typed into the defaults attribute box
-  switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
-    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-      // over write defaults with the value they entered last time
+	
+	// if it is set, use the passed in default
+	//debug('radiobuttons: $db_value = '.$db_value);
+	if (isset($db_value)) {
+    if (in_array($db_value, $options_keys)) {
       $default = $db_value;
-      break;
-    case FETCHIT7_FIELD_DEFAULT_NONE:
-    case FETCHIT7_FIELD_DEFAULT_BLANK:
-      $default = '';
-      break;
-    case FETCHIT7_FIELD_DEFAULT_FIRST:
-    case FETCHIT7_FIELD_DEFAULT_ALL:
-      $options_keys = array_keys($options);
+    }
+    else {
       $default = $options_keys[0];
-      break;
-    case '':
-      $default = '';
-      break;
-    default:
-      $userdefault = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR];
-      $options_keys = array_keys($options);
-      if (in_array($userdefault, $options_keys)) {
-        $default = $userdefault;
-      }
-      else {
-        $default = '';
-      }
-  }
+    }
+	}
+	
+  // then set up the defaults based on the string they typed into the defaults attribute box
+  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+    switch ($entered) {
+	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+	      // over write defaults with the value they entered last time
+	      // it is already set
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_NONE:
+	    case FETCHIT7_FIELD_DEFAULT_BLANK:
+	      $default = '';
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_FIRST:
+	    case FETCHIT7_FIELD_DEFAULT_ALL:
+	      $default = $options_keys[0];
+	      break;
+	    default:
+	      if (in_array($entered, $options_keys)) {
+	        $default = $entered;
+	      }
+	      else {
+	        $default = '';
+	      }
+	  }
+	}
+	
   //debug($default,'fetchit_get_select_element $default');
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
     $description = t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-    $form = array('#title' => $title, '#type' => 'select', '#options' => $options, '#multiple' => FALSE, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#description' => $description, '#weight' => $weight, '#empty_value' => $empty_value, );
+    $form = array(
+    	'#title' => $title,
+    	'#type' => 'select',
+    	'#options' => $options,
+    	'#multiple' => FALSE,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#description' => $description,
+    	'#weight' => $weight,
+    	'#empty_value' => $empty_value,
+		);
   }
   else {
-    $form = array('#type' => 'select', '#options' => $options, '#multiple' => FALSE, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#weight' => $weight, '#empty_value' => $empty_value, );
+    $form = array(
+    	'#type' => 'select',
+    	'#options' => $options,
+    	'#multiple' => FALSE,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#weight' => $weight,
+    	'#empty_value' => $empty_value,
+		);
   }
 
   return $form;
@@ -3879,6 +3908,8 @@ function fetchit_get_select_element_bool($user_field_data, $user_field_ndx, $db_
     }
   }
 
+  $options_keys = array_keys($options);
+
   // process the required attribute - should be boolean already
   $required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
 
@@ -3891,52 +3922,87 @@ function fetchit_get_select_element_bool($user_field_data, $user_field_ndx, $db_
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $options_keys = array_keys($options);
-    $default = '';
+    $default = $options_keys[0];
+    //$default = '';
     $empty_value = '';
   }
   else {
-    $options_keys = array_keys($options);
-    $default = '';
+    $default = $options_keys[0];
+    //$default = '';
     $empty_value = '';
   }
-  // then set up the defaults based on the string they typed into the defaults attribute box
-  switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
-    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-      // over write defaults with the value they entered last time
-      $default = $db_value;
-      break;
-    case FETCHIT7_FIELD_DEFAULT_NONE:
-    case FETCHIT7_FIELD_DEFAULT_BLANK:
-      $default = '';
-      break;
-    case FETCHIT7_FIELD_DEFAULT_FIRST:
-    case FETCHIT7_FIELD_DEFAULT_ALL:
-      $options_keys = array_keys($options);
-      $default = $options_keys[0];
-      break;
-    case '':
-      $default = '';
-      break;
-    default:
-      // since we know the keys are 0 and 1 in this specialized select control, go ahead and do the conversion
-      $userdefault = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR], FILTER_VALIDATE_BOOLEAN);
-      $options_keys = array_keys($options);
-      if (in_array($userdefault, $options_keys)) {
-        $default = $userdefault;
-      }
-      else {
-        $default = '';
-      }
-  }
 
+	// handle the default value passed in
+	//debug('radiobuttons: $db_value = '.$db_value);
+	if (isset($db_value)) {
+		$mykey = fetchit_booleantointeger($db_value);
+    if (in_array($mykey, $options_keys)) {
+      $default = $mykey;
+    }
+    else {
+      $default = $options_keys[0];
+    }
+	}
+
+  // then set up the defaults based on the string they typed into the defaults attribute box
+  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+    switch ($entered) {
+	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+	      // over write defaults with the value they entered last time
+	      // it is already set
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_TRUE:
+		    $default = $options_keys[1];
+				break;
+	    case FETCHIT7_FIELD_DEFAULT_FALSE:
+		    $default = $options_keys[0];
+				break;
+	    case FETCHIT7_FIELD_DEFAULT_NONE:
+	    case FETCHIT7_FIELD_DEFAULT_BLANK:
+	      $default = '';
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_FIRST:
+	    case FETCHIT7_FIELD_DEFAULT_ALL:
+	      $default = $options_keys[0];
+	      break;
+	    default:
+				$mykey = fetchit_booleantointeger($entered);
+		    if (in_array($mykey, $options_keys)) {
+		      $default = $mykey;
+		    }
+		    else {
+		      $default = $options_keys[0];
+		    }
+  	}
+	}
+	
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
     $description = t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-    $form = array('#title' => $title, '#type' => 'select', '#options' => $options, '#multiple' => FALSE, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#description' => $description, '#weight' => $weight, '#empty_value' => $empty_value, );
+    $form = array(
+    	'#title' => $title,
+    	'#type' => 'select',
+    	'#options' => $options,
+    	'#multiple' => FALSE,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#description' => $description,
+    	'#weight' => $weight,
+    	'#empty_value' => $empty_value,
+		);
   }
   else {
-    $form = array('#type' => 'select', '#options' => $options, '#multiple' => FALSE, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#weight' => $weight, '#empty_value' => $empty_value, );
+    $form = array(
+    	'#type' => 'select',
+    	'#options' => $options,
+    	'#multiple' => FALSE,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#weight' => $weight,
+    	'#empty_value' => $empty_value,
+		);
   }
 
   return $form;
@@ -3973,6 +4039,8 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
     }
   }
 
+  $options_keys = array_keys($options);
+
   // process the required attribute - should be boolean already
   $required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
 
@@ -3985,53 +4053,88 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $options_keys = array_keys($options);
-    $defaults = array('');
+    $defaults = array($options_keys[0]);
     $empty_value = '';
   }
   else {
-    $options_keys = array_keys($options);
     $defaults = array('');
     $empty_value = '';
   }
+	
+	// if it is set, use the passed in default
+	if (isset($db_values)) {
+		$found_values = array();
+		foreach ($db_values as $db_value) {
+			if (in_array($db_value, $options_keys)) {
+				$found_values[] = $db_value;
+    	}
+		}
+		$defaults = $found_values;
+  } else {
+    $defaults = array('');
+	}
+	
   // then set up the defaults based on the string they typed into the defaults attribute box
-  switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
-    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-      // over write defaults with the value they entered last time
-      $defaults = $db_values;
-      break;
-    case FETCHIT7_FIELD_DEFAULT_NONE:
-    case FETCHIT7_FIELD_DEFAULT_BLANK:
-      $defaults = array('');
-      break;
-    case FETCHIT7_FIELD_DEFAULT_FIRST:
-      $options_keys = array_keys($options);
-      $defaults = array($options_keys[0]);
-      break;
-    case FETCHIT7_FIELD_DEFAULT_ALL:
-      $options_keys = array_keys($options);
-      $defaults = $options_keys;
-      break;
-    case '':
-      $defaults = array('');
-      break;
-    default:
-      $userdefaults = explode(',', $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
-      if (count($userdefaults)) {
-        $default = $userdefaults;
-      }
-      else {
-        $defaults = array('');
-      }
-  }
+  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+    switch ($entered) {
+	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+	      // over write defaults with the value they entered last time
+	      // already set
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_TRUE:
+		    $default = $options_keys[1];
+				break;
+	    case FETCHIT7_FIELD_DEFAULT_FALSE:
+		    $default = $options_keys[0];
+				break;
+	    case FETCHIT7_FIELD_DEFAULT_NONE:
+	    case FETCHIT7_FIELD_DEFAULT_BLANK:
+	      $defaults = array('');
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_FIRST:
+	      $defaults = array($options_keys[0]);
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_ALL:
+	      $defaults = $options_keys;
+	      break;
+	    default:
+	      $userdefaults = explode(',', $entered);
+	      if (count($userdefaults)) {
+	        $defaults = $userdefaults;
+	      }
+	      else {
+	        $defaults = array('');
+	      }
+	  }
+	}
 
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
     $description = t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-    $form = array('#title' => $title, '#type' => 'select', '#options' => $options, '#multiple' => FALSE, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#description' => $description, '#weight' => $weight, '#empty_value' => $empty_value, );
+    $form = array(
+    	'#title' => $title,
+    	'#type' => 'select',
+    	'#options' => $options,
+    	'#multiple' => TRUE,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#description' => $description,
+    	'#weight' => $weight,
+    	'#empty_value' => $empty_value,
+		);
   }
   else {
-    $form = array('#type' => 'select', '#options' => $options, '#multiple' => FALSE, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#weight' => $weight, '#empty_value' => $empty_value, );
+    $form = array(
+    	'#type' => 'select',
+    	'#options' => $options,
+    	'#multiple' => TRUE,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#weight' => $weight,
+    	'#empty_value' => $empty_value,
+		);
   }
 
   return $form;
@@ -4068,6 +4171,8 @@ function fetchit_get_radios_element($user_field_data, $user_field_ndx, $db_handl
     }
   }
 
+  $options_keys = array_keys($options);
+
   // process the required attribute - should be boolean already
   $required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
 
@@ -4080,49 +4185,76 @@ function fetchit_get_radios_element($user_field_data, $user_field_ndx, $db_handl
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $options_keys = array_keys($options);
     $default = $options_keys[0];
   }
   else {
-    $options_keys = array_keys($options);
     $default = $options_keys[0];
   }
 	
 	// if it is set, use the passed in default
-	debug('radiobuttons: $db_value = '.$db_value);
-  // then set up the defaults based on the string they typed into the defaults attribute box
-  switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
-    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-      // over write defaults with the value they entered last time
+	//debug('radiobuttons: $db_value = '.$db_value);
+	if (isset($db_value)) {
+    if (in_array($db_value, $options_keys)) {
       $default = $db_value;
-      break;
-    case FETCHIT7_FIELD_DEFAULT_NONE:
-    case FETCHIT7_FIELD_DEFAULT_BLANK:
-    case FETCHIT7_FIELD_DEFAULT_FIRST:
-    case FETCHIT7_FIELD_DEFAULT_ALL:
-    case '':
-      $options_keys = array_keys($options);
+    }
+    else {
       $default = $options_keys[0];
-      break;
-    default:
-      $userdefault = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR];
-      $options_keys = array_keys($options);
-      if (in_array($userdefault, $options_keys)) {
-        $default = $userdefault;
-      }
-      else {
-        $options_keys = array_keys($options);
-        $default = $options_keys[0];
-      }
+    }
+	}
+	
+  // then set up the defaults based on the string they typed into the defaults attribute box
+  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+	  switch ($entered) {
+	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+	      // over write defaults with the value they entered last time - this is what is already in there
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_TRUE:
+		    $default = $options_keys[1];
+				break;
+	    case FETCHIT7_FIELD_DEFAULT_FALSE:
+		    $default = $options_keys[0];
+				break;
+	    case FETCHIT7_FIELD_DEFAULT_NONE:
+	    case FETCHIT7_FIELD_DEFAULT_BLANK:
+	    case FETCHIT7_FIELD_DEFAULT_FIRST:
+	    case FETCHIT7_FIELD_DEFAULT_ALL:
+				// just mark the first one
+	      $default = $options_keys[0];
+	      break;
+	    default: // try to find the one they entered
+	      if (in_array($entered, $options_keys)) {
+	        $default = $entered;
+	      }
+	      else {
+	        $default = $options_keys[0];
+	      }
+	  }
   }
+
   //debug($default,'fetchit_get_select_element $default');
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
     $description = t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-    $form = array('#title' => $title, '#type' => 'radios', '#options' => $options, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#description' => $description, '#weight' => $weight, );
+    $form = array(
+    	'#title' => $title,
+    	'#type' => 'radios',
+    	'#options' => $options,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#description' => $description,
+    	'#weight' => $weight,
+		);
   }
   else {
-    $form = array('#type' => 'radios', '#options' => $options, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#weight' => $weight, );
+    $form = array(
+    	'#type' => 'radios',
+    	'#options' => $options,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#weight' => $weight,
+		);
   }
 
   return $form;
@@ -4179,6 +4311,8 @@ function fetchit_get_radios_element_bool($user_field_data, $user_field_ndx, $db_
     }
   }
 
+	$options_keys = array_keys($options);
+	
   // process the required attribute - should be boolean already
   $required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
 
@@ -4191,45 +4325,80 @@ function fetchit_get_radios_element_bool($user_field_data, $user_field_ndx, $db_
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $options_keys = array_keys($options);
     $default = $options_keys[0];
   }
   else {
-    $options_keys = array_keys($options);
     $default = $options_keys[0];
   }
 
 	// handle the default value passed in
-	if (isset($db_value)) $default = fetchit_booleantointeger($db_value);
-		
+	//debug('radiobuttons: $db_value = '.$db_value);
+	if (isset($db_value)) {
+		$mykey = fetchit_booleantointeger($db_value);
+    if (in_array($mykey, $options_keys)) {
+      $default = $mykey;
+    }
+    else {
+      $default = $options_keys[0];
+    }
+	}
+
   // then set up the defaults based on the string they typed into the defaults attribute box
-  if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-    switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+    switch ($entered) {
 	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
 	      // over write defaults with the value they entered last time
-				if (isset($db_value)) $default = fetchit_booleantointeger($db_value);
+	      // it is already set
 	      break;
+	    case FETCHIT7_FIELD_DEFAULT_TRUE:
+		    $default = $options_keys[1];
+				break;
+	    case FETCHIT7_FIELD_DEFAULT_FALSE:
+		    $default = $options_keys[0];
+				break;
 	    case FETCHIT7_FIELD_DEFAULT_NONE:
 	    case FETCHIT7_FIELD_DEFAULT_BLANK:
-				$default = 0;
+		    $default = $options_keys[0];
 				break;
 	    case FETCHIT7_FIELD_DEFAULT_FIRST:
 	    case FETCHIT7_FIELD_DEFAULT_ALL:
-				$default = 1;
+		    $default = $options_keys[1];
 				break;
 	    default:
 	      // since we know the keys are 0 and 1 in this specialized select control, go ahead and do the conversion
-	      $default = fetchit_booleantointeger(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]));
+				$mykey = fetchit_booleantointeger($entered);
+		    if (in_array($mykey, $options_keys)) {
+		      $default = $mykey;
+		    }
+		    else {
+		      $default = $options_keys[0];
+		    }
   	}
 	}
 
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
     $description = t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-    $form = array('#title' => $title, '#type' => 'radios', '#options' => $options, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#description' => $description, '#weight' => $weight, );
+    $form = array(
+    	'#title' => $title,
+    	'#type' => 'radios',
+    	'#options' => $options,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#description' => $description,
+    	'#weight' => $weight,
+		);
   }
   else {
-    $form = array('#type' => 'radios', '#options' => $options, '#required' => $required, '#default_value' => $default, '#disabled' => $disabled, '#weight' => $weight, );
+    $form = array(
+    	'#type' => 'radios',
+    	'#options' => $options,
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	'#weight' => $weight,
+		);
   }
 
   return $form;
