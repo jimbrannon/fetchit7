@@ -1927,15 +1927,27 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 		        $multiple = $form['elements'][$element_name]['#multiple'];
 		        if ($multiple) {
 		          $values = array_filter($form_state['values']['elements'][$element_name]);
-							$tmp_val_str = $values[0]; //only one record so only one value 
-		        }
+							if (count($values)) {
+								$options_keys = array_keys($values);
+								$tmp_val_str = $options_keys[0]; //only one record so only one value
+							} else {
+								// nothing selected
+								$tmp_val_str = '';
+							}
+						}
 		        else {
 		          $tmp_val_str = $form_state['values']['elements'][$element_name];
 		        }
 		        break;
 		      case 'checkboxes':
 		        $values = array_filter($form_state['values']['elements'][$element_name]);
-						$tmp_val_str = $values[0]; //only one record so only one value
+						if (count($values)) {
+							$options_keys = array_keys($values);
+							$tmp_val_str = $options_keys[0]; //only one record so only one value
+						} else {
+							// nothing selected
+							$tmp_val_str = '';
+						}
 		        break;
 					default: //everything else until we get another that is not a string
 						if ($disabled) {
@@ -3565,6 +3577,8 @@ function fetchit_get_checkboxes_element($user_field_data, $user_field_ndx, $db_h
     }
   }
 
+  $options_keys = array_keys($options);
+
   // process the required attribute - should be boolean already
   $required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
 
@@ -3577,43 +3591,77 @@ function fetchit_get_checkboxes_element($user_field_data, $user_field_ndx, $db_h
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $options_keys = array_keys($options);
     $defaults = array($options_keys[0]);
   }
   else {
     $defaults = array();
   }
+	
+	// if it is set, use the passed in default
+	if (isset($db_values)) {
+		$found_values = array();
+		foreach ($db_values as $db_value) {
+			if (in_array($db_value, $options_keys)) {
+				$found_values[] = $db_value;
+    	}
+		}
+		$defaults = $found_values;
+  } else {
+    $defaults = array();
+	}
+	
   // then set up the defaults based on the string they typed into the defaults attribute box
-  switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
-    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-      // over write defaults with the values they entered last time
-      $defaults = $db_values;
-      break;
-    case FETCHIT7_FIELD_DEFAULT_FIRST:
-      $options_keys = array_keys($options);
-      $defaults = array($options_keys[0]);
-      break;
-    case FETCHIT7_FIELD_DEFAULT_ALL:
-      $defaults = array_keys($options);
-      break;
-    case FETCHIT7_FIELD_DEFAULT_NONE:
-    case FETCHIT7_FIELD_DEFAULT_BLANK:
-      $defaults = array();
-      break;
-    case '':
-      // to me this means user does not care - that means leave it set as is
-      break;
-    default:
-      $default = explode(',', $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
-  }
+  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+    switch ($entered) {
+	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+	      // over write defaults with the values they entered last time
+	      // already entered
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_FIRST:
+	      $defaults = array($options_keys[0]);
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_ALL:
+	      $defaults = array_keys($options);
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_NONE:
+	    case FETCHIT7_FIELD_DEFAULT_BLANK:
+	      $defaults = array();
+	      break;
+	    default:
+	      $db_values = explode(',', $entered);
+				$found_values = array();
+				foreach ($db_values as $db_value) {
+					if (in_array($db_value, $options_keys)) {
+						$found_values[] = $db_value;
+		    	}
+				}
+				$defaults = $found_values;
+	  }
+	}
 
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
     $description = t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-    $form = array('#title' => $title, '#type' => 'checkboxes', '#options' => $options, '#required' => $required, '#default_value' => $defaults, '#disabled' => $disabled, '#description' => $description, '#weight' => $weight, );
+    $form = array(
+    	'#title' => $title,
+    	'#type' => 'checkboxes',
+    	'#options' => $options,
+    	'#required' => $required,
+    	'#default_value' => $defaults,
+    	'#disabled' => $disabled,
+    	'#description' => $description,
+    	'#weight' => $weight,
+		);
   }
   else {
-    $form = array('#type' => 'checkboxes', '#options' => $options, '#required' => $required, '#default_value' => $defaults, '#disabled' => $disabled, '#weight' => $weight, );
+    $form = array(
+    	'#type' => 'checkboxes',
+    	'#options' => $options,
+    	'#required' => $required,
+    	'#default_value' => $defaults,
+    	'#disabled' => $disabled,
+    	'#weight' => $weight,
+		);
   }
 
   return $form;
