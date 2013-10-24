@@ -1788,7 +1788,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       } else {
       	$default_value='';
       }
-			//if ($i==1) debug('converted to default: $default_value='.$default_value);
+			//debug('field '.$i.' converted to default: $default_value='.$default_value);
 
       // add everything else to the form we might need in the theme, validate, or submit functions
       //$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
@@ -2899,7 +2899,7 @@ function fetchit_parse_parameter_string($parameter_name, $parameter_string) {
 
 //function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type,$db_handle,$user_field_ndx,$user_field_data,$nid,$showtitles,$db_value) {
 function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user_field_ndx, $user_field_data, $nid, $showtitles, $db_value, $enabled=TRUE, $hidden=FALSE) {
-	//debug($field_name.', '.$field_type.', '.$user_field_ndx.', '.$db_value,'$field_name, $field_type, $user_field_ndx, $db_value');
+	//debug('fetchit7_param_element_form passed in values:'.$field_name.', '.$field_type.', '.$user_field_ndx.', '.$db_value,'$field_name, $field_type, $user_field_ndx, $db_value');
 	//debug($user_field_data,'$user_field_data');
   $form = array();
   switch (strtolower(trim($field_type))) {
@@ -4213,6 +4213,7 @@ function fetchit_get_radios_element_bool($user_field_data, $user_field_ndx, $db_
 }
 
 function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles, $db_value) {
+	debug($db_value,'fetchit_get_date_element: passed in value $db_value');
   $form = array();
 
   // process the required attribute - should be boolean already
@@ -4228,53 +4229,66 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
   // start with today's date if it is required
   // use the system date as a default
   if ($required) {
-    $default = array('month' => date('n'), 'day' => date('j'), 'year' => date('Y'), );
+    $default = array(
+    	'month' => (int) date('n'),
+    	'day' => (int) date('j'),
+    	'year' => (int) date('Y'),
+		);
   }
+	debug($default,'fetchit_get_date_element: today $default');
 
-  //
-  if (strlen($db_value)) {
-    $default = array('month' => date('n', strtotime($db_value)), 'day' => date('j', strtotime($db_value)), 'year' => date('Y', strtotime($db_value)), );
+  // now replace it with the passed in default value if it is set...
+  if (isset($db_value)) {
+  	$mydate = strtotime($db_value);
+    $default = array(
+    	'month' => (int) date('n', strtotime($db_value)),
+    	'day' => (int) date('j', strtotime($db_value)),
+    	'year' => (int) date('Y', strtotime($db_value)),
+		);
   }
+	debug($default,'fetchit_get_date_element: passed in default $default');
 
-  if (strlen($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR])) {
-    $entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]);
-    dpm(strtotime($entered));
-    $default = array('month' => format_date(strtotime($entered), 'custom', 'n'), 'day' => format_date(strtotime($entered), 'custom', 'j'), 'year' => format_date(strtotime($entered), 'custom', 'Y'), );
+  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+	  switch ($entered) {
+	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+	      // over write defaults with the value they entered last time
+	      // these are already the default...
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_NONE:
+	    case FETCHIT7_FIELD_DEFAULT_BLANK:
+	    case FETCHIT7_FIELD_DEFAULT_FIRST:
+	    case FETCHIT7_FIELD_DEFAULT_ALL:
+	    default: // try to convert the entered value into a date
+	      $default = array(
+	      	'year' => (int) date('Y', strtotime($entered)),
+	      	'month' => (int) date('n', strtotime($entered)),
+	      	'day' => (int) date('j', strtotime($entered)),
+				);
+	  }
   }
-
-  // then set up the defaults based on the string they typed into the defaults attribute box
-  switch ($userdate = $user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
-    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-      // over write defaults with the value they entered last time
-      $default = array('month' => date('n', strtotime($db_value)), 'day' => date('j', strtotime($db_value)), 'year' => date('Y', strtotime($db_value)), );
-      break;
-    case FETCHIT7_FIELD_DEFAULT_NONE:
-    case FETCHIT7_FIELD_DEFAULT_BLANK:
-    case FETCHIT7_FIELD_DEFAULT_FIRST:
-    case FETCHIT7_FIELD_DEFAULT_ALL:
-    case '':
-      break;
-    default:
-      $default = array('month' => date('n', strtotime($userdate)), 'day' => date('j', strtotime($userdate)), 'year' => date('Y', strtotime($userdate)), );
-  }
+	debug($default,'fetchit_get_date_element: user entered default $default');
 
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
     $description = t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-    $form = array('#title' => $title, '#type' => 'date',
-    //'#required' => $required,
-    //'#default_value' => $default,
-    '#disabled' => $disabled,
-    //'#process' => array('expand_date_fetchit'),
-    '#description' => $description, '#weight' => $weight, );
-  }
-  else {
-    $form = array('#type' => 'date',
-    //'#required' => $required,
-    //'#default_value' => $default,
-    '#disabled' => $disabled,
-    //'#process' => array('expand_date_fetchit'),
-    '#weight' => $weight, );
+    $form = array(
+    	'#title' => $title,
+    	'#type' => 'date',
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	//'#process' => array('expand_date_fetchit'),
+    	'#description' => $description, '#weight' => $weight,
+		);
+  } else {
+    $form = array(
+    	'#type' => 'date',
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#disabled' => $disabled,
+    	//'#process' => array('expand_date_fetchit'),
+    	'#weight' => $weight,
+		);
   }
 
   return $form;
