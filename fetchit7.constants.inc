@@ -3,6 +3,8 @@
 // fetchit7 content type names - used in node table "type" field, field instance "bundle" field
 define("FETCHIT7_CONTENT_NAME_TABLE","fetchit7_content_table");
 define("FETCHIT7_CONTENT_NAME_PARAM","fetchit7_content_param");
+define("FETCHIT7_CONTENT_NAME_EGRID","fetchit7_content_egrid");
+define("FETCHIT7_CONTENT_NAME_APPND","fetchit7_content_appnd");
 
 define("FETCHIT7_DBTYPE_NAME_PGSQL","postgresql");
 define("FETCHIT7_DBTYPE_LABEL_PGSQL","PostgreSQL");

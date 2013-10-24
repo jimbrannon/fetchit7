@@ -673,7 +673,7 @@ function fetchit7_node_info() {
 		),
 		'fetchit7_content_param' => array(
 			'name'				=> t('fetchit7 parameter input content type'),
-			'base'				=> 'node_content', // should this be fetchit7_content_param?
+			'base'				=> 'node_content',
 			'description'	=> t('Use this fetchit7 content to create a form containing parameter input/selection controls connected to database views/tables'),
 			'help'				=> t('Enter all the information necessary to create a parameter input/selection form connected to a database server'),
 			'custom'			=> FALSE,
@@ -687,7 +687,7 @@ function fetchit7_node_info() {
 		),
 		'fetchit7_content_egrid' => array(
 			'name'				=> t('fetchit7 editable grid content type'),
-			'base'				=> 'node_content', // should this be fetchit7_content_param?
+			'base'				=> 'node_content',
 			'description'	=> t('Use this fetchit7 content to create an editable grid form connected to a database table'),
 			'help'				=> t('Enter all the information necessary to create an editable grid form connected to a database server'),
 			'custom'			=> FALSE,

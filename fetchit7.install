@@ -214,8 +214,8 @@ function fetchit7_install () {
 	// change the display settings
 	variable_set('node_submitted_fetchit7_content_table', 0); // turns off display author and date
 	variable_set('node_submitted_fetchit7_content_param', 0); // turns off display author and date
-	variable_set('node_submitted_fetchit7_content_table', 0); // turns off display author and date
-	variable_set('node_submitted_fetchit7_content_table', 0); // tturns off display author and date
+	variable_set('node_submitted_fetchit7_content_egrid', 0); // turns off display author and date
+	variable_set('node_submitted_fetchit7_content_appnd', 0); // tturns off display author and date
 							 
 	//create the various fields to be used by the fetchit7 content types
 	foreach (_fetchit7_installed_fields() as $field) {
@@ -229,11 +229,11 @@ function fetchit7_install () {
 	foreach (_fetchit7_content_param_installed_instances() as $instance) {
 		field_create_instance($instance);
 	}	
-	// link the fields to the fetchit7_content_param content type via "instances"
+	// link the fields to the fetchit7_content_egrid content type via "instances"
 	foreach (_fetchit7_content_egrid_installed_instances() as $instance) {
 		field_create_instance($instance);
 	}	
-	// link the fields to the fetchit7_content_param content type via "instances"
+	// link the fields to the fetchit7_content_appnd content type via "instances"
 	foreach (_fetchit7_content_appnd_installed_instances() as $instance) {
 		field_create_instance($instance);
 	}	

@@ -269,7 +269,7 @@ function fetchit7_admin_backupcontent_submit ($form, $form_state) {
 	if(!strlen(trim($string = $form_state['values']['fetchit7_admin_backupcontent_name']))) $string = 'default';
 	// fetchit7 content types
 	// TODO: should loop through all fetchit7 content types - search by name? - rather than have them hardcoded here
-	$content_types = array('fetchit7_content_table','fetchit7_content_param');
+	$content_types = array('fetchit7_content_table','fetchit7_content_param','fetchit7_content_egrid','fetchit7_content_appnd');
 	$contenttypecount = 0;
 	$contentcount = 0;
 	foreach ($content_types as $content_type) {
@@ -472,6 +472,12 @@ function fetchit7_admin_restorecontent_submit ($form, $form_state) {
 			break;
 		case 'param':
 			$content_type = 'fetchit7_content_param';
+			break;
+		case 'egrid':
+			$content_type = 'fetchit7_content_egrid';
+			break;
+		case 'appnd':
+			$content_type = 'fetchit7_content_appnd';
 			break;
 		default:
 			drupal_set_message(t("Error processing fetchit7 backup table $tablename"),'warning');
