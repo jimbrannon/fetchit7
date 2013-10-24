@@ -4087,6 +4087,9 @@ function fetchit_get_radios_element($user_field_data, $user_field_ndx, $db_handl
     $options_keys = array_keys($options);
     $default = $options_keys[0];
   }
+	
+	// if it is set, use the passed in default
+	debug('radiobuttons: $db_value = '.$db_value);
   // then set up the defaults based on the string they typed into the defaults attribute box
   switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
     case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
