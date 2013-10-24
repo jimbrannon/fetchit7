@@ -1419,6 +1419,7 @@ function fetchit7_egrid_form($form, &$form_state) {
 
   
   // figure out if we are adding a new row
+  //debug($appendrecord.', '.$row_count.', '.$table_rows,'$appendrecord $row_count $table_rows');
   if (!$row_count) $appendrecord=TRUE;
   if ($appendrecord) {
   	$form['appendrecord'] = array('#type' => 'value', '#value' => $appendrecord);
@@ -1761,6 +1762,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       // but because this is an egrid, it must be an array containing a single value
       if ($itsarealrecord) {
 	      $value = fetchit_get_data($db_type,$db_data_object,$r,$i);
+				//if ($i==1) debug('reading from table: $value='.$value);
 	      $form['sourcetable'][$r][$i] = array('#type' => 'value', '#value' => $value); // the whole table is stored here in case it is needed
 	      switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
 	        case F_DR_CONTROL_CHECKBOXES:
@@ -1786,6 +1788,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       } else {
       	$default_value='';
       }
+			//if ($i==1) debug('converted to default: $default_value='.$default_value);
 
       // add everything else to the form we might need in the theme, validate, or submit functions
       //$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
@@ -1853,7 +1856,7 @@ function fetchit7_egrid_form($form, &$form_state) {
  */
 function fetchit7_egrid_form_validate($form, &$form_state) {
   $nid = $form['nid']['#value'];
-  debug($nid, 'fetchit7_egrid_form_validate $nid');
+  //debug($nid, 'fetchit7_egrid_form_validate $nid');
 }
 
 /**
@@ -2266,8 +2269,12 @@ function fetchit7_content_field_mapper($field_id) {
     case 'fetchit7_field_par_fld_data_uid':
       $field_name = 'fetchit7_field_par_fld_data_uid';
       break;
-
-    default:
+    case 'egrid_append':
+    case 'fetchit7_field_egrid_append':
+      $field_name = 'fetchit7_field_egrid_append';
+      break;
+			
+		default:
       break;
   }
   return $field_name;
@@ -3594,7 +3601,7 @@ function fetchit_get_checkboxes_element($user_field_data, $user_field_ndx, $db_h
 
 function fetchit_get_checkbox_element_bool($user_field_data, $user_field_ndx, $db_handle, $nid, $showtitles, $db_value) {
   //note that $db_value should be a scalar, not an array
-
+	//debug('passed into checkbox routine: $db_value='.$db_value);
   $form = array();
 
   // create the $options array containing the selectable items
@@ -3667,28 +3674,32 @@ function fetchit_get_checkbox_element_bool($user_field_data, $user_field_ndx, $d
     $default = 0;
   }
 
+	// handle the default value passed in
+	$default = fetchit_booleantointeger($db_value);
+	//$default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
+	
   // then set up the default based on the string they typed into the defaults attribute box
-  switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
-    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-      // over write defaults with the values they entered last time
-      $default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
-      break;
-    case FETCHIT7_FIELD_DEFAULT_TRUE:
-    case FETCHIT7_FIELD_DEFAULT_FIRST:
-    case FETCHIT7_FIELD_DEFAULT_ALL:
-      $default = 1;
-      break;
-    case FETCHIT7_FIELD_DEFAULT_NONE:
-    case FETCHIT7_FIELD_DEFAULT_BLANK:
-    case FETCHIT7_FIELD_DEFAULT_FALSE:
-      $default = 0;
-      break;
-    case '':
-      // to me this means user does not care - that means leave it set as is
-      break;
-    default:
-      $default = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR], FILTER_VALIDATE_BOOLEAN);
+  if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+	  switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+	      // over write defaults with the values they entered last time
+	      $default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_TRUE:
+	    case FETCHIT7_FIELD_DEFAULT_FIRST:
+	    case FETCHIT7_FIELD_DEFAULT_ALL:
+	      $default = 1;
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_NONE:
+	    case FETCHIT7_FIELD_DEFAULT_BLANK:
+	    case FETCHIT7_FIELD_DEFAULT_FALSE:
+	      $default = 0;
+	      break;
+	    default:
+	      $default = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR], FILTER_VALIDATE_BOOLEAN);
+	  }
   }
+	//debug('converted inside checkbox routine: $default='.$default);
 
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
@@ -4984,6 +4995,29 @@ function fetchit7_integer_to_sql_values_str($val, $field_type = 'integer', $null
       }
     }
   }
+}
+
+function fetchit_booleantointeger($val) {
+	switch (strtolower($val)) {
+	case "t":
+	case "true":
+	case "yes":
+	case "1":
+	case "on":
+		return 1;
+	case "f":
+	case "false":
+	case "no":
+	case "0":
+	case "off":
+		return 0;
+	}
+	switch ($val) {
+	case 0:
+		return 0;
+	default:
+		return 1;
+	}
 }
 
 function fetchit7_get_control_list() {
