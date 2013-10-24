@@ -3675,6 +3675,8 @@ function fetchit_get_checkbox_element_bool($user_field_data, $user_field_ndx, $d
     }
   }
 
+	$options_keys = array_keys($options);
+	
   // process the required attribute - should be boolean already
   $required = $user_field_data[$user_field_ndx][F_DR_FIELD_REQUIRED_STR];
   // avoid setting this to true because it essentially disables the checkbox
@@ -3688,35 +3690,48 @@ function fetchit_get_checkbox_element_bool($user_field_data, $user_field_ndx, $d
 
   // set up the beginning default based on the required flag
   if ($required) {
-    $default = 1;
+    $default = $options_keys[1];
   }
   else {
-    $default = 0;
+    $default = $options_keys[0];
   }
 
 	// handle the default value passed in
-	$default = fetchit_booleantointeger($db_value);
-	//$default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
+	if (isset($db_value)) {
+		$mykey = fetchit_booleantointeger($db_value);
+    if (in_array($mykey, $options_keys)) {
+      $default = $mykey;
+    }
+    else {
+      $default = $options_keys[0];
+    }
+	}
 	
   // then set up the default based on the string they typed into the defaults attribute box
-  if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-	  switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+	  switch ($entered) {
 	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
 	      // over write defaults with the values they entered last time
-	      $default = filter_var(trim($db_value), FILTER_VALIDATE_BOOLEAN);
+	      // should already be set
 	      break;
 	    case FETCHIT7_FIELD_DEFAULT_TRUE:
 	    case FETCHIT7_FIELD_DEFAULT_FIRST:
 	    case FETCHIT7_FIELD_DEFAULT_ALL:
-	      $default = 1;
+	      $default = $options_keys[1];
 	      break;
 	    case FETCHIT7_FIELD_DEFAULT_NONE:
 	    case FETCHIT7_FIELD_DEFAULT_BLANK:
 	    case FETCHIT7_FIELD_DEFAULT_FALSE:
-	      $default = 0;
+	      $default = $options_keys[0];
 	      break;
 	    default:
-	      $default = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR], FILTER_VALIDATE_BOOLEAN);
+				$mykey = fetchit_booleantointeger($entered);
+		    if (in_array($mykey, $options_keys)) {
+		      $default = $mykey;
+		    }
+		    else {
+		      $default = $options_keys[0];
+		    }
 	  }
   }
 	//debug('converted inside checkbox routine: $default='.$default);
@@ -3724,11 +3739,28 @@ function fetchit_get_checkbox_element_bool($user_field_data, $user_field_ndx, $d
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
     $description = t($user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR]);
-    $form = array('#title' => $title, '#type' => 'checkbox', '#required' => $required, '#default_value' => $default, '#return_value' => 1, '#disabled' => $disabled, '#description' => $description, '#weight' => $weight, );
+    $form = array(
+    	'#title' => $title,
+    	'#type' => 'checkbox',
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#return_value' => 1,
+    	'#disabled' => $disabled,
+    	'#description' => $description,
+    	'#weight' => $weight,
+		);
   }
   else {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
-    $form = array('#title' => $title, '#type' => 'checkbox', '#required' => $required, '#default_value' => $default, '#return_value' => 1, '#disabled' => $disabled, '#weight' => $weight, );
+    $form = array(
+    	'#title' => $title,
+    	'#type' => 'checkbox',
+    	'#required' => $required,
+    	'#default_value' => $default,
+    	'#return_value' => 1,
+    	'#disabled' => $disabled,
+    	'#weight' => $weight,
+		);
   }
 
   return $form;
