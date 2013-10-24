@@ -332,7 +332,7 @@ function fetchit7_content_backuptable_create($type,$tablename) {
 	$query
 		->entityCondition('entity_type', 'node')
 		->entityCondition('bundle', $type)
-		->propertyCondition('status', 1)
+		//->propertyCondition('status', 1)
 		->propertyOrderBy('created', 'DESC')
 		//->fieldCondition('field_us_state', 'value', array('CT', 'NJ', 'NY'))
 		//->range(0,10)

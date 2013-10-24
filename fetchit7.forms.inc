@@ -4175,31 +4175,30 @@ function fetchit_get_radios_element_bool($user_field_data, $user_field_ndx, $db_
     $options_keys = array_keys($options);
     $default = $options_keys[0];
   }
+
+	// handle the default value passed in
+	if (isset($db_value)) $default = fetchit_booleantointeger($db_value);
+		
   // then set up the defaults based on the string they typed into the defaults attribute box
-  switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
-    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-      // over write defaults with the value they entered last time
-      $default = $db_value;
-      break;
-    case FETCHIT7_FIELD_DEFAULT_NONE:
-    case FETCHIT7_FIELD_DEFAULT_BLANK:
-    case FETCHIT7_FIELD_DEFAULT_FIRST:
-    case FETCHIT7_FIELD_DEFAULT_ALL:
-    case '':
-      $options_keys = array_keys($options);
-      $default = $options_keys[0];
-      break;
-    default:
-      // since we know the keys are 0 and 1 in this specialized select control, go ahead and do the conversion
-      $userdefault = filter_var($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR], FILTER_VALIDATE_BOOLEAN);
-      $options_keys = array_keys($options);
-      if (in_array($userdefault, $options_keys)) {
-        $default = $userdefault;
-      }
-      else {
-        $default = $options_keys[0];
-      }
-  }
+  if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+    switch ($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]) {
+	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+	      // over write defaults with the value they entered last time
+				if (isset($db_value)) $default = fetchit_booleantointeger($db_value);
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_NONE:
+	    case FETCHIT7_FIELD_DEFAULT_BLANK:
+				$default = 0;
+				break;
+	    case FETCHIT7_FIELD_DEFAULT_FIRST:
+	    case FETCHIT7_FIELD_DEFAULT_ALL:
+				$default = 1;
+				break;
+	    default:
+	      // since we know the keys are 0 and 1 in this specialized select control, go ahead and do the conversion
+	      $default = fetchit_booleantointeger(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]));
+  	}
+	}
 
   if ($showtitles) {
     $title = t($user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR]);
