@@ -3618,11 +3618,16 @@ function fetchit_get_checkboxes_element($user_field_data, $user_field_ndx, $db_h
 	      // already entered
 	      break;
 	    case FETCHIT7_FIELD_DEFAULT_FIRST:
+	    case FETCHIT7_FIELD_DEFAULT_FALSE:
 	      $defaults = array($options_keys[0]);
+	      break;
+	    case FETCHIT7_FIELD_DEFAULT_TRUE:
+	      $defaults = array($options_keys[1]);
 	      break;
 	    case FETCHIT7_FIELD_DEFAULT_ALL:
 	      $defaults = array_keys($options);
 	      break;
+	    case FETCHIT7_FIELD_DEFAULT_FALSE:
 	    case FETCHIT7_FIELD_DEFAULT_NONE:
 	    case FETCHIT7_FIELD_DEFAULT_BLANK:
 	      $defaults = array();
