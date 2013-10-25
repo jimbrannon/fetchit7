@@ -1914,9 +1914,11 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 			//	$val_str .= fetchit_make_val_str($form['key_field'][$row_ndx]['#value'],"integer");
 			} else {
 				$control_type = $form['elements'][$element_name]['#type'];
-				$disabled = $form['elements'][$element_name]['#disabled']; 
 				switch ($control_type) {
+					case 'value':
+						$tmp_val_str = $form_state['values']['elements'][$element_name];
 					case 'date': // the weird drupal core date element - an array of three values
+						$disabled = $form['elements'][$element_name]['#disabled']; 
 						if ($disabled) {
 							$tmp_val_str = $form['elements'][$element_name]['#default_value']['year'];
 							$tmp_val_str .= "-";
@@ -1958,6 +1960,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 						}
 		        break;
 					default: //everything else until we get another that is not a string
+						$disabled = $form['elements'][$element_name]['#disabled']; 
 						if ($disabled) {
 							$tmp_val_str = $form['elements'][$element_name]['#default_value'];
 						} else {
