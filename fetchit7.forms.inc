@@ -1492,6 +1492,7 @@ function fetchit7_egrid_form($form, &$form_state) {
   //should return an array
   // boolean, but leave these input values as strings until later, also can deal with default values then
   $param_hidden = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_hidden', 'values'));
+	//debug($param_hidden,'$param_hidden');
   //should return an array
   // boolean, but leave these input values as strings until later, also can deal with default values then
   $param_required = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_required', 'values'));
@@ -1606,44 +1607,50 @@ function fetchit7_egrid_form($form, &$form_state) {
     //fetchit2 uses disabled - so default of false means it should be enabled (editable)
     if ($param_found) {
       if (($param_found - 1) < count($param_enabled)) {
-        $enabled = filter_var($param_enabled[$param_found - 1], FILTER_VALIDATE_BOOLEAN);
-        $user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = !$enabled;
+        //$enabled = filter_var($param_enabled[$param_found - 1], FILTER_VALIDATE_BOOLEAN);
+        $user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = 
+        	fetchit_booleantointeger($param_enabled[$param_found - 1]);
       }
       else {
-        $user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = FALSE;
+        $user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = 0;
       }
     }
     else {
-      $user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = FALSE;
+      $user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = 0;
     }
 
     //$param_hidden
     // default of false means it should be displayed
     if ($param_found) {
       if (($param_found - 1) < count($param_hidden)) {
-        $hidden = filter_var($param_hidden[$param_found - 1], FILTER_VALIDATE_BOOLEAN);
-        $user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR] = $hidden;
+        $user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR] = 
+        	fetchit_booleantointeger($param_hidden[$param_found - 1]);
+        //filter_var($param_hidden[$param_found - 1], FILTER_VALIDATE_BOOLEAN);
       }
       else {
-        $user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR] = FALSE;
+        $user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR] = 0;
       }
     }
     else {
-      $user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR] = FALSE;
+      $user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR] = 0;
     }
+		//debug($field_index,'$field_index');
+		//debug(FETCHIT7_FIELD_HIDDEN_STR,'FETCHIT7_FIELD_HIDDEN_STR');
+		//debug($user_field_data[$field_index][FETCHIT7_FIELD_HIDDEN_STR],'$user_field_data');
 
     //$param_required
     //default of required = true is OK
     if ($param_found) {
       if (($param_found - 1) < count($param_required)) {
-        $user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = filter_var($param_required[$param_found - 1], FILTER_VALIDATE_BOOLEAN);
+        $user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] =
+        	fetchit_booleantointeger($param_required[$param_found - 1]);
       }
       else {
-        $user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = TRUE;
+        $user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = 1;
       }
     }
     else {
-      $user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = TRUE;
+      $user_field_data[$field_index][F_DR_FIELD_REQUIRED_STR] = 1;
     }
 
     //$param_str parameter string
@@ -1754,6 +1761,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       $element_name = fetchit_make_element_name($nid, $r, $i);
      	$enabled = !$user_field_data[$i][F_DR_FIELD_DISABLED_STR];
      	$hidden = $user_field_data[$i][FETCHIT7_FIELD_HIDDEN_STR];
+			//debug ($r.' '.$i.' '.$hidden, '$r $i $hidden');
 
       // set a default value to pass into the element generator
       // this value is used unless the user specified a default value in the configuration
@@ -2012,8 +2020,7 @@ function theme_fetchit7_egrid_form($variables) {
 		if ($table_headers_count==1 && $table_headers[0]=='') $table_headers_count = 0; //in other words, assume the user did not enter anything
     $header = array();
     for ($fld_ndx = 0; $fld_ndx < $field_count; $fld_ndx++) {
-    	$theval = $form['param_hidden'][$fld_ndx]['#value'];
-    	$hidden = filter_var($theval, FILTER_VALIDATE_BOOLEAN);
+			$hidden = fetchit_booleantointeger($form['param_hidden'][$fld_ndx]['#value']);
 	    //debug($fld_ndx.' '.$theval.' '.$hidden,'$fld_ndx $theval $hidden');
     	if (!$hidden) { // hidden fields should have been created with a non-renderable control element type
 	      if ($col_count < $table_headers_count) {
@@ -2028,15 +2035,18 @@ function theme_fetchit7_egrid_form($variables) {
     $rows = array();
     for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
       $row = array();
-      for ($col_ndx = 0; $col_ndx < $col_count; $col_ndx++) {
-        $element_name = fetchit_make_element_name($nid, $row_ndx, $col_ndx);
-        $row[] = drupal_render($form['elements'][$element_name]);
-      }
+	    for ($fld_ndx = 0; $fld_ndx < $field_count; $fld_ndx++) {
+        $element_name = fetchit_make_element_name($nid, $row_ndx, $fld_ndx);
+				$hidden = fetchit_booleantointeger($form['param_hidden'][$fld_ndx]['#value']);
+	    	if (!$hidden) { // hidden fields should have been created with a non-renderable control element type
+        	$row[] = drupal_render($form['elements'][$element_name]);
+				}
+   		}
       $rows[] = $row;
-    }
-    //debug($table_weight,'$table_weight');
-    $form['table'] = array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#weight' => $table_weight, '#empty' => "Empty table.", );
-    $output .= drupal_render($form['table']);
+  	}
+  	//debug($table_weight,'$table_weight');
+  	$form['table'] = array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#weight' => $table_weight, '#empty' => "Empty table.", );
+  	$output .= drupal_render($form['table']);
   }
   else {
     $output .= drupal_render($form['elements']);
@@ -2240,6 +2250,10 @@ function fetchit7_content_field_mapper($field_id) {
     case 'par_fld_required':
     case 'fetchit7_field_par_fld_required':
       $field_name = 'fetchit7_field_par_fld_required';
+      break;
+    case 'par_fld_hidden':
+    case 'fetchit7_field_par_fld_hidden':
+      $field_name = 'fetchit7_field_par_fld_hidden';
       break;
     case 'par_fld_parstr':
     case 'fetchit7_field_par_fld_parstr':
@@ -2917,6 +2931,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
   switch (strtolower(trim($field_type))) {
     case 'bool':
       // a boolean from a pg database
+      if ($hidden) return array('#type' => 'value','#value' => fetchit_booleantointeger($db_value));
       if ($user_field_ndx) {// if the user specified something this is set to the control index+1, else it is 0 to use the default for the field type
         switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_DROPDOWN_SINGLE:
@@ -2980,6 +2995,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
     // an integer from a pg database
     case 'int8':
       // a long integer from a pg database
+      if ($hidden) return array('#type' => 'value','#value' => $db_value);
       if ($user_field_ndx) {// the user specified something
         switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_DROPDOWN_SINGLE:
@@ -3060,6 +3076,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
     // a single precision real number field from a pg database
     case 'float8':
       // a double precision real number field from a pg database
+      if ($hidden) return array('#type' => 'value','#value' => $db_value);
       if ($user_field_ndx) {// the user specified something
         switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_DROPDOWN_SINGLE:
@@ -3132,6 +3149,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
       break;
     case 'date':
       // a date field from a pg database
+      if ($hidden) return array('#type' => 'value','#value' => $db_value);
       if ($user_field_ndx) {// the user specified something
         switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_DATESEL:
@@ -3216,6 +3234,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
     // a time field from a pg database
     case 'timetz':
       // a time field with timezone from a pg database
+      if ($hidden) return array('#type' => 'value','#value' => $db_value);
       if ($user_field_ndx) {
         switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_DATETIMESEL:
@@ -3283,6 +3302,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
     // a timestamp field from a pg database
     case 'timestamptz':
       // a timestamp field with timezone from a pg database
+      if ($hidden) return array('#type' => 'value','#value' => $db_value);
       if ($user_field_ndx) {
         switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_DATETIMESEL:
@@ -3354,6 +3374,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
     // a varchar field from a pg database
     case 'bpchar':
       // a bpchar field from a pg database
+      if ($hidden) return array('#type' => 'value','#value' => $db_value);
       if ($user_field_ndx) {// the user specified something
         switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_DROPDOWN_SINGLE:
@@ -3419,6 +3440,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
       break;
     default:
       // an unanticipated field type, put a text box or single selects, but may not work
+      if ($hidden) return array('#type' => 'value','#value' => $db_value);
       if ($user_field_ndx) {// the user specified something
         switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_TEXTBOX:
