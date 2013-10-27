@@ -1917,6 +1917,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 				switch ($control_type) {
 					case 'value':
 						$tmp_val_str = $form_state['values']['elements'][$element_name];
+						break;
 					case 'date': // the weird drupal core date element - an array of three values
 						$disabled = $form['elements'][$element_name]['#disabled']; 
 						if ($disabled) {
@@ -1926,6 +1927,8 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 							$tmp_val_str .= "-";
 							$tmp_val_str .= $form['elements'][$element_name]['#default_value']['day'];
 						} else {
+							//debug($element_name,'$element_name');
+							//debug($form_state,'$form_state');
 							$tmp_val_str = $form_state['values']['elements'][$element_name]['year'];
 							$tmp_val_str .= "-";
 							$tmp_val_str .= $form_state['values']['elements'][$element_name]['month'];
