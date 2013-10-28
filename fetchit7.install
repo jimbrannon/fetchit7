@@ -3589,7 +3589,7 @@ function _fetchit7_content_egrid_installed_instances () {
 			'description'		=> $t('Whether a control for this field is displayed in the editable grid. Enter true or false.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'true',
+					'value'					=> 'false',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_hidden',
@@ -3616,7 +3616,7 @@ function _fetchit7_content_egrid_installed_instances () {
 			'description'		=> $t('Whether this control for this field requires an input value to be selected/entered before submitting the form.'),
 			'default_value'	=> array(
 				0								=> array(
-					'value'					=> 'false',
+					'value'					=> 'true',
 				),
 			),
 			'field_name'		=> 'fetchit7_field_par_fld_required',

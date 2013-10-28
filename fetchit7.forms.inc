@@ -1604,12 +1604,16 @@ function fetchit7_egrid_form($form, &$form_state) {
     }
 
     //$param_enabled
-    //fetchit2 uses disabled - so default of false means it should be enabled (editable)
+    // fetchit2 uses disabled - so default of false means it should be enabled (editable)
     if ($param_found) {
       if (($param_found - 1) < count($param_enabled)) {
         //$enabled = filter_var($param_enabled[$param_found - 1], FILTER_VALIDATE_BOOLEAN);
-        $user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = 
-        	fetchit_booleantointeger($param_enabled[$param_found - 1]);
+        $enabled = fetchit_booleantointeger($param_enabled[$param_found - 1]);
+				if($enabled) {
+					$user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = 0;
+				} else {
+					$user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = 1;
+				}
       }
       else {
         $user_field_data[$field_index][F_DR_FIELD_DISABLED_STR] = 0;
@@ -1759,7 +1763,12 @@ function fetchit7_egrid_form($form, &$form_state) {
   for ($r = 0; $r < $row_count; $r++) {
     for ($i = 0; $i < $field_count; $i++) {
       $element_name = fetchit_make_element_name($nid, $r, $i);
-     	$enabled = !$user_field_data[$i][F_DR_FIELD_DISABLED_STR];
+     	$disabled = $user_field_data[$i][F_DR_FIELD_DISABLED_STR];
+     	if ($disabled) {
+     		$enabled = 0;
+     	} else {
+     		$enabled = 1;
+     	}
      	$hidden = $user_field_data[$i][FETCHIT7_FIELD_HIDDEN_STR];
 			//debug ($r.' '.$i.' '.$hidden, '$r $i $hidden');
 
