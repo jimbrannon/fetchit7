@@ -1,5 +1,4 @@
-//<?php
-
+<?php
 // fetchit7 content type names - used in node table "type" field, field instance "bundle" field
 define("FETCHIT7_CONTENT_NAME_TABLE","fetchit7_content_table");
 define("FETCHIT7_CONTENT_NAME_PARAM","fetchit7_content_param");
@@ -87,3 +86,5 @@ define("FETCHIT7_FIELD_DEFAULT_FIRST","FETCHIT7_DEFAULT_FIRST");
 define("FETCHIT7_FIELD_DEFAULT_ALL","FETCHIT7_DEFAULT_ALL");
 define("FETCHIT7_FIELD_DEFAULT_TRUE","FETCHIT7_DEFAULT_TRUE");
 define("FETCHIT7_FIELD_DEFAULT_FALSE","FETCHIT7_DEFAULT_FALSE");
+
+?>
