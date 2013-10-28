@@ -1,4 +1,4 @@
-<?php
+//<?php
 
 // fetchit7 content type names - used in node table "type" field, field instance "bundle" field
 define("FETCHIT7_CONTENT_NAME_TABLE","fetchit7_content_table");

@@ -220,23 +220,23 @@ function fetchit7_install () {
 	//create the various fields to be used by the fetchit7 content types
 	foreach (_fetchit7_installed_fields() as $field) {
 		field_create_field($field);
-	}	
+	}
 	// link the fields to the fetchit7_content_table content type via "instances"
 	foreach (_fetchit7_content_table_installed_instances() as $instance) {
 		field_create_instance($instance);
-	}	
+	}
 	// link the fields to the fetchit7_content_param content type via "instances"
 	foreach (_fetchit7_content_param_installed_instances() as $instance) {
 		field_create_instance($instance);
-	}	
+	}
 	// link the fields to the fetchit7_content_egrid content type via "instances"
 	foreach (_fetchit7_content_egrid_installed_instances() as $instance) {
 		field_create_instance($instance);
-	}	
+	}
 	// link the fields to the fetchit7_content_appnd content type via "instances"
 	foreach (_fetchit7_content_appnd_installed_instances() as $instance) {
 		field_create_instance($instance);
-	}	
+	}
 		
 }
 

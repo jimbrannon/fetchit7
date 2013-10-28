@@ -1877,7 +1877,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 	$db_handle = $form['db_handle']['#value'];
 	$table_name = $form['view_name']['#value'];
 	$appendrecord = $form['appendrecord']['#value'];
-	debug(!$appendrecord,'!$appendrecord');
+	//debug(!$appendrecord,'!$appendrecord');
 	if (!$appendrecord) {
 		//clear out the existing records
 		$result = fetchit_remove_records($db_handle,$db_type,$table_name,$user_uid_field);
