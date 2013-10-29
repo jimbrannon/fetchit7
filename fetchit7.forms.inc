@@ -262,6 +262,7 @@ function fetchit7_table_form($form, &$form_state) {
       if ($table_selection_type == 'copy_single') {
         $multiple_flag = FALSE;
         $selectall_flag = FALSE;
+				if (!$row_count) $default_value = array(); // doesn't get set above if there are no rows
       }
       else {
         $multiple_flag = TRUE;
@@ -270,7 +271,16 @@ function fetchit7_table_form($form, &$form_state) {
         // reset to nothing selected
       }
       // create the HTML tableselect render array with a single select option
-      $form['table'] = array('#type' => 'tableselect', '#header' => $header, '#options' => $options, '#default_value' => $default_value, '#multiple' => $multiple_flag, '#js_select' => $selectall_flag, '#empty' => $table_empty_message, '#weight' => $table_weight, );
+      $form['table'] = array(
+      	'#type' => 'tableselect',
+      	'#header' => $header,
+      	'#options' => $options,
+      	'#default_value' => $default_value,
+      	'#multiple' => $multiple_flag,
+      	'#js_select' => $selectall_flag,
+      	'#empty' => $table_empty_message,
+      	'#weight' => $table_weight,
+			);
       break;
 
     case 'none':
