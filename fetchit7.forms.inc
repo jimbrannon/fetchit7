@@ -22,7 +22,7 @@ function fetchit7_table_form($form, &$form_state) {
   $append_record_flag = FALSE;
   $parameter_select_flag = FALSE;
   $text_input_flag = FALSE;
-  $addbody_flag = TRUE;
+  $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
   $table_weight = -8;
   // it goes at the top of the form
   $submit_weight = 8;
@@ -526,13 +526,19 @@ function theme_fetchit7_table_form($variables) {
   $output .= '</div>';
 	$submit_button_flag = $form['submit_button_flag']['#value'];
 	if ($submit_button_flag) {
+    $output = '<div class="' . $form_id . '_submit">';
 		$output .= drupal_render($form['submit']);
+    $output .= '</div>';
 	}
 	$addbody_flag = $form['addbody_flag']['#value'];
 	if ($addbody_flag) {
+    $output = '<div class="' . $form_id . '_body">';
 		$output .= drupal_render($form['body']);
+    $output .= '</div>';
 	}
+  $output = '<div class="' . $form_id . '_other">';
   $output .= drupal_render_children($form);
+  $output .= '</div>';
   return $output;
 }
 
@@ -559,6 +565,7 @@ function theme_fetchit7_table_form($variables) {
  *
  */
 function fetchit7_param_form($form, &$form_state) {
+  $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
   // some things we can put in the $form
   //$form['#attached']['css'] = array(drupal_get_path('module', 'block') . '/block.css');
   $form['elements'] = array();
@@ -610,6 +617,12 @@ function fetchit7_param_form($form, &$form_state) {
     }
     //TODO: check pre function result?
   }
+
+  // addbody
+  // addbody_flag should be a single boolean value
+  // use it if something valid is entered.   if not set it to a default of true
+  //$addbody_flag = fetchit7_content_field_fetcher($nid, 'addbody_flag', 'value');
+  $form['addbody_flag'] = array('#type' => 'value', '#value' => $addbody_flag);
 
   // submit button attributes
   // submit button label should be a single string value
@@ -1029,6 +1042,7 @@ function fetchit7_param_form($form, &$form_state) {
    */
 
   $submit_button_flag = TRUE;
+  $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag);
   if ($submit_button_flag) {
     //$form['actions'] = array(
     //  '#tree' => FALSE,
@@ -1224,7 +1238,20 @@ function theme_fetchit7_param_form($variables) {
   else {
     $output .= drupal_render($form['elements']);
   }
-  //$output .= drupal_render($form['actions']['submit']);
+  $output .= '</div>';
+  $submit_button_flag = $form['submit_button_flag']['#value'];
+  if ($submit_button_flag) {
+    $output = '<div class="' . $form_id . '_submit">';
+    $output .= drupal_render($form['actions']['submit']);
+    $output .= '</div>';
+  }
+  $addbody_flag = $form['addbody_flag']['#value'];
+  if ($addbody_flag) {
+    $output = '<div class="' . $form_id . '_body">';
+    $output .= drupal_render($form['body']);
+    $output .= '</div>';
+  }
+  $output = '<div class="' . $form_id . '_other">';
   $output .= drupal_render_children($form);
   $output .= '</div>';
 
@@ -1254,6 +1281,7 @@ function theme_fetchit7_param_form($variables) {
  *
  */
 function fetchit7_egrid_form($form, &$form_state) {
+  $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
   // some things we can put in the $form
   //$form['#attached']['css'] = array(drupal_get_path('module', 'block') . '/block.css');
   $form['elements'] = array();
@@ -1355,6 +1383,12 @@ function fetchit7_egrid_form($form, &$form_state) {
   $table_headers = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_table_headers', 'values'));
   //should return an array
   $form['table_headers'] = array('#type' => 'value', '#value' => $table_headers);
+
+  // addbody
+  // addbody_flag should be a single boolean value
+  // use it if something valid is entered.   if not set it to a default of true
+  //$addbody_flag = fetchit7_content_field_fetcher($nid, 'addbody_flag', 'value');
+  $form['addbody_flag'] = array('#type' => 'value', '#value' => $addbody_flag);
 
   // submit button attributes
   // submit button label should be a single string value
@@ -1873,6 +1907,7 @@ function fetchit7_egrid_form($form, &$form_state) {
   }
 
   $submit_button_flag = TRUE;
+  $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag);
   if ($submit_button_flag) {
     //$form['actions'] = array(
     //  '#tree' => FALSE,
@@ -2087,7 +2122,20 @@ function theme_fetchit7_egrid_form($variables) {
   else {
     $output .= drupal_render($form['elements']);
   }
-  //$output .= drupal_render($form['actions']['submit']);
+  $output .= '</div>';
+  $submit_button_flag = $form['submit_button_flag']['#value'];
+  if ($submit_button_flag) {
+    $output = '<div class="' . $form_id . '_submit">';
+    $output .= drupal_render($form['actions']['submit']);
+    $output .= '</div>';
+  }
+  $addbody_flag = $form['addbody_flag']['#value'];
+  if ($addbody_flag) {
+    $output = '<div class="' . $form_id . '_body">';
+    $output .= drupal_render($form['body']);
+    $output .= '</div>';
+  }
+  $output = '<div class="' . $form_id . '_other">';
   $output .= drupal_render_children($form);
   $output .= '</div>';
 
