@@ -1236,7 +1236,10 @@ function theme_fetchit7_param_form($variables) {
     $output .= drupal_render($form['table']);
   }
   else {
-    $output .= drupal_render($form['elements']);
+		for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
+			$element_name = fetchit_make_element_name($nid, 0, $p_ndx);
+			$output .= drupal_render($form['elements'][$element_name]);
+		}
   }
   $output .= '</div>';
   $submit_button_flag = $form['submit_button_flag']['#value'];
@@ -2120,7 +2123,15 @@ function theme_fetchit7_egrid_form($variables) {
   	$output .= drupal_render($form['table']);
   }
   else {
-    $output .= drupal_render($form['elements']);
+    for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
+	    for ($fld_ndx = 0; $fld_ndx < $field_count; $fld_ndx++) {
+        $element_name = fetchit_make_element_name($nid, $row_ndx, $fld_ndx);
+				$hidden = fetchit_booleantointeger($form['param_hidden'][$fld_ndx]['#value']);
+	    	if (!$hidden) { // hidden fields should have been created with a non-renderable control element type
+        	$output .= drupal_render($form['elements'][$element_name]);
+				}
+   		}
+  	}
   }
   $output .= '</div>';
   $submit_button_flag = $form['submit_button_flag']['#value'];
