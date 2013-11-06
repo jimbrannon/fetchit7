@@ -1244,17 +1244,17 @@ function theme_fetchit7_param_form($variables) {
   $output .= '</div>';
   $submit_button_flag = $form['submit_button_flag']['#value'];
   if ($submit_button_flag) {
-    $output = '<div class="' . $form_id . '_submit">';
+    $output .= '<div class="' . $form_id . '_submit">';
     $output .= drupal_render($form['actions']['submit']);
     $output .= '</div>';
   }
   $addbody_flag = $form['addbody_flag']['#value'];
   if ($addbody_flag) {
-    $output = '<div class="' . $form_id . '_body">';
+    $output .= '<div class="' . $form_id . '_body">';
     $output .= drupal_render($form['body']);
     $output .= '</div>';
   }
-  $output = '<div class="' . $form_id . '_other">';
+  $output .= '<div class="' . $form_id . '_other">';
   $output .= drupal_render_children($form);
   $output .= '</div>';
 
@@ -1293,7 +1293,7 @@ function fetchit7_egrid_form($form, &$form_state) {
   // get nid embedded into original form_id; format fetchit7_param_form_X### - nid starts at character 21
   $form_id = $form_state['build_info']['form_id'];
   // to get here, this is definitely set
-  //debug($form_state['build_info']);
+  //debug('fetchit7_egrid_form 1');
   $nid = (int) substr($form_id, 21);
   $form['nid'] = array('#type' => 'value', '#value' => $nid);
 
@@ -1435,6 +1435,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       return $form;
     }
   }
+  //debug('fetchit7_egrid_form 2');
 
   // get the source table meta data
   $row_count = fetchit_get_row_count($db_type, $db_data_object);
@@ -1475,6 +1476,7 @@ function fetchit7_egrid_form($form, &$form_state) {
   $form['uid_field_found'] = array('#type' => 'value', '#value' => $uid_field_found);
   $form['uid_field_index'] = array('#type' => 'value', '#value' => $uid_field_index);
 
+  //debug('fetchit7_egrid_form 3');
   
   // figure out if we are adding a new row
   //debug($appendrecord.', '.$row_count.', '.$table_rows,'$appendrecord $row_count $table_rows');
@@ -1574,7 +1576,8 @@ function fetchit7_egrid_form($form, &$form_state) {
   //$param_data_tbl = array_map('trim',fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_tbl','values')); //should return an array
   //$param_data_key = array_map('trim',fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_key','values')); //should return an array
   //$param_data_uid = array_map('trim',fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_uid','values')); //should return an array
-
+  //debug('fetchit7_egrid_form 4');
+  
   //use the above arrays to contruct the $user_field_data array
   // note that in this editable grid formm the source table defines the list and count of fields, not the param list
   // we will use defaults is possible where items are missing
@@ -1812,6 +1815,8 @@ function fetchit7_egrid_form($form, &$form_state) {
     }
   }
 
+  //debug('fetchit7_egrid_form 5');
+
   // loop through the source table rows and fields
   // create renderable form control element constructions in the form() array for those values that will be displayed
 	// the source table field values and field types plus the the user entered
@@ -1908,6 +1913,7 @@ function fetchit7_egrid_form($form, &$form_state) {
 					$hidden); // this is used to draw a special value type form element so that it's in the form 
   	}
   }
+  //debug('fetchit7_egrid_form 6');
 
   $submit_button_flag = TRUE;
   $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag);
@@ -1923,6 +1929,7 @@ function fetchit7_egrid_form($form, &$form_state) {
     	'#weight' => $submit_weight,
 		);
   }
+  //debug('fetchit7_egrid_form 7');
 
   return $form;
 }
@@ -2072,6 +2079,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 }
 
 function theme_fetchit7_egrid_form($variables) {
+  //debug('theme_fetchit7_egrid_form 1');
   $form = $variables['form'];
   $nid = $form['nid']['#value'];
   $form_id = $form['form_id']['#value'];
@@ -2085,6 +2093,7 @@ function theme_fetchit7_egrid_form($variables) {
   //$output  = '';
 
   if ($table_row_count) {
+	  //debug('theme_fetchit7_egrid_form 2');
     //figure out the table structure
     $row_count = $form['row_count']['#value'];
     $field_count = $form['field_count']['#value'];
@@ -2123,6 +2132,9 @@ function theme_fetchit7_egrid_form($variables) {
   	$output .= drupal_render($form['table']);
   }
   else {
+  	//debug('theme_fetchit7_egrid_form 3');
+    $row_count = $form['row_count']['#value'];
+    $field_count = $form['field_count']['#value'];
     for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
 	    for ($fld_ndx = 0; $fld_ndx < $field_count; $fld_ndx++) {
         $element_name = fetchit_make_element_name($nid, $row_ndx, $fld_ndx);
@@ -2133,20 +2145,22 @@ function theme_fetchit7_egrid_form($variables) {
    		}
   	}
   }
+	//debug('theme_fetchit7_egrid_form 4');
+	
   $output .= '</div>';
   $submit_button_flag = $form['submit_button_flag']['#value'];
   if ($submit_button_flag) {
-    $output = '<div class="' . $form_id . '_submit">';
+    $output .= '<div class="' . $form_id . '_submit">';
     $output .= drupal_render($form['actions']['submit']);
     $output .= '</div>';
   }
   $addbody_flag = $form['addbody_flag']['#value'];
   if ($addbody_flag) {
-    $output = '<div class="' . $form_id . '_body">';
+    $output .= '<div class="' . $form_id . '_body">';
     $output .= drupal_render($form['body']);
     $output .= '</div>';
   }
-  $output = '<div class="' . $form_id . '_other">';
+  $output .= '<div class="' . $form_id . '_other">';
   $output .= drupal_render_children($form);
   $output .= '</div>';
 
