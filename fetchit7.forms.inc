@@ -333,8 +333,8 @@ function fetchit7_table_form($form, &$form_state) {
 		$form['body'] = array('#type' => 'markup', '#markup' => $body, );
 	}
 
+ 	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
   if ($submit_button_flag) {
-  	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
     $form['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
   }
 
@@ -1236,6 +1236,7 @@ function theme_fetchit7_param_form($variables) {
     $output .= drupal_render($form['table']);
   }
   else {
+    $param_count = $form['param_count']['#value'];
 		for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
 			$element_name = fetchit_make_element_name($nid, 0, $p_ndx);
 			$output .= drupal_render($form['elements'][$element_name]);
