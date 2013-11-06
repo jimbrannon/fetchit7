@@ -526,17 +526,17 @@ function theme_fetchit7_table_form($variables) {
   $output .= '</div>';
 	$submit_button_flag = $form['submit_button_flag']['#value'];
 	if ($submit_button_flag) {
-    $output = '<div class="' . $form_id . '_submit">';
+    $output .= '<div class="' . $form_id . '_submit">';
 		$output .= drupal_render($form['submit']);
     $output .= '</div>';
 	}
 	$addbody_flag = $form['addbody_flag']['#value'];
 	if ($addbody_flag) {
-    $output = '<div class="' . $form_id . '_body">';
+    $output .= '<div class="' . $form_id . '_body">';
 		$output .= drupal_render($form['body']);
     $output .= '</div>';
 	}
-  $output = '<div class="' . $form_id . '_other">';
+  $output .= '<div class="' . $form_id . '_other">';
   $output .= drupal_render_children($form);
   $output .= '</div>';
   return $output;
