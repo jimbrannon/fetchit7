@@ -278,7 +278,18 @@ function fetchit7_table_form($form, &$form_state) {
         // reset to nothing selected
       }
       // create the HTML tableselect render array with a single select option
-      $form['table'] = array('#type' => 'tableselect', '#header' => $header, '#options' => $options, '#default_value' => $default_value, '#multiple' => $multiple_flag, '#js_select' => $selectall_flag, '#empty' => $table_empty_message, '#weight' => $table_weight, );
+      $form['table'] = array(
+      	'#type' => 'tableselect',
+      	'#header' => $header,
+      	'#options' => $options,
+      	'#default_value' => $default_value,
+      	'#multiple' => $multiple_flag,
+      	'#js_select' => $selectall_flag,
+      	'#empty' => $table_empty_message,
+      	'#weight' => $table_weight,
+			);
+			//no submit button if table is empty
+			//if ($row_count==0) $submit_button_flag = FALSE;
       break;
 
     case 'none':
@@ -355,6 +366,7 @@ function fetchit7_table_form_validate($form, &$form_state) {
   //debug($nid,'fetchit7_table_form_validate the nid is ');
   // get the table type
   $record_select = $form['record_select']['#value'];
+	//debug($record_select,'validate $record_select');
   // check out the table for errors
   switch ($record_select) {
     case 0:
@@ -363,6 +375,7 @@ function fetchit7_table_form_validate($form, &$form_state) {
     case 1:
       //radio buttons
       $selected = $form_state['values']['table'];
+			//debug($selected,'validate $selected');
       if (is_null($selected)) {
         form_set_error('submit', t("Invalid selection: $selected  A selection is required before pressing the submit button."));
         return;
@@ -412,6 +425,7 @@ function fetchit7_table_form_submit($form, &$form_state) {
   $record_select = $form['record_select']['#value'];
   $db_type = $form['db_type']['#value'];
   $db_handle = $form['db_handle']['#value'];
+	//debug($record_select,'submit $record_select');
   switch ($record_select) {
     case 'none':
       // static html - no selection - do nothing
@@ -419,23 +433,32 @@ function fetchit7_table_form_submit($form, &$form_state) {
     case 'copy_single':
       // there is always one value when it is working correctly
       $key_field_ndx = $form['key_field_ndx']['#value'];
+			//debug($key_field_ndx,'submit $key_field_ndx');
       if ($key_field_ndx) {
         $db_type = $form['db_type']['#value'];
         $db_handle = $form['db_handle']['#value'];
         $selected_radio_option = $form_state['values']['table'];
-        if (is_null($selected_radio_option)) {
-          drupal_set_message(t("Selection not saved because no records were selected."), 'warning');
-        }
-        else {
-          // now the D7 tableselect actually returns the key field value
-          $key_field_val = $selected_radio_option;
-          if ($result = fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $key_field_val)) {
-            drupal_set_message(t("Selection saved."), 'status');
-          }
-          else {
-            drupal_set_message(t("The selected record was NOT saved. Please contact the site administrator."), 'warning');
-          }
-        }
+				//debug($selected_radio_option,'submit $selected_radio_option');
+				//have to handle a special case here - single select table but table is empty
+	      $row_count = $form['row_count']['#value'];
+				//debug($row_count,'submit $row_count');
+				if ($row_count==0) {
+	      //    drupal_set_message(t("Selection not saved because selection table was empty."), 'warning');
+				}	else {
+	        if (is_null($selected_radio_option)) {
+	          drupal_set_message(t("Selection not saved because no records were selected."), 'warning');
+	        }
+	        else {
+	          // now the D7 tableselect actually returns the key field value
+	          $key_field_val = $selected_radio_option;
+	          if ($result = fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $key_field_val)) {
+	            drupal_set_message(t("Selection saved."), 'status');
+	          }
+	          else {
+	            drupal_set_message(t("The selected record was NOT saved. Please contact the site administrator."), 'warning');
+	          }
+	        }
+				}			
       }
       else {
         drupal_set_message(t("The selected record was NOT saved because a table key field was not detected.  Please contact the site administrator."), 'warning');
