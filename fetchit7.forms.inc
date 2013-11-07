@@ -269,6 +269,7 @@ function fetchit7_table_form($form, &$form_state) {
       if ($table_selection_type == 'copy_single') {
         $multiple_flag = FALSE;
         $selectall_flag = FALSE;
+        $default_value = 0;
       }
       else {
         $multiple_flag = TRUE;
