@@ -22,6 +22,7 @@ function fetchit7_table_form($form, &$form_state) {
   $append_record_flag = FALSE;
   $parameter_select_flag = FALSE;
   $text_input_flag = FALSE;
+  $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
   $table_weight = -8;
   // it goes at the top of the form
   $submit_weight = 8;
@@ -122,6 +123,12 @@ function fetchit7_table_form($form, &$form_state) {
   $table_empty_message = trim(fetchit7_content_field_fetcher($nid, 'fetchit7_field_table_emptymsg', 'value'));
   //should return a string
   $form['table_empty_message'] = array('#type' => 'value', '#value' => $table_empty_message);
+
+  // addbody
+  // addbody_flag should be a single boolean value
+  // use it if something valid is entered.   if not set it to a default of true
+  //$addbody_flag = fetchit7_content_field_fetcher($nid, 'addbody_flag', 'value');
+  $form['addbody_flag'] = array('#type' => 'value', '#value' => $addbody_flag);
 
   // get submit button label
   $submit_label = trim(fetchit7_content_field_fetcher($nid, 'submit_label', 'value'));
@@ -262,7 +269,7 @@ function fetchit7_table_form($form, &$form_state) {
       if ($table_selection_type == 'copy_single') {
         $multiple_flag = FALSE;
         $selectall_flag = FALSE;
-				if (!$row_count) $default_value = array(); // doesn't get set above if there are no rows
+        $default_value = 0;
       }
       else {
         $multiple_flag = TRUE;
@@ -281,6 +288,8 @@ function fetchit7_table_form($form, &$form_state) {
       	'#empty' => $table_empty_message,
       	'#weight' => $table_weight,
 			);
+	//no submit button if table is empty
+	//if ($row_count==0) $submit_button_flag = FALSE;
       break;
 
     case 'none':
@@ -331,6 +340,12 @@ function fetchit7_table_form($form, &$form_state) {
     $form['fetchit7_table_text'] = array('#type' => 'textfield', '#default_value' => variable_get('fetchit7_table_text', 'fetchit7_table_text_default_value'), '#title' => t('Enter some text'), '#size' => 30, '#maxlength' => 60, '#required' => TRUE, );
   }
 
+  if ($addbody_flag) {
+	  $body = fetchit7_content_field_fetcher($nid, 'body', 'value');
+		$form['body'] = array('#type' => 'markup', '#markup' => $body, );
+	}
+
+ 	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
   if ($submit_button_flag) {
     $form['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
   }
@@ -351,6 +366,7 @@ function fetchit7_table_form_validate($form, &$form_state) {
   //debug($nid,'fetchit7_table_form_validate the nid is ');
   // get the table type
   $record_select = $form['record_select']['#value'];
+	//debug($record_select,'validate $record_select');
   // check out the table for errors
   switch ($record_select) {
     case 0:
@@ -359,6 +375,7 @@ function fetchit7_table_form_validate($form, &$form_state) {
     case 1:
       //radio buttons
       $selected = $form_state['values']['table'];
+			//debug($selected,'validate $selected');
       if (is_null($selected)) {
         form_set_error('submit', t("Invalid selection: $selected  A selection is required before pressing the submit button."));
         return;
@@ -408,6 +425,7 @@ function fetchit7_table_form_submit($form, &$form_state) {
   $record_select = $form['record_select']['#value'];
   $db_type = $form['db_type']['#value'];
   $db_handle = $form['db_handle']['#value'];
+	//debug($record_select,'submit $record_select');
   switch ($record_select) {
     case 'none':
       // static html - no selection - do nothing
@@ -415,23 +433,32 @@ function fetchit7_table_form_submit($form, &$form_state) {
     case 'copy_single':
       // there is always one value when it is working correctly
       $key_field_ndx = $form['key_field_ndx']['#value'];
+			//debug($key_field_ndx,'submit $key_field_ndx');
       if ($key_field_ndx) {
         $db_type = $form['db_type']['#value'];
         $db_handle = $form['db_handle']['#value'];
         $selected_radio_option = $form_state['values']['table'];
-        if (is_null($selected_radio_option)) {
-          drupal_set_message(t("Selection not saved because no records were selected."), 'warning');
-        }
-        else {
-          // now the D7 tableselect actually returns the key field value
-          $key_field_val = $selected_radio_option;
-          if ($result = fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $key_field_val)) {
-            drupal_set_message(t("Selection saved."), 'status');
-          }
-          else {
-            drupal_set_message(t("The selected record was NOT saved. Please contact the site administrator."), 'warning');
-          }
-        }
+				//debug($selected_radio_option,'submit $selected_radio_option');
+				//have to handle a special case here - single select table but table is empty
+	      $row_count = $form['row_count']['#value'];
+				//debug($row_count,'submit $row_count');
+				if ($row_count==0) {
+	      //    drupal_set_message(t("Selection not saved because selection table was empty."), 'warning');
+				}	else {
+	        if (is_null($selected_radio_option)) {
+	          drupal_set_message(t("Selection not saved because no records were selected."), 'warning');
+	        }
+	        else {
+	          // now the D7 tableselect actually returns the key field value
+	          $key_field_val = $selected_radio_option;
+	          if ($result = fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $key_field_val)) {
+	            drupal_set_message(t("Selection saved."), 'status');
+	          }
+	          else {
+	            drupal_set_message(t("The selected record was NOT saved. Please contact the site administrator."), 'warning');
+	          }
+	        }
+				}			
       }
       else {
         drupal_set_message(t("The selected record was NOT saved because a table key field was not detected.  Please contact the site administrator."), 'warning');
@@ -521,7 +548,21 @@ function theme_fetchit7_table_form($variables) {
   $output = '<div class="' . $form_id . '_table">';
   $output .= drupal_render($form['table']);
   $output .= '</div>';
+	$submit_button_flag = $form['submit_button_flag']['#value'];
+	if ($submit_button_flag) {
+    $output .= '<div class="' . $form_id . '_submit">';
+		$output .= drupal_render($form['submit']);
+    $output .= '</div>';
+	}
+	$addbody_flag = $form['addbody_flag']['#value'];
+	if ($addbody_flag) {
+    $output .= '<div class="' . $form_id . '_body">';
+		$output .= drupal_render($form['body']);
+    $output .= '</div>';
+	}
+  $output .= '<div class="' . $form_id . '_other">';
   $output .= drupal_render_children($form);
+  $output .= '</div>';
   return $output;
 }
 
@@ -548,6 +589,7 @@ function theme_fetchit7_table_form($variables) {
  *
  */
 function fetchit7_param_form($form, &$form_state) {
+  $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
   // some things we can put in the $form
   //$form['#attached']['css'] = array(drupal_get_path('module', 'block') . '/block.css');
   $form['elements'] = array();
@@ -599,6 +641,12 @@ function fetchit7_param_form($form, &$form_state) {
     }
     //TODO: check pre function result?
   }
+
+  // addbody
+  // addbody_flag should be a single boolean value
+  // use it if something valid is entered.   if not set it to a default of true
+  //$addbody_flag = fetchit7_content_field_fetcher($nid, 'addbody_flag', 'value');
+  $form['addbody_flag'] = array('#type' => 'value', '#value' => $addbody_flag);
 
   // submit button attributes
   // submit button label should be a single string value
@@ -1018,6 +1066,7 @@ function fetchit7_param_form($form, &$form_state) {
    */
 
   $submit_button_flag = TRUE;
+  $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag);
   if ($submit_button_flag) {
     //$form['actions'] = array(
     //  '#tree' => FALSE,
@@ -1211,9 +1260,26 @@ function theme_fetchit7_param_form($variables) {
     $output .= drupal_render($form['table']);
   }
   else {
-    $output .= drupal_render($form['elements']);
+    $param_count = $form['param_count']['#value'];
+		for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
+			$element_name = fetchit_make_element_name($nid, 0, $p_ndx);
+			$output .= drupal_render($form['elements'][$element_name]);
+		}
   }
-  //$output .= drupal_render($form['actions']['submit']);
+  $output .= '</div>';
+  $submit_button_flag = $form['submit_button_flag']['#value'];
+  if ($submit_button_flag) {
+    $output .= '<div class="' . $form_id . '_submit">';
+    $output .= drupal_render($form['actions']['submit']);
+    $output .= '</div>';
+  }
+  $addbody_flag = $form['addbody_flag']['#value'];
+  if ($addbody_flag) {
+    $output .= '<div class="' . $form_id . '_body">';
+    $output .= drupal_render($form['body']);
+    $output .= '</div>';
+  }
+  $output .= '<div class="' . $form_id . '_other">';
   $output .= drupal_render_children($form);
   $output .= '</div>';
 
@@ -1243,6 +1309,7 @@ function theme_fetchit7_param_form($variables) {
  *
  */
 function fetchit7_egrid_form($form, &$form_state) {
+  $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
   // some things we can put in the $form
   //$form['#attached']['css'] = array(drupal_get_path('module', 'block') . '/block.css');
   $form['elements'] = array();
@@ -1251,7 +1318,7 @@ function fetchit7_egrid_form($form, &$form_state) {
   // get nid embedded into original form_id; format fetchit7_param_form_X### - nid starts at character 21
   $form_id = $form_state['build_info']['form_id'];
   // to get here, this is definitely set
-  //debug($form_state['build_info']);
+  //debug('fetchit7_egrid_form 1');
   $nid = (int) substr($form_id, 21);
   $form['nid'] = array('#type' => 'value', '#value' => $nid);
 
@@ -1345,6 +1412,12 @@ function fetchit7_egrid_form($form, &$form_state) {
   //should return an array
   $form['table_headers'] = array('#type' => 'value', '#value' => $table_headers);
 
+  // addbody
+  // addbody_flag should be a single boolean value
+  // use it if something valid is entered.   if not set it to a default of true
+  //$addbody_flag = fetchit7_content_field_fetcher($nid, 'addbody_flag', 'value');
+  $form['addbody_flag'] = array('#type' => 'value', '#value' => $addbody_flag);
+
   // submit button attributes
   // submit button label should be a single string value
   // use it if something is entered.   if not offer a default of Submit
@@ -1387,6 +1460,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       return $form;
     }
   }
+  //debug('fetchit7_egrid_form 2');
 
   // get the source table meta data
   $row_count = fetchit_get_row_count($db_type, $db_data_object);
@@ -1427,6 +1501,7 @@ function fetchit7_egrid_form($form, &$form_state) {
   $form['uid_field_found'] = array('#type' => 'value', '#value' => $uid_field_found);
   $form['uid_field_index'] = array('#type' => 'value', '#value' => $uid_field_index);
 
+  //debug('fetchit7_egrid_form 3');
   
   // figure out if we are adding a new row
   //debug($appendrecord.', '.$row_count.', '.$table_rows,'$appendrecord $row_count $table_rows');
@@ -1526,7 +1601,8 @@ function fetchit7_egrid_form($form, &$form_state) {
   //$param_data_tbl = array_map('trim',fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_tbl','values')); //should return an array
   //$param_data_key = array_map('trim',fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_key','values')); //should return an array
   //$param_data_uid = array_map('trim',fetchit7_content_field_fetcher($nid,'fetchit7_field_par_fld_data_uid','values')); //should return an array
-
+  //debug('fetchit7_egrid_form 4');
+  
   //use the above arrays to contruct the $user_field_data array
   // note that in this editable grid formm the source table defines the list and count of fields, not the param list
   // we will use defaults is possible where items are missing
@@ -1764,6 +1840,8 @@ function fetchit7_egrid_form($form, &$form_state) {
     }
   }
 
+  //debug('fetchit7_egrid_form 5');
+
   // loop through the source table rows and fields
   // create renderable form control element constructions in the form() array for those values that will be displayed
 	// the source table field values and field types plus the the user entered
@@ -1860,8 +1938,10 @@ function fetchit7_egrid_form($form, &$form_state) {
 					$hidden); // this is used to draw a special value type form element so that it's in the form 
   	}
   }
+  //debug('fetchit7_egrid_form 6');
 
   $submit_button_flag = TRUE;
+  $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag);
   if ($submit_button_flag) {
     //$form['actions'] = array(
     //  '#tree' => FALSE,
@@ -1874,6 +1954,7 @@ function fetchit7_egrid_form($form, &$form_state) {
     	'#weight' => $submit_weight,
 		);
   }
+  //debug('fetchit7_egrid_form 7');
 
   return $form;
 }
@@ -2023,6 +2104,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 }
 
 function theme_fetchit7_egrid_form($variables) {
+  //debug('theme_fetchit7_egrid_form 1');
   $form = $variables['form'];
   $nid = $form['nid']['#value'];
   $form_id = $form['form_id']['#value'];
@@ -2036,6 +2118,7 @@ function theme_fetchit7_egrid_form($variables) {
   //$output  = '';
 
   if ($table_row_count) {
+	  //debug('theme_fetchit7_egrid_form 2');
     //figure out the table structure
     $row_count = $form['row_count']['#value'];
     $field_count = $form['field_count']['#value'];
@@ -2074,9 +2157,35 @@ function theme_fetchit7_egrid_form($variables) {
   	$output .= drupal_render($form['table']);
   }
   else {
-    $output .= drupal_render($form['elements']);
+  	//debug('theme_fetchit7_egrid_form 3');
+    $row_count = $form['row_count']['#value'];
+    $field_count = $form['field_count']['#value'];
+    for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
+	    for ($fld_ndx = 0; $fld_ndx < $field_count; $fld_ndx++) {
+        $element_name = fetchit_make_element_name($nid, $row_ndx, $fld_ndx);
+				$hidden = fetchit_booleantointeger($form['param_hidden'][$fld_ndx]['#value']);
+	    	if (!$hidden) { // hidden fields should have been created with a non-renderable control element type
+        	$output .= drupal_render($form['elements'][$element_name]);
+				}
+   		}
+  	}
   }
-  //$output .= drupal_render($form['actions']['submit']);
+	//debug('theme_fetchit7_egrid_form 4');
+	
+  $output .= '</div>';
+  $submit_button_flag = $form['submit_button_flag']['#value'];
+  if ($submit_button_flag) {
+    $output .= '<div class="' . $form_id . '_submit">';
+    $output .= drupal_render($form['actions']['submit']);
+    $output .= '</div>';
+  }
+  $addbody_flag = $form['addbody_flag']['#value'];
+  if ($addbody_flag) {
+    $output .= '<div class="' . $form_id . '_body">';
+    $output .= drupal_render($form['body']);
+    $output .= '</div>';
+  }
+  $output .= '<div class="' . $form_id . '_other">';
   $output .= drupal_render_children($form);
   $output .= '</div>';
 
@@ -3646,13 +3755,21 @@ function fetchit_get_checkboxes_element($user_field_data, $user_field_ndx, $db_h
 	
 	// if it is set, use the passed in default
 	if (isset($db_values)) {
-		$found_values = array();
-		foreach ($db_values as $db_value) {
-			if (in_array($db_value, $options_keys)) {
-				$found_values[] = $db_value;
-    	}
+		if (is_array($db_values)) {
+			if (count($db_values)) {
+				$found_values = array();
+				foreach ($db_values as $db_value) {
+					if (in_array($db_value, $options_keys)) {
+						$found_values[] = $db_value;
+		    	}
+				}
+				$defaults = $found_values;
+			} else {
+		    $defaults = array();
+			}
+		} else {
+	    $defaults = array();
 		}
-		$defaults = $found_values;
   } else {
     $defaults = array();
 	}
@@ -4192,18 +4309,26 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
     $defaults = array('');
     $empty_value = '';
   }
-	
+
 	// if it is set, use the passed in default
 	if (isset($db_values)) {
-		$found_values = array();
-		foreach ($db_values as $db_value) {
-			if (in_array($db_value, $options_keys)) {
-				$found_values[] = $db_value;
-    	}
+		if (is_array($db_values)) {
+			if (count($db_values)) {
+				$found_values = array();
+				foreach ($db_values as $db_value) {
+					if (in_array($db_value, $options_keys)) {
+						$found_values[] = $db_value;
+		    	}
+				}
+				$defaults = $found_values;
+			} else {
+		    $defaults = array();
+			}
+		} else {
+	    $defaults = array();
 		}
-		$defaults = $found_values;
   } else {
-    $defaults = array('');
+    $defaults = array();
 	}
 	
   // then set up the defaults based on the string they typed into the defaults attribute box
@@ -4249,7 +4374,7 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
     	'#options' => $options,
     	'#multiple' => TRUE,
     	'#required' => $required,
-    	'#default_value' => $default,
+    	'#default_value' => $defaults,
     	'#disabled' => $disabled,
     	'#description' => $description,
     	'#weight' => $weight,
@@ -4262,7 +4387,7 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
     	'#options' => $options,
     	'#multiple' => TRUE,
     	'#required' => $required,
-    	'#default_value' => $default,
+    	'#default_value' => $defaults,
     	'#disabled' => $disabled,
     	'#weight' => $weight,
     	'#empty_value' => $empty_value,
@@ -4550,7 +4675,7 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
   $weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
 
   // figure out the default value
-  // start with today's date if it is required
+  // start with today's date if it is required or even if it is not :-)
   // use the system date as a default
   if ($required) {
     $default = array(
@@ -4558,8 +4683,13 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
     	'day' => (int) date('j'),
     	'year' => (int) date('Y'),
 		);
+  } else {
+  	$default = array(
+    	'month' => (int) date('n'),
+    	'day' => (int) date('j'),
+    	'year' => (int) date('Y'),
+		);
   }
-	//debug($default,'fetchit_get_date_element: today $default');
 
   // now replace it with the passed in default value if it is set...
   if (isset($db_value)) {
@@ -4570,7 +4700,6 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
     	'year' => (int) date('Y', strtotime($db_value)),
 		);
   }
-	//debug($default,'fetchit_get_date_element: passed in default $default');
 
   if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
 	  switch ($entered) {
@@ -4582,6 +4711,10 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
 	    case FETCHIT7_FIELD_DEFAULT_BLANK:
 	    case FETCHIT7_FIELD_DEFAULT_FIRST:
 	    case FETCHIT7_FIELD_DEFAULT_ALL:
+	    case FETCHIT7_FIELD_DEFAULT_TRUE:
+	    case FETCHIT7_FIELD_DEFAULT_FALSE:
+				// can't do these, leave it at whatever it is
+	      break;
 	    default: // try to convert the entered value into a date
 	      $default = array(
 	      	'year' => (int) date('Y', strtotime($entered)),
