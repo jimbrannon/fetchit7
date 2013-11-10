@@ -3755,13 +3755,21 @@ function fetchit_get_checkboxes_element($user_field_data, $user_field_ndx, $db_h
 	
 	// if it is set, use the passed in default
 	if (isset($db_values)) {
-		$found_values = array();
-		foreach ($db_values as $db_value) {
-			if (in_array($db_value, $options_keys)) {
-				$found_values[] = $db_value;
-    	}
+		if (is_array($db_values)) {
+			if (count($db_values)) {
+				$found_values = array();
+				foreach ($db_values as $db_value) {
+					if (in_array($db_value, $options_keys)) {
+						$found_values[] = $db_value;
+		    	}
+				}
+				$defaults = $found_values;
+			} else {
+		    $defaults = array();
+			}
+		} else {
+	    $defaults = array();
 		}
-		$defaults = $found_values;
   } else {
     $defaults = array();
 	}
@@ -4301,18 +4309,26 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
     $defaults = array('');
     $empty_value = '';
   }
-	
+
 	// if it is set, use the passed in default
 	if (isset($db_values)) {
-		$found_values = array();
-		foreach ($db_values as $db_value) {
-			if (in_array($db_value, $options_keys)) {
-				$found_values[] = $db_value;
-    	}
+		if (is_array($db_values)) {
+			if (count($db_values)) {
+				$found_values = array();
+				foreach ($db_values as $db_value) {
+					if (in_array($db_value, $options_keys)) {
+						$found_values[] = $db_value;
+		    	}
+				}
+				$defaults = $found_values;
+			} else {
+		    $defaults = array();
+			}
+		} else {
+	    $defaults = array();
 		}
-		$defaults = $found_values;
   } else {
-    $defaults = array('');
+    $defaults = array();
 	}
 	
   // then set up the defaults based on the string they typed into the defaults attribute box
@@ -4659,7 +4675,7 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
   $weight = $user_field_data[$user_field_ndx][FETCHIT7_FIELD_WEIGHT_STR];
 
   // figure out the default value
-  // start with today's date if it is required
+  // start with today's date if it is required or even if it is not :-)
   // use the system date as a default
   if ($required) {
     $default = array(
@@ -4667,8 +4683,13 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
     	'day' => (int) date('j'),
     	'year' => (int) date('Y'),
 		);
+  } else {
+  	$default = array(
+    	'month' => (int) date('n'),
+    	'day' => (int) date('j'),
+    	'year' => (int) date('Y'),
+		);
   }
-	//debug($default,'fetchit_get_date_element: today $default');
 
   // now replace it with the passed in default value if it is set...
   if (isset($db_value)) {
@@ -4679,7 +4700,6 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
     	'year' => (int) date('Y', strtotime($db_value)),
 		);
   }
-	//debug($default,'fetchit_get_date_element: passed in default $default');
 
   if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
 	  switch ($entered) {
@@ -4691,6 +4711,10 @@ function fetchit_get_date_element($user_field_data, $user_field_ndx, $showtitles
 	    case FETCHIT7_FIELD_DEFAULT_BLANK:
 	    case FETCHIT7_FIELD_DEFAULT_FIRST:
 	    case FETCHIT7_FIELD_DEFAULT_ALL:
+	    case FETCHIT7_FIELD_DEFAULT_TRUE:
+	    case FETCHIT7_FIELD_DEFAULT_FALSE:
+				// can't do these, leave it at whatever it is
+	      break;
 	    default: // try to convert the entered value into a date
 	      $default = array(
 	      	'year' => (int) date('Y', strtotime($entered)),
