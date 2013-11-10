@@ -269,7 +269,11 @@ function fetchit7_table_form($form, &$form_state) {
       if ($table_selection_type == 'copy_single') {
         $multiple_flag = FALSE;
         $selectall_flag = FALSE;
+<<<<<<< HEAD
         $default_value = 0;
+=======
+				if (!$row_count) $default_value = array(); // doesn't get set above if there are no rows
+>>>>>>> 911703deff25fb13e75e69d6901f7393928a065f
       }
       else {
         $multiple_flag = TRUE;
@@ -288,8 +292,11 @@ function fetchit7_table_form($form, &$form_state) {
       	'#empty' => $table_empty_message,
       	'#weight' => $table_weight,
 			);
+<<<<<<< HEAD
 			//no submit button if table is empty
 			//if ($row_count==0) $submit_button_flag = FALSE;
+=======
+>>>>>>> 911703deff25fb13e75e69d6901f7393928a065f
       break;
 
     case 'none':
