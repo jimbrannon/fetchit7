@@ -3647,6 +3647,7 @@ function fetchit_get_textbox_element($user_field_data, $user_field_ndx, $size, $
   // $db_value is a scalar, NOT an array
 
   $default = '';
+  $maxlength = 255;
 
   // process the value stored in the output table already for this parameter/user
   // convert whatever it is to a string...this is a text box, after all!
@@ -3690,10 +3691,10 @@ function fetchit_get_textbox_element($user_field_data, $user_field_ndx, $size, $
   if ($showtitles) {
     $title = $user_field_data[$user_field_ndx][F_DR_FIELD_TITLE_STR];
     $description = $user_field_data[$user_field_ndx][F_DR_FIELD_DESC_STR];
-    $form = array('#title' => $title, '#type' => 'textfield', '#size' => $size, '#default_value' => $default, '#required' => $required, '#disabled' => $disabled, '#description' => $description, '#weight' => $weight, );
+    $form = array('#title' => $title, '#type' => 'textfield', '#size' => $size, '#maxlength' => $maxlength, '#default_value' => $default, '#required' => $required, '#disabled' => $disabled, '#description' => $description, '#weight' => $weight, );
   }
   else {
-    $form = array('#type' => 'textfield', '#size' => $size, '#default_value' => $default, '#required' => $required, '#disabled' => $disabled,
+    $form = array('#type' => 'textfield', '#size' => $size, '#maxlength' => $maxlength, '#default_value' => $default, '#required' => $required, '#disabled' => $disabled,
     //'#weight' => $weight,
     );
   }
