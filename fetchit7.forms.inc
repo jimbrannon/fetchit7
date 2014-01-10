@@ -3081,7 +3081,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 7;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3145,7 +3145,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 7;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3166,7 +3166,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 7;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
@@ -3179,7 +3179,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = (int)$size_string;
         }
         else {
-          $size = 7;
+          $size = FETCHIT7_OPTIONS_TEXTBOX_SIZE;
         }
         if (strlen(trim($db_value))) {
           $default = (int)$db_value;
@@ -3226,7 +3226,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 9;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_NUMBER_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3247,7 +3247,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 9;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_NUMBER_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
@@ -3524,7 +3524,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3545,7 +3545,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
@@ -3557,7 +3557,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = (int)$size_string;
         }
         else {
-          $size = 20;
+          $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
         }
         $default = $db_value;
         //$weight = $user_field_ndx - 1;
@@ -3584,7 +3584,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3605,7 +3605,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
@@ -3619,7 +3619,7 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = (int)$size_string;
         }
         else {
-          $size = 40;
+          $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
         }
         $default = $db_value;
         //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
@@ -3647,7 +3647,7 @@ function fetchit_get_textbox_element($user_field_data, $user_field_ndx, $size, $
   // $db_value is a scalar, NOT an array
 
   $default = '';
-  $maxlength = 255;
+  $maxlength = FETCHIT7_OPTIONS_TEXTBOX_MAXLENGTH;
 
   // process the value stored in the output table already for this parameter/user
   // convert whatever it is to a string...this is a text box, after all!
