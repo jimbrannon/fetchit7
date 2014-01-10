@@ -539,7 +539,7 @@ function fetchit7_table_form_submit($form, &$form_state) {
   }
 
   // reset the text
-  drupal_set_message(t('Successfully submitted changes.'), 'status');
+  if (FETCHIT7_OPTIONS_TABLE_SUBMIT_SUCCESS) drupal_set_message(t('Successfully submitted changes.'), 'status');
 }
 
 function theme_fetchit7_table_form($variables) {
@@ -1207,7 +1207,7 @@ function fetchit7_param_form_submit($form, &$form_state) {
     }
   }
 
-  drupal_set_message(t('Successfully submitted changes.'), 'status');
+  if (FETCHIT7_OPTIONS_PARAM_SUBMIT_SUCCESS) drupal_set_message(t('Successfully submitted changes.'), 'status');
 }
 
 function theme_fetchit7_param_form($variables) {
@@ -2100,7 +2100,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
     }
   }
 	
-  drupal_set_message(t('Successfully submitted changes.'), 'status');
+  if (FETCHIT7_OPTIONS_EGRID_SUBMIT_SUCCESS) drupal_set_message(t('Successfully submitted changes.'), 'status');
 }
 
 function theme_fetchit7_egrid_form($variables) {

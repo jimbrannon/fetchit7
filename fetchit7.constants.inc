@@ -1,4 +1,13 @@
 <?php
+// fetchit7 temporary location for various content type option values
+//   that are not part of the actual content types yet
+// going forward the code will have to do some "if exist" type constructions
+//   to make this proceed cleanly
+define("FETCHIT7_OPTIONS_TABLE_SUBMIT_SUCCESS",1);
+define("FETCHIT7_OPTIONS_PARAM_SUBMIT_SUCCESS",1);
+define("FETCHIT7_OPTIONS_EGRID_SUBMIT_SUCCESS",1);
+define("FETCHIT7_OPTIONS_APPND_SUBMIT_SUCCESS",1);
+
 // fetchit7 content type names - used in node table "type" field, field instance "bundle" field
 define("FETCHIT7_CONTENT_NAME_TABLE","fetchit7_content_table");
 define("FETCHIT7_CONTENT_NAME_PARAM","fetchit7_content_param");
