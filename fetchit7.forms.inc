@@ -346,8 +346,12 @@ function fetchit7_table_form($form, &$form_state) {
 	}
 
  	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
+	$submit_button_location = $submit_weight; //temporary; 0 no button, 1 below, 2 above, 3 both(?)
+ 	$form['submit_button_location'] = array('#type' => 'value', '#value' => $submit_button_location, );
   if ($submit_button_flag) {
-    $form['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	if ($submit_button_location) { // 0 no button, 1 below, 2 above, 3 both(?)
+    	$form['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+		}
   }
 
   //$form['#validate'][] = 'fetchit7_table_form_validate';
@@ -545,14 +549,24 @@ function fetchit7_table_form_submit($form, &$form_state) {
 function theme_fetchit7_table_form($variables) {
   $form = $variables['form'];
   $form_id = $form['form_id']['#value'];
+	$submit_button_flag = $form['submit_button_flag']['#value'];
+	$submit_button_location = $form['submit_button_location']['#value'];
+	if ($submit_button_flag) {
+		if ($submit_button_location == 2 || $submit_button_location == 3) {
+	    $output .= '<div class="' . $form_id . '_submit_top">';
+			$output .= drupal_render($form['submit']);
+	    $output .= '</div>';
+		}
+	}
   $output = '<div class="' . $form_id . '_table">';
   $output .= drupal_render($form['table']);
   $output .= '</div>';
-	$submit_button_flag = $form['submit_button_flag']['#value'];
 	if ($submit_button_flag) {
-    $output .= '<div class="' . $form_id . '_submit">';
-		$output .= drupal_render($form['submit']);
-    $output .= '</div>';
+		if ($submit_button_location == 1 || $submit_button_location == 3) {
+	    $output .= '<div class="' . $form_id . '_submit">';
+			$output .= drupal_render($form['submit']);
+	    $output .= '</div>';
+		}
 	}
 	$addbody_flag = $form['addbody_flag']['#value'];
 	if ($addbody_flag) {
