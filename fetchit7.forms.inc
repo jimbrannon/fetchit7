@@ -4098,11 +4098,13 @@ function fetchit_get_select_element($user_field_data, $user_field_ndx, $db_handl
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $default = $options_keys[0];
+   	// remove as test
+    //$default = $options_keys[0];
     $empty_value = '';
   }
   else {
-    $default = $options_keys[0];
+   	// remove as test
+    //$default = $options_keys[0];
     $empty_value = '';
   }
 	
@@ -4113,7 +4115,8 @@ function fetchit_get_select_element($user_field_data, $user_field_ndx, $db_handl
       $default = $db_value;
     }
     else {
-      $default = $options_keys[0];
+    	// remove as test
+      //$default = $options_keys[0];
     }
 	}
 	
