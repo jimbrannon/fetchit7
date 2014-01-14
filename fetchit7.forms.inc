@@ -1484,6 +1484,7 @@ function fetchit7_egrid_form($form, &$form_state) {
     // in case we HAVE to have a button
   }
   $form['submit_label'] = array('#type' => 'value', '#value' => $submit_label);
+ 	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag);
 
   // submit button weight should be a single integer value
   // use it if something is entered.   if not offer a default of 10 - puts it at or close to the bottom of the form
@@ -1495,6 +1496,9 @@ function fetchit7_egrid_form($form, &$form_state) {
 	$submit_button_top = fetchit7_submit_button_weight_to_top($submit_weight);
 	$submit_button_bottom = fetchit7_submit_button_weight_to_bottom($submit_weight);
 	$submit_success_message = fetchit7_submit_button_weight_to_success_message($submit_weight);
+  $form['submit_button_top'] = array('#type' => 'value', '#value' => $submit_button_top);
+  $form['submit_button_bottom'] = array('#type' => 'value', '#value' => $submit_button_bottom);
+  $form['submit_success_message'] = array('#type' => 'value', '#value' => $submit_success_message);
 
   // redirectl should be a single string value
   // optional, use it if something is entered.   if not set it to an empty string
@@ -1997,17 +2001,7 @@ function fetchit7_egrid_form($form, &$form_state) {
 					$hidden); // this is used to draw a special value type form element so that it's in the form 
   	}
   }
-  //debug('fetchit7_egrid_form 6');
-
- 	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
-  $form['submit_button_top'] = array('#type' => 'value', '#value' => $submit_button_top, );
-  $form['submit_button_bottom'] = array('#type' => 'value', '#value' => $submit_button_bottom, );
-  $form['submit_success_message'] = array('#type' => 'value', '#value' => $submit_success_message, );
   if ($submit_button_flag) {
-    //$form['actions'] = array(
-    //  '#tree' => FALSE,
-    //  '#type' => 'actions',
-    //);
     $form['actions']['submit'] = array(
     	'#type' => 'submit',
     	'#value' => $submit_label,
