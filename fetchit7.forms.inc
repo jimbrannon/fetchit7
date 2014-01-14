@@ -4377,11 +4377,13 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $defaults = array($options_keys[0]);
+  	// remove as test
+    // $defaults = array($options_keys[0]);
+    $defaults = array();
     $empty_value = '';
   }
   else {
-    $defaults = array('');
+    $defaults = array();
     $empty_value = '';
   }
 
