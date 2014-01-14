@@ -363,7 +363,12 @@ function fetchit7_table_form($form, &$form_state) {
   $form['submit_success_message'] = array('#type' => 'value', '#value' => $submit_success_message, );
 	// create the render array for the submit button if the table type needs it
   if ($submit_button_flag) {
-    $form['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	if ($submit_button_top) {
+  		$form['submit_top'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	}
+  	if ($submit_button_bottom) {
+  		$form['submit_bottom'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	}
   }
 
   //$form['#validate'][] = 'fetchit7_table_form_validate';
@@ -570,7 +575,7 @@ function theme_fetchit7_table_form($variables) {
 	$output = '';
 	if ($submit_button_flag && $submit_button_top) {
     $output .= '<div class="' . $form_id . '_submit_top">';
-		$output .= drupal_render($form['submit']);
+		$output .= drupal_render($form['submit_top']);
     $output .= '</div>';
 	}
   $output = '<div class="' . $form_id . '_table">';
@@ -578,7 +583,7 @@ function theme_fetchit7_table_form($variables) {
   $output .= '</div>';
 	if ($submit_button_flag && $submit_button_bottom) {
     $output .= '<div class="' . $form_id . '_submit_bottom">';
-		$output .= drupal_render($form['submit']);
+		$output .= drupal_render($form['submit_bottom']);
     $output .= '</div>';
 	}
 	if ($addbody_flag) {
@@ -1109,12 +1114,12 @@ function fetchit7_param_form($form, &$form_state) {
   $form['submit_button_bottom'] = array('#type' => 'value', '#value' => $submit_button_bottom, );
   $form['submit_success_message'] = array('#type' => 'value', '#value' => $submit_success_message, );
   if ($submit_button_flag) {
-    //$form['actions'] = array(
-    //  '#tree' => FALSE,
-    //  '#type' => 'actions',
-    //);
-    //debug($submit_weight,'$submit_weight');
-    $form['actions']['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	if ($submit_button_top) {
+	    $form['actions']['submit_top'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	}
+  	if ($submit_button_bottom) {
+	    $form['actions']['submit_bottom'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	}
   }
 
   return $form;
@@ -1265,7 +1270,7 @@ function theme_fetchit7_param_form($variables) {
 	$output = '';
 	if ($submit_button_flag && $submit_button_top) {
     $output .= '<div class="' . $form_id . '_submit_top">';
-    $output .= drupal_render($form['actions']['submit']);
+    $output .= drupal_render($form['actions']['submit_top']);
     $output .= '</div>';
 	}
   $output .= '<div class="' . $form_id . '_params">';
@@ -1315,7 +1320,7 @@ function theme_fetchit7_param_form($variables) {
   $output .= '</div>';
 	if ($submit_button_flag && $submit_button_bottom) {
     $output .= '<div class="' . $form_id . '_submit_bottom">';
-    $output .= drupal_render($form['actions']['submit']);
+    $output .= drupal_render($form['actions']['submit_bottom']);
     $output .= '</div>';
 	}
   $addbody_flag = $form['addbody_flag']['#value'];
@@ -2002,11 +2007,20 @@ function fetchit7_egrid_form($form, &$form_state) {
   	}
   }
   if ($submit_button_flag) {
-    $form['actions']['submit'] = array(
-    	'#type' => 'submit',
-    	'#value' => $submit_label,
-    	'#weight' => $submit_weight,
-		);
+  	if ($submit_button_top) {
+	    $form['actions']['submit_top'] = array(
+	    	'#type' => 'submit',
+	    	'#value' => $submit_label,
+	    	'#weight' => $submit_weight,
+			);
+  	}
+  	if ($submit_button_bottom) {
+	    $form['actions']['submit_bottom'] = array(
+	    	'#type' => 'submit',
+	    	'#value' => $submit_label,
+	    	'#weight' => $submit_weight,
+			);
+  	}
   }
 
   return $form;
@@ -2170,7 +2184,7 @@ function theme_fetchit7_egrid_form($variables) {
 	$output = '';
 	if ($submit_button_flag && $submit_button_top) {
     $output .= '<div class="' . $form_id . '_submit_top">';
-    $output .= drupal_render($form['actions']['submit']);
+    $output .= drupal_render($form['actions']['submit_top']);
     $output .= '</div>';
 	}
   $output .= '<div class="' . $form_id . '_egrid">';
@@ -2230,7 +2244,7 @@ function theme_fetchit7_egrid_form($variables) {
   $output .= '</div>';
 	if ($submit_button_flag && $submit_button_bottom) {
     $output .= '<div class="' . $form_id . '_submit_bottom">';
-    $output .= drupal_render($form['actions']['submit']);
+    $output .= drupal_render($form['actions']['submit_bottom']);
     $output .= '</div>';
 	}
   $addbody_flag = $form['addbody_flag']['#value'];
