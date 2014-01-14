@@ -4100,12 +4100,14 @@ function fetchit_get_select_element($user_field_data, $user_field_ndx, $db_handl
   if ($required) {
    	// remove as test
     //$default = $options_keys[0];
-    $empty_value = '';
+      $default = '';
+      $empty_value = '';
   }
   else {
    	// remove as test
     //$default = $options_keys[0];
-    $empty_value = '';
+      $default = '';
+      $empty_value = '';
   }
 	
 	// if it is set, use the passed in default
@@ -4117,6 +4119,7 @@ function fetchit_get_select_element($user_field_data, $user_field_ndx, $db_handl
     else {
     	// remove as test
       //$default = $options_keys[0];
+      $default = '';
     }
 	}
 	
