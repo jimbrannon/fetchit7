@@ -1073,26 +1073,92 @@ function fetchit7_param_form($form, &$form_state) {
     //  '#type' => 'actions',
     //);
     //debug($submit_weight,'$submit_weight');
-    $form['actions']['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+    $form['actions']['submit'] = array(
+    		'#type' => 'submit',
+    		'#value' => $submit_label,
+    		'#weight' => $submit_weight, );
+    $form['all'] = array(
+    		'#type' => 'submit',
+    		'#value' => 'All',
+    		'#validate' => array('fetchit7_param_all_validate'),
+    		'#submit' => array('fetchit7_param_all_submit'),
+			'#weight' => $submit_weight-2, );
+    $form['none'] = array(
+    		'#type' => 'submit',
+    		'#value' => 'None',
+    		'#validate' => array('fetchit7_param_none_validate'),
+    		'#submit' => array('fetchit7_param_none_submit'),
+    		'#weight' => $submit_weight-1, );
   }
-
+  $form['#after_build'][] = 'fetchit7_param_form_force_triggering_element';
   return $form;
 }
 
+function fetchit7_param_form_force_triggering_element($form, &$form_state) {
+	if (isset($form_state['input']['all'])) {
+		$string=$form_state['input']['all'];
+		$form_state['triggering_element'] = $form['all'];
+	    debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears all was pressed:');
+	} elseif (isset($form_state['input']['none'])) {
+		$string=$form_state['input']['none'];
+		$form_state['triggering_element'] = $form['none'];
+	    debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears none was pressed:');
+	} elseif (isset($form_state['input']['actions']['submit'])) {
+		$string=$form_state['input']['actions']['submit'];
+		$form_state['triggering_element'] = $form['actions']['submit'];
+	    debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears submit was pressed:');
+	} else {
+		if (isset($form_state['triggering_element'])) {
+			$string=$form_state['triggering_element'];
+			debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears nothing was pressed (yet?) but triggering element is:');
+		} else {
+			$string=null;
+			debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears nothing was pressed (yet?) but triggering element is:');
+		}
+	}
+	return $form;
+}
 /**
  * Process form validation
  */
+function fetchit7_param_all_validate($form, &$form_state) {
+	$nid = $form['nid']['#value'];
+	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	debug($string,'Hello from the parameter all validate function. From here it appears the param_count is:');
+	drupal_set_message(t('Successfully submitted changes.'), 'status');
+}
+
+function fetchit7_param_none_validate($form, &$form_state) {
+	$nid = $form['nid']['#value'];
+	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	debug($string,'Hello from the parameter none validate function. From here it appears the param_count is:');
+}
+
 function fetchit7_param_form_validate($form, &$form_state) {
-  //$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-  //debug($string,'Hello from the all important parameter input form validate function. From here it appears the param_count is:');
-  $nid = $form['nid']['#value'];
-  //$row_ndx = 0;
-  //$param_ndx = 0;
-  //$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
-  //debug($element_name,'$element_name');
-  //$control_type = $form['elements'][$element_name]['#type'];
-  //debug($control_type,'$control_type');
-  //debug($form_state['values']['elements'],'$form_state[values][elements]');
+	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	debug($string,'Hello from the all important parameter input form validate function. From here it appears the param_count is:');
+	$nid = $form['nid']['#value'];
+	//$row_ndx = 0;
+	//$param_ndx = 0;
+	//$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
+	//debug($element_name,'$element_name');
+	//$control_type = $form['elements'][$element_name]['#type'];
+	//debug($control_type,'$control_type');
+	//debug($form_state['values']['elements'],'$form_state[values][elements]');
+}
+
+function fetchit7_param_all_submit($form, &$form_state) {
+	$nid = $form['nid']['#value'];
+	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	debug($string,'Hello from the parameter all submit function. From here it appears the param_count is:');
+	drupal_set_message(t('Successfully selected all.'), 'status');
+}
+
+function fetchit7_param_none_submit($form, &$form_state) {
+	$nid = $form['nid']['#value'];
+	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	debug($string,'Hello from the parameter none submit function. From here it appears the param_count is:');
+	drupal_set_message(t('Successfully selected none.'), 'status');
 }
 
 /**
@@ -1214,10 +1280,12 @@ function theme_fetchit7_param_form($variables) {
   $form = $variables['form'];
   $nid = $form['nid']['#value'];
   $form_id = $form['form_id']['#value'];
-  //the drupal way is to do all the non display related preprocessing in a theme preprocessor function ... move it there later ...
+  //the drupal way is to do all the non display related preprocessing in a theme preprocessor function
+  // ... move it there later ...
   $table_row_count = $form['table_rows']['#value'];
   //debug($table_row_count,'$table_row_count');
   $table_weight = $form['table_weight']['#value'];
+  $submit_button_flag = $form['submit_button_flag']['#value'];
   //debug($table_weight,'$table_weight');
   //figure out the formatting
   $output = '<div class="' . $form_id . '_params">';
@@ -1246,25 +1314,45 @@ function theme_fetchit7_param_form($variables) {
         $p_ndx = $row_ndx + $col_ndx * $table_row_count;
         if ($p_ndx < $param_count) {
           $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
-          $row[] = drupal_render($form['elements'][$element_name]);
+          if ($submit_button_flag) {
+            $row[] = drupal_render($form['elements'][$element_name]).
+            			drupal_render($form['all']).
+            			drupal_render($form['none']);
+          } else {
+          	$row[] = drupal_render($form['elements'][$element_name]);
+          }
         }
         else {
-          $sillyform[$p_ndx] = array('#type' => 'item', '#title' => 'Empty Cell', '#markup' => "I am an empty cell.", );
+          $sillyform[$p_ndx] = array(
+          		'#type' => 'item',
+          		'#title' => 'Empty Cell',
+          		'#markup' => "I am an empty cell.", );
           $row[] = drupal_render($sillyform[$p_ndx]);
         }
       }
       $rows[] = $row;
     }
     //debug($table_weight,'$table_weight');
-    $form['table'] = array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#weight' => $table_weight, '#empty' => "Empty table.", );
+    $form['table'] = array(
+    		'#theme' => 'table',
+    		'#header' => $header,
+    		'#rows' => $rows,
+    		'#weight' => $table_weight,
+    		'#empty' => "Empty table.", );
     $output .= drupal_render($form['table']);
   }
   else {
     $param_count = $form['param_count']['#value'];
-		for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
-			$element_name = fetchit_make_element_name($nid, 0, $p_ndx);
-			$output .= drupal_render($form['elements'][$element_name]);
-		}
+	for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
+	  $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
+	  if ($submit_button_flag) {
+	  	$output .= drupal_render($form['elements'][$element_name]);
+        $output .= drupal_render($form['all']);
+        $output .= drupal_render($form['none']);
+	  } else {
+	  	$output .= drupal_render($form['elements'][$element_name]);
+	  }
+	}
   }
   $output .= '</div>';
   $submit_button_flag = $form['submit_button_flag']['#value'];
@@ -2524,8 +2612,9 @@ function fetchit_get_db_handle($nid) {
         }
         // create the pg connection
         $db_string = "host=$db_host port=$db_port user=$db_login password=$db_password dbname=$db_name";
-				//debug($db_string,'$db_string');
+		//debug($db_string,'fetchit_get_db_handle '.$nid.' $db_string');
         $db_handle = pg_connect($db_string);
+		//debug($db_handle,'fetchit_get_db_handle '.$nid.' $db_handle');
         break;
       case FETCHIT7_DBTYPE_NAME_MYSQL:
         //'mysql':
@@ -2540,7 +2629,10 @@ function fetchit_get_db_handle($nid) {
 }
 
 function fetchit_run_query($db_type, $db_handle, $query) {
-  switch ($db_type) {
+	//debug($db_type,'fetchit_run_query $db_type');
+	//debug($db_handle,'fetchit_run_query $db_handle');
+	//debug($query,'fetchit_run_query $query');
+	switch ($db_type) {
     case FETCHIT7_DBTYPE_NAME_PGSQL:
       //'postgresql':
       $result = pg_query($db_handle, $query);
