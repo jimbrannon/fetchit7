@@ -90,6 +90,24 @@ function fetchit7_table_form($form, &$form_state) {
 
   // get table selection table - this is required for the copy selection types
   $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+  $table_selection_default_flag = '-';
+  debug($table_selection_table,'before $table_selection_table');
+  debug($table_selection_default_flag,'before $table_selection_default_flag');
+  $table_selection_default_flag = '-';
+  if (strlen($table_selection_table)) {
+    switch ($table_selection_table[0]) {
+      case '-':
+      case '*':
+      case '+':
+        $table_selection_default_flag = $table_selection_table[0];
+        $table_selection_table = substr($table_selection_table, 1);
+        break;
+      default:
+        $table_selection_default_flag = '-';
+    }
+  }
+  debug($table_selection_table,'after $table_selection_table');
+  debug($table_selection_default_flag,'after $table_selection_default_flag');
   $form['record_select_table'] = array('#type' => 'value', '#value' => $table_selection_table);
   if (in_array($table_selection_type, array('copy_single', 'copy_multiple'))) {
     if (!strlen($table_selection_table)) {
@@ -195,7 +213,6 @@ function fetchit7_table_form($form, &$form_state) {
   // skip implementing this for now ... until after testing is done
   //$existing_selections = fetchit_get_existing_selection_nid($db_handle,$db_type,$nid);
   //$existing_selections = fetchit_get_existing_selection_nid($db_handle,$db_type,$nid);
-
   // loop through the fields and determine if they are either a source data key field or a drupal user id field
   // these are not displayed in the table or tableselect element
   // the key field values will become the options[] array keys used in record selection,
@@ -219,12 +236,26 @@ function fetchit7_table_form($form, &$form_state) {
   }
 	//debug($uid_field_ndx,'$uid_field_ndx');
 	//debug($key_field_ndx,'$key_field_ndx');
+  // create the data for no selection
+  $none_selection = null;
+  $none_selections = array();
+  // create the data for previous selection
+  $previous_selection = fetchit_get_existing_selection_single($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
+  $selections = fetchit_get_existing_selection_multiple($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
+  $previous_selections = array();
+  foreach ($selections as $selection) {
+     $previous_selections[$selection] = TRUE; 
+  }
+  // initialize the data for all and first selection
+  $all_selections = array();
+  $first_selection = null;
+  $first_selections = array();
   // create the render arrays for each case
   switch ($table_selection_type) {
     case 'copy_single':
-    // single row selection and key field copy via radio buttons
+      // single row selection and key field copy via radio buttons
     case 'copy_multiple':
-    // multiple row selection and key field copy via check boxes
+      // multiple row selection and key field copy via check boxes
     case 'delete_multiple':
       // multiple row selection and record deletion via check boxes
       // create the HTML tableselect header and options
@@ -243,12 +274,14 @@ function fetchit7_table_form($form, &$form_state) {
             if ($field_ndx == ($key_field_ndx - 1)) {
               // use this as the key for the options array
               $options_key = $db_value;
-              if ($row_ndx == 0) {
-                $default_value = $db_value;
-              }
+              // its the index field
+              $all_selections[$db_value] = TRUE;
             }
             else {
               if ($row_ndx == 0) {
+                // its the first row
+                $first_selection = $db_value;
+                $first_selections[$db_value] = TRUE;
                 if ($column_count < $table_headers_count) {
                   $header['column' . $column_count] = $table_headers[$column_count];
                 }
@@ -269,14 +302,62 @@ function fetchit7_table_form($form, &$form_state) {
       if ($table_selection_type == 'copy_single') {
         $multiple_flag = FALSE;
         $selectall_flag = FALSE;
-        $default_value = 0;
       }
       else {
         $multiple_flag = TRUE;
         $selectall_flag = TRUE;
-        $default_value = array();
-        // reset to nothing selected
       }
+      // set the default based on the type and the flag
+      switch ($table_selection_type) {
+        case 'copy_single':
+          switch ($table_selection_default_flag) {
+            case '-':
+              $default_value = $first_selection;
+              break;
+            case '*':
+              $default_value = $previous_selection;
+              break;
+            case '+':
+              $default_value = $first_selection;
+              break;
+            default:
+              $default_value = $first_selection;
+          }
+          break;
+        case 'copy_multiple':
+          switch ($table_selection_default_flag) {
+            case '-':
+              $default_value = $none_selections;
+              break;
+            case '*':
+              $default_value = $previous_selections;
+              break;
+            case '+':
+              $default_value = $all_selections;
+              break;
+            default:
+              $default_value = $none_selections;
+          }
+          break;
+        case 'delete_multiple':
+          switch ($table_selection_default_flag) {
+            case '-':
+              $default_value = $none_selections;
+              break;
+            case '*':
+              $default_value = $none_selections;
+              break;
+            case '+':
+              $default_value = $all_selections;
+              break;
+            default:
+              $default_value = $none_selections;
+          }
+          break;
+        default:
+          $default_value = null;
+      } 
+      debug($default_value,'$default_value');
       // create the HTML tableselect render array with a single select option
       $form['table'] = array(
       	'#type' => 'tableselect',
@@ -2870,6 +2951,16 @@ function fetchit_get_existing_selection_nid($db_handle, $db_type, $nid) {
           case 'copy_single':
             // radio button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+            if (strlen($table_selection_table)) {
+              switch ($table_selection_table[0]) {
+                case '-':
+                case '*':
+                case '+':
+                  $table_selection_table = substr($table_selection_table, 1);
+                  break;
+                default:
+              }
+            }
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_get_existing_selection_single($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
@@ -2879,6 +2970,16 @@ function fetchit_get_existing_selection_nid($db_handle, $db_type, $nid) {
           case 'copy_multiple':
             // check boxes button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+            if (strlen($table_selection_table)) {
+              switch ($table_selection_table[0]) {
+                case '-':
+                case '*':
+                case '+':
+                  $table_selection_table = substr($table_selection_table, 1);
+                  break;
+                default:
+              }
+            }
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_get_existing_selection_multiple($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
@@ -2906,6 +3007,16 @@ function fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $val) {
           case 'copy_single':
             // radio button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+            if (strlen($table_selection_table)) {
+              switch ($table_selection_table[0]) {
+                case '-':
+                case '*':
+                case '+':
+                  $table_selection_table = substr($table_selection_table, 1);
+                  break;
+                default:
+              }
+            }
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_set_existing_selection_single($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field, $val);
@@ -2915,6 +3026,16 @@ function fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $val) {
           case 'copy_multiple':
             // check boxes button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+            if (strlen($table_selection_table)) {
+              switch ($table_selection_table[0]) {
+                case '-':
+                case '*':
+                case '+':
+                  $table_selection_table = substr($table_selection_table, 1);
+                  break;
+                default:
+              }
+            }
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_set_existing_selection_multiple($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field, $val);
