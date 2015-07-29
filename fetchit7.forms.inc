@@ -90,24 +90,15 @@ function fetchit7_table_form($form, &$form_state) {
 
   // get table selection table - this is required for the copy selection types
   $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
-  $table_selection_default_flag = '-';
-  debug($table_selection_table,'before $table_selection_table');
-  debug($table_selection_default_flag,'before $table_selection_default_flag');
-  $table_selection_default_flag = '-';
-  if (strlen($table_selection_table)) {
-    switch ($table_selection_table[0]) {
-      case '-':
-      case '*':
-      case '+':
-        $table_selection_default_flag = $table_selection_table[0];
-        $table_selection_table = substr($table_selection_table, 1);
-        break;
-      default:
-        $table_selection_default_flag = '-';
-    }
+  $table_selection_default_flag = fetchit7_get_special_char_default($table_selection_table);
+  $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
+  //debug($table_selection_table,'before $table_selection_table');
+  //debug($table_selection_default_flag,'before $table_selection_default_flag');
+  if($table_selection_default_flag == '') {
+    $table_selection_default_flag = '-';
   }
-  debug($table_selection_table,'after $table_selection_table');
-  debug($table_selection_default_flag,'after $table_selection_default_flag');
+  //debug($table_selection_table,'after $table_selection_table');
+  //debug($table_selection_default_flag,'after $table_selection_default_flag');
   $form['record_select_table'] = array('#type' => 'value', '#value' => $table_selection_table);
   if (in_array($table_selection_type, array('copy_single', 'copy_multiple'))) {
     if (!strlen($table_selection_table)) {
@@ -968,9 +959,15 @@ function fetchit7_param_form($form, &$form_state) {
     }
 
     //$param_list_def F_DR_FIELD_DEFAULT_STR
+    // adding something new here - if the first char is a special character:
+    //   - means put all and none buttons above, 
+    //   * and + means put all and none buttons below
+    // also strip the special character from the default value if it is there (- * +)
+    //   and the default value after stripping becomes the integer threshold for adding the buttons (>= means put the buttons)
     if ($field_index < count($param_list_def)) {
       if (strlen($param_list_def[$field_index])) {
-        $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = $param_list_def[$field_index];
+        $user_field_data[$field_index][F_DR_FIELD_DEFAULT_CHAR_STR] = fetchit7_get_special_char_default($param_list_def[$field_index]);
+        $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = fetchit7_strip_special_char_default($param_list_def[$field_index]);
       }
       else {
         $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
@@ -982,9 +979,15 @@ function fetchit7_param_form($form, &$form_state) {
 
     //$param_data_tbl F_DR_FIELD_DATA_TBL_STR
     // this is required
+    // adding something new here - if the first char is a special character:
+    //   - means default selection is none
+    //   * means default selection is previous selection
+    //   + means default selection is all
+    // also strip the special character from the table name if it is there (- * +)
     if ($field_index < count($param_data_tbl)) {
       if (strlen($param_data_tbl[$field_index])) {
-        $user_field_data[$field_index][F_DR_FIELD_DATA_TBL_STR] = $param_data_tbl[$field_index];
+        $user_field_data[$field_index][F_DR_FIELD_DATA_TBL_CHAR_STR] = fetchit7_get_special_char_default($param_data_tbl[$field_index]);
+        $user_field_data[$field_index][F_DR_FIELD_DATA_TBL_STR] = fetchit7_strip_special_char_default($param_data_tbl[$field_index]);
       }
       else {
         // can't have a default here, too many complications
@@ -1158,18 +1161,6 @@ function fetchit7_param_form($form, &$form_state) {
     		'#type' => 'submit',
     		'#value' => $submit_label,
     		'#weight' => $submit_weight, );
-    $form['all'] = array(
-    		'#type' => 'submit',
-    		'#value' => 'All',
-    		'#validate' => array('fetchit7_param_all_validate'),
-    		'#submit' => array('fetchit7_param_all_submit'),
-			'#weight' => $submit_weight-2, );
-    $form['none'] = array(
-    		'#type' => 'submit',
-    		'#value' => 'None',
-    		'#validate' => array('fetchit7_param_none_validate'),
-    		'#submit' => array('fetchit7_param_none_submit'),
-    		'#weight' => $submit_weight-1, );
   }
   $form['#after_build'][] = 'fetchit7_param_form_force_triggering_element';
   return $form;
@@ -2951,16 +2942,7 @@ function fetchit_get_existing_selection_nid($db_handle, $db_type, $nid) {
           case 'copy_single':
             // radio button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
-            if (strlen($table_selection_table)) {
-              switch ($table_selection_table[0]) {
-                case '-':
-                case '*':
-                case '+':
-                  $table_selection_table = substr($table_selection_table, 1);
-                  break;
-                default:
-              }
-            }
+            $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_get_existing_selection_single($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
@@ -2970,16 +2952,7 @@ function fetchit_get_existing_selection_nid($db_handle, $db_type, $nid) {
           case 'copy_multiple':
             // check boxes button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
-            if (strlen($table_selection_table)) {
-              switch ($table_selection_table[0]) {
-                case '-':
-                case '*':
-                case '+':
-                  $table_selection_table = substr($table_selection_table, 1);
-                  break;
-                default:
-              }
-            }
+            $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_get_existing_selection_multiple($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
@@ -3007,16 +2980,7 @@ function fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $val) {
           case 'copy_single':
             // radio button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
-            if (strlen($table_selection_table)) {
-              switch ($table_selection_table[0]) {
-                case '-':
-                case '*':
-                case '+':
-                  $table_selection_table = substr($table_selection_table, 1);
-                  break;
-                default:
-              }
-            }
+            $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_set_existing_selection_single($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field, $val);
@@ -3026,16 +2990,7 @@ function fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $val) {
           case 'copy_multiple':
             // check boxes button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
-            if (strlen($table_selection_table)) {
-              switch ($table_selection_table[0]) {
-                case '-':
-                case '*':
-                case '+':
-                  $table_selection_table = substr($table_selection_table, 1);
-                  break;
-                default:
-              }
-            }
+            $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_set_existing_selection_multiple($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field, $val);
@@ -5720,4 +5675,34 @@ function fetchit7_get_control_list_string() {
     ++$count;
   }
   return $control_list_string;
+}
+
+function fetchit7_strip_special_char_default($val) {
+  $newval=$val;
+  if (strlen($val)) {
+    switch ($val[0]) {
+      case '-':
+      case '*':
+      case '+':
+        $newval = substr($val, 1);
+        break;
+      default:
+    }
+  }
+  return $newval;
+}
+
+function fetchit7_get_special_char_default($val) {
+  $special_char = '';
+  if (strlen($val)) {
+    switch ($val[0]) {
+      case '-':
+      case '*':
+      case '+':
+        $special_char = $val[0];
+        break;
+      default:
+    }
+  }
+  return $special_char;
 }
