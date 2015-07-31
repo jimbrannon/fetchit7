@@ -973,10 +973,12 @@ function fetchit7_param_form($form, &$form_state) {
       }
       else {
         $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        $user_field_data[$field_index][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR] = '';
       }
     }
     else {
       $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+      $user_field_data[$field_index][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR] = '';
     }
 
     //$param_data_tbl F_DR_FIELD_DATA_TBL_STR
@@ -1135,7 +1137,12 @@ function fetchit7_param_form($form, &$form_state) {
       if (strlen(trim($data_tbl_ndx_type))) {// if we have a type, then an index field was found, and then we can continue building the parameter input control
         $grp_ndx = 0;
         $element_name = fetchit_make_element_name($nid, $grp_ndx, $param_count);
-
+		if (variable_get($element_name.'_value',FALSE)) {
+			// need to reset this control to an interim saved state
+			debug(variable_get($element_name.'_value',FALSE),'saved element '.$element_name.' value is:');
+			variable_set($element_name.'_value',NULL);
+		}
+        $user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_ALL;
         // set a default value to pass into the element generator
         // this value is used unless the user specified a default value in the configuration
         // get the last entered value from the selection table
@@ -1144,6 +1151,43 @@ function fetchit7_param_form($form, &$form_state) {
           case F_DR_CONTROL_CHECKBOXES:
           case F_DR_CONTROL_DROPDOWN_MULTI:
             $db_value = fetchit_get_existing_selection_multiple($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
+            // also here is where we change the default if the all or none buttons were pressed
+            if (variable_get($element_name.'_allbtn',FALSE)) {
+            	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_ALL;
+            	//do the following in the submit button submit function
+            	//variable_set($element_name.'_allbtn',FALSE);
+            }
+            if (variable_get($element_name.'_nonebtn',FALSE)) {
+            	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_NONE;
+            	//do the following in the submit button submit function
+            	//variable_set($element_name.'_nonebtn',FALSE);
+            }
+            // only need to make these if it is this type of control
+            // be sure to check isset in theme function, though
+	        $form['elements'][$element_name.'_allbtn'] = array(
+	        		'#type' => 'submit',
+	        		'#name' => $element_name.'_allbtn',
+	        		'#validate' => array(
+	        				'fetchit7_param_all_validate'
+	        		),
+	        		'#submit' => array(
+	        				'fetchit7_param_all_submit'
+	        		),
+	        		'#buttontype' => 'button',
+	        		'#value' => t('All'),
+	        );
+	        $form['elements'][$element_name.'_nonebtn'] = array(
+	        		'#type' => 'submit',
+	        		'#name' => $element_name.'_nonebtn',
+	        		'#validate' => array(
+	        				'fetchit7_param_none_validate'
+	        		),
+	        		'#submit' => array(
+	        				'fetchit7_param_none_submit'
+	        		),
+	        		'#buttontype' => 'button',
+	        		'#value' => t('None'),
+	        );
             break;
           case F_DR_CONTROL_DROPDOWN_SINGLE:
           case F_DR_CONTROL_RADIOBTN:
@@ -1169,7 +1213,8 @@ function fetchit7_param_form($form, &$form_state) {
         $form['param_data_table'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DATA_TBL_STR]);
         $form['param_data_ndx'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DATA_KEY_STR]);
         $form['param_data_uid'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DATA_UID_STR]);
-
+        $form['param_allnone'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR]);
+        
         // the following creates the "renderable array" of the next parameter input control (drupal form element)
         //   to be displayed on this form ($nid)
         // stack these up in the array. "How" they are to be displayed will be handled by the theme function
@@ -1236,6 +1281,23 @@ function fetchit7_param_form($form, &$form_state) {
 }
 
 function fetchit7_param_form_force_triggering_element($form, &$form_state) {
+	if(isset($form_state['triggering_element']['#name'])) {
+		debug($form_state['triggering_element']['#name'],'Hello from the fetchit7_param_form_force_triggering_element function. element name:');
+		$element_name_components = array();
+		$element_name_components = explode('_',$form_state['triggering_element']['#name']);
+		debug($element_name_components,'Hello from the fetchit7_param_form_force_triggering_element function. element name components:');
+		variable_set($form_state['triggering_element']['#name'],TRUE);
+		//save the existing state of all the form elements
+		$param_count = $form['param_count']['#value'];
+		for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
+			$element_name = $element_name_components[0].'_'.$element_name_components[1].'_'.$element_name_components[2].'_'.$element_name_components[3].'_'.$param_ndx;
+			variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
+		}
+		//$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
+	} else {
+		//debug($form_state['triggering_element']['#name'],'Hello from the fetchit7_param_form_force_triggering_element function. element name:');
+	}
+	/*
 	if (isset($form_state['input']['all'])) {
 		$string=$form_state['input']['all'];
 		$form_state['triggering_element'] = $form['all'];
@@ -1257,22 +1319,22 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
 			debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears nothing was pressed (yet?) but triggering element is:');
 		}
 	}
+	*/
 	return $form;
 }
 /**
  * Process form validation
  */
 function fetchit7_param_all_validate($form, &$form_state) {
-	$nid = $form['nid']['#value'];
-	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	debug($string,'Hello from the parameter all validate function. From here it appears the param_count is:');
-	drupal_set_message(t('Successfully submitted changes.'), 'status');
+	debug($form_state['triggering_element']['#name'],'Hello from the parameter all validate function. From here the triggering element is:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'Hello from the parameter all validate function. From here the triggering element is:');
+	drupal_set_message(t('Successfully validated all.'), 'status');
 }
 
 function fetchit7_param_none_validate($form, &$form_state) {
-	$nid = $form['nid']['#value'];
-	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	debug($string,'Hello from the parameter none validate function. From here it appears the param_count is:');
+	debug($form_state['triggering_element']['#name'],'Hello from the parameter none validate function. From here the triggering element is:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'Hello from the parameter none validate function. From here the triggering element is:');
+	drupal_set_message(t('Successfully validated none.'), 'status');
 }
 
 function fetchit7_param_form_validate($form, &$form_state) {
@@ -1289,16 +1351,14 @@ function fetchit7_param_form_validate($form, &$form_state) {
 }
 
 function fetchit7_param_all_submit($form, &$form_state) {
-	$nid = $form['nid']['#value'];
-	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	debug($string,'Hello from the parameter all submit function. From here it appears the param_count is:');
+	debug($form_state['triggering_element']['#name'],'Hello from the parameter all submit function. From here the triggering element is:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'Hello from the parameter all submit function. From here the triggering element is:');
 	drupal_set_message(t('Successfully selected all.'), 'status');
 }
 
 function fetchit7_param_none_submit($form, &$form_state) {
-	$nid = $form['nid']['#value'];
-	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	debug($string,'Hello from the parameter none submit function. From here it appears the param_count is:');
+	debug($form_state['triggering_element']['#name'],'Hello from the parameter none submit function. From here the triggering element is:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'Hello from the parameter none submit function. From here the triggering element is:');
 	drupal_set_message(t('Successfully selected none.'), 'status');
 }
 
@@ -1456,9 +1516,13 @@ function theme_fetchit7_param_form($variables) {
         if ($p_ndx < $param_count) {
           $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
           if ($submit_button_flag) {
-            $row[] = drupal_render($form['elements'][$element_name]).
-            			drupal_render($form['all']).
-            			drupal_render($form['none']);
+          	if (isset($form['elements'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+	            $row[] = drupal_render($form['elements'][$element_name]).
+    	        			drupal_render($form['elements'][$element_name.'_allbtn']).
+        	    			drupal_render($form['elements'][$element_name.'_nonebtn']);
+          	} else {
+          		$row[] = drupal_render($form['elements'][$element_name]);
+          	}    
           } else {
           	$row[] = drupal_render($form['elements'][$element_name]);
           }
@@ -1488,8 +1552,10 @@ function theme_fetchit7_param_form($variables) {
 	  $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
 	  if ($submit_button_flag) {
 	  	$output .= drupal_render($form['elements'][$element_name]);
-        $output .= drupal_render($form['all']);
-        $output .= drupal_render($form['none']);
+       	if (isset($form['elements'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+	  		$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
+        	$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
+       	}
 	  } else {
 	  	$output .= drupal_render($form['elements'][$element_name]);
 	  }
