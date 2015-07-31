@@ -1134,15 +1134,12 @@ function fetchit7_param_form($form, &$form_state) {
         $j++;
       }
       //debug($data_tbl_ndx_type,'fetchit7_param_form $data_tbl_ndx_type');
-      if (strlen(trim($data_tbl_ndx_type))) {// if we have a type, then an index field was found, and then we can continue building the parameter input control
+      // if we have a type, then an index field was found,
+      //   and then we can continue building the parameter input control
+      if (strlen(trim($data_tbl_ndx_type))) {
         $grp_ndx = 0;
+        //create a unique element name string
         $element_name = fetchit_make_element_name($nid, $grp_ndx, $param_count);
-		if (variable_get($element_name.'_value',FALSE)) {
-			// need to reset this control to an interim saved state
-			debug(variable_get($element_name.'_value',FALSE),'saved element '.$element_name.' value is:');
-			variable_set($element_name.'_value',NULL);
-		}
-        $user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_ALL;
         // set a default value to pass into the element generator
         // this value is used unless the user specified a default value in the configuration
         // get the last entered value from the selection table
@@ -1151,7 +1148,20 @@ function fetchit7_param_form($form, &$form_state) {
           case F_DR_CONTROL_CHECKBOXES:
           case F_DR_CONTROL_DROPDOWN_MULTI:
             $db_value = fetchit_get_existing_selection_multiple($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
+            //check to see if there is an "interim state" we need to reset the control too
+	        //(in other words, the user hit a select All or select None button)
+	        //see if there is a stored variable with the name element_name_value
+			if (variable_get($element_name.'_value',FALSE)) {
+				// need to reset this control to an interim saved state
+				// set the default string to '' and then set the $db_value to the interim state
+        		$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]='';
+				debug(variable_get($element_name.'_value',FALSE),'saved element '.$element_name.' value is:');
+				$db_value = variable_get($element_name.'_value',FALSE);
+				//and then finally erase the interim state flag...
+				variable_set($element_name.'_value',NULL);
+			}
             // also here is where we change the default if the all or none buttons were pressed
+            //   for this particular element
             if (variable_get($element_name.'_allbtn',FALSE)) {
             	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_ALL;
             	//do the following in the submit button submit function
@@ -1293,7 +1303,7 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
 			$element_name = $element_name_components[0].'_'.$element_name_components[1].'_'.$element_name_components[2].'_'.$element_name_components[3].'_'.$param_ndx;
 			variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
 		}
-		//$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
+		$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
 	} else {
 		//debug($form_state['triggering_element']['#name'],'Hello from the fetchit7_param_form_force_triggering_element function. element name:');
 	}
