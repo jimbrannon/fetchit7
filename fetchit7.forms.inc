@@ -792,27 +792,29 @@ function fetchit7_param_form($form, &$form_state) {
     return $form;
   }
   // optional
+  //should return an array
   $param_titles = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_title', 'values'));
   //should return an array
   $param_descriptions = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_desc', 'values'));
-  //should return an array
   // i equivocate on this, but for now is optional - there is a default control type that is picked based on the output field type
+  //should return an array
   $param_types = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_type', 'values'));
-  //should return an array
   // weights are integers, but leave these input values as strings until later
-  $param_weights = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_weight', 'values'));
   //should return an array
+  $param_weights = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_weight', 'values'));
   //debug($param_weights,'$param_weights');
   // boolean, but leave these input values as strings until later, also can deal with default values then
+  //should return an array
   $param_enabled = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_enabled', 'values'));
-  //should return an array
   // boolean, but leave these input values as strings until later, also can deal with default values then
+  //should return an array
   $param_required = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_required', 'values'));
-  //should return an array
-  // optional
-  $param_str = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_parstr', 'values'));
-  //should return an array
 
+  // optional
+  //should return an array
+  $param_str = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_parstr', 'values'));
+
+  //should return an array
   $param_list_tbl = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_list_tbl', 'values'));
   //should return an array
   $param_list_key = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_list_key', 'values'));
@@ -821,15 +823,16 @@ function fetchit7_param_form($form, &$form_state) {
   //should return an array
   $param_list_uid = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_list_uid', 'values'));
   //should return an array
+  // note that the default strings in this array might have a "special" initial char, which will be handled later
   $param_list_def = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_list_def', 'values'));
+  
   //should return an array
-
+  // note that the database table names in this array might have a "special" initial char, which will be handled later
   $param_data_tbl = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_data_tbl', 'values'));
   //should return an array
   $param_data_key = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_data_key', 'values'));
   //should return an array
   $param_data_uid = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_data_uid', 'values'));
-  //should return an array
 
   //use the above arrays to contruct the $user_field_data array allowing the use of the fetchit2 code AMAP
   // note that param names DEFINES the count of the fields
@@ -963,7 +966,6 @@ function fetchit7_param_form($form, &$form_state) {
     //   - means put all and none buttons above, 
     //   * and + means put all and none buttons below
     // also strip the special character from the default value if it is there (- * +)
-    //   and the default value after stripping becomes the integer threshold for adding the buttons (>= means put the buttons)
     if ($field_index < count($param_list_def)) {
       if (strlen($param_list_def[$field_index])) {
         $user_field_data[$field_index][F_DR_FIELD_DEFAULT_CHAR_STR] = fetchit7_get_special_char_default($param_list_def[$field_index]);
@@ -978,16 +980,82 @@ function fetchit7_param_form($form, &$form_state) {
     }
 
     //$param_data_tbl F_DR_FIELD_DATA_TBL_STR
-    // this is required
+    // this is a required value
     // adding something new here - if the first char is a special character:
     //   - means default selection is none
     //   * means default selection is previous selection
     //   + means default selection is all
     // also strip the special character from the table name if it is there (- * +)
+    //   only doing this because it could be confusing to the fetchit user to have special characters
+    //   on selectable tables but not parameters - so support it on both, even though it is not
+    //   necessary on parameters
     if ($field_index < count($param_data_tbl)) {
       if (strlen($param_data_tbl[$field_index])) {
         $user_field_data[$field_index][F_DR_FIELD_DATA_TBL_CHAR_STR] = fetchit7_get_special_char_default($param_data_tbl[$field_index]);
         $user_field_data[$field_index][F_DR_FIELD_DATA_TBL_STR] = fetchit7_strip_special_char_default($param_data_tbl[$field_index]);
+        if (strlen($user_field_data[$field_index][F_DR_FIELD_DATA_TBL_CHAR_STR])) {
+        	// then set the default if it isn't set already
+        	if ($user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR]=='') {
+        		switch ($user_field_data[$field_index][F_DR_FIELD_DATA_TBL_CHAR_STR]) {
+        			case '-':
+        				// unfortunately have to know the param type to know the appropriate default
+        				switch ($user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR]) {
+        					case F_DR_CONTROL_DROPDOWN_SINGLE:
+        					case F_DR_CONTROL_RADIOBTN:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_FIRST;
+        						break;
+        					case F_DR_CONTROL_CHECKBOXES:
+        					case F_DR_CONTROL_DROPDOWN_MULTI:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_NONE;
+        						break;
+        					case F_DR_CONTROL_CHECKBOX:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_FALSE;
+        						break;
+        					default:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        				}
+        				break;
+        			case '*':
+        				// unfortunately have to know the param type to know the appropriate default
+        				switch ($user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR]) {
+        					case F_DR_CONTROL_DROPDOWN_SINGLE:
+        					case F_DR_CONTROL_RADIOBTN:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+        						break;
+        					case F_DR_CONTROL_CHECKBOXES:
+        					case F_DR_CONTROL_DROPDOWN_MULTI:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+        						break;
+        					case F_DR_CONTROL_CHECKBOX:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+        						break;
+        					default:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        				}
+        				break;
+        			case '+':
+        		        // unfortunately have to know the param type to know the appropriate default
+        				switch ($user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR]) {
+        					case F_DR_CONTROL_DROPDOWN_SINGLE:
+        					case F_DR_CONTROL_RADIOBTN:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_FIRST;
+        						break;
+        					case F_DR_CONTROL_CHECKBOXES:
+        					case F_DR_CONTROL_DROPDOWN_MULTI:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_ALL;
+        						break;
+        					case F_DR_CONTROL_CHECKBOX:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_TRUE;
+        						break;
+        					default:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        				}
+        				break;
+        			default:
+        				$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        		}
+        	}
+        }
       }
       else {
         // can't have a default here, too many complications
@@ -4487,7 +4555,7 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
 				foreach ($db_values as $db_value) {
 					if (in_array($db_value, $options_keys)) {
 						$found_values[] = $db_value;
-		    	}
+					}
 				}
 				$defaults = $found_values;
 			} else {
@@ -4496,42 +4564,41 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
 		} else {
 	    $defaults = array();
 		}
-  } else {
-    $defaults = array();
+	} else {
+    	$defaults = array();
 	}
 	
-  // then set up the defaults based on the string they typed into the defaults attribute box
-  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-    switch ($entered) {
-	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-	      // over write defaults with the value they entered last time
-	      // already set
-	      break;
-	    case FETCHIT7_FIELD_DEFAULT_TRUE:
-		    $default = $options_keys[1];
+	// then set up the defaults based on the string they typed into the defaults attribute box
+	if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		switch ($entered) {
+			case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+				// over write defaults with the value they entered last time
+				// already set
 				break;
-	    case FETCHIT7_FIELD_DEFAULT_FALSE:
-		    $default = $options_keys[0];
+			case FETCHIT7_FIELD_DEFAULT_TRUE:
+		    	$default = $options_keys[1];
 				break;
-	    case FETCHIT7_FIELD_DEFAULT_NONE:
-	    case FETCHIT7_FIELD_DEFAULT_BLANK:
-	      $defaults = array('');
-	      break;
-	    case FETCHIT7_FIELD_DEFAULT_FIRST:
-	      $defaults = array($options_keys[0]);
-	      break;
-	    case FETCHIT7_FIELD_DEFAULT_ALL:
-	      $defaults = $options_keys;
-	      break;
-	    default:
-	      $userdefaults = explode(',', $entered);
-	      if (count($userdefaults)) {
-	        $defaults = $userdefaults;
-	      }
-	      else {
-	        $defaults = array('');
-	      }
-	  }
+			case FETCHIT7_FIELD_DEFAULT_FALSE:
+				$default = $options_keys[0];
+				break;
+			case FETCHIT7_FIELD_DEFAULT_NONE:
+	    	case FETCHIT7_FIELD_DEFAULT_BLANK:
+	      		$defaults = array('');
+	      		break;
+	    	case FETCHIT7_FIELD_DEFAULT_FIRST:
+	      		$defaults = array($options_keys[0]);
+	      		break;
+	    	case FETCHIT7_FIELD_DEFAULT_ALL:
+				$defaults = $options_keys;
+			break;
+		default:
+			$userdefaults = explode(',', $entered);
+			if (count($userdefaults)) {
+				$defaults = $userdefaults;
+			} else {
+	        	$defaults = array('');
+	      	}
+	  	}
 	}
 
   if ($showtitles) {
@@ -5660,8 +5727,17 @@ function fetchit_booleantointeger($val) {
 }
 
 function fetchit7_get_control_list() {
-  return array(// add 1 to make array_search() easier.  subtract 1 later...
-  F_DR_CONTROL_TEXTBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_TEXTBOX, F_DR_CONTROL_DATESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATESEL, F_DR_CONTROL_DROPDOWN_SINGLE + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_SINGLE, F_DR_CONTROL_RADIOBTN + 1 => FETCHIT7_CONTROLTYPE_NAME_RADIOBTN, F_DR_CONTROL_CHECKBOXES + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOXES, F_DR_CONTROL_DROPDOWN_MULTI + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_MULTI, F_DR_CONTROL_CHECKBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOX, F_DR_CONTROL_DATETIMESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATETIMESEL, F_DR_CONTROL_POPUPDATE + 1 => FETCHIT7_CONTROLTYPE_NAME_POPUPDATE, );
+	return array(// add 1 to make array_search() easier.  subtract 1 later...
+		F_DR_CONTROL_TEXTBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_TEXTBOX,
+		F_DR_CONTROL_DATESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATESEL,
+		F_DR_CONTROL_DROPDOWN_SINGLE + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_SINGLE,
+		F_DR_CONTROL_RADIOBTN + 1 => FETCHIT7_CONTROLTYPE_NAME_RADIOBTN,
+		F_DR_CONTROL_CHECKBOXES + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOXES,
+		F_DR_CONTROL_DROPDOWN_MULTI + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_MULTI,
+		F_DR_CONTROL_CHECKBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOX,
+		F_DR_CONTROL_DATETIMESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATETIMESEL,
+		F_DR_CONTROL_POPUPDATE + 1 => FETCHIT7_CONTROLTYPE_NAME_POPUPDATE,
+	);
 }
 
 function fetchit7_get_control_list_string() {
