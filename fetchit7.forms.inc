@@ -965,11 +965,11 @@ function fetchit7_param_form($form, &$form_state) {
     // adding something new here - if the first char is a special character:
     //   - means put all and none buttons above, 
     //   * and + means put all and none buttons below
-    // also strip the special character from the default value if it is there (- * +)
+    // also strip the special allnone button character from the default value if it is there (- * +)
     if ($field_index < count($param_list_def)) {
       if (strlen($param_list_def[$field_index])) {
-        $user_field_data[$field_index][F_DR_FIELD_DEFAULT_CHAR_STR] = fetchit7_get_special_char_default($param_list_def[$field_index]);
-        $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = fetchit7_strip_special_char_default($param_list_def[$field_index]);
+        $user_field_data[$field_index][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR] = fetchit7_get_special_char_allnone($param_list_def[$field_index]);
+        $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = fetchit7_strip_special_char_allnone($param_list_def[$field_index]);
       }
       else {
         $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
@@ -991,12 +991,13 @@ function fetchit7_param_form($form, &$form_state) {
     //   necessary on parameters
     if ($field_index < count($param_data_tbl)) {
       if (strlen($param_data_tbl[$field_index])) {
-        $user_field_data[$field_index][F_DR_FIELD_DATA_TBL_CHAR_STR] = fetchit7_get_special_char_default($param_data_tbl[$field_index]);
+        $user_field_data[$field_index][FETCHIT7_DEFAULT_SPECIAL_CHAR_STR] = fetchit7_get_special_char_default($param_data_tbl[$field_index]);
         $user_field_data[$field_index][F_DR_FIELD_DATA_TBL_STR] = fetchit7_strip_special_char_default($param_data_tbl[$field_index]);
-        if (strlen($user_field_data[$field_index][F_DR_FIELD_DATA_TBL_CHAR_STR])) {
-        	// then set the default if it isn't set already
+        // if we have a special character on the table name
+        if (strlen($user_field_data[$field_index][FETCHIT7_DEFAULT_SPECIAL_CHAR_STR])) {
+        	// then set the default via the param default field if it isn't set already
         	if ($user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR]=='') {
-        		switch ($user_field_data[$field_index][F_DR_FIELD_DATA_TBL_CHAR_STR]) {
+        		switch ($user_field_data[$field_index][FETCHIT7_DEFAULT_SPECIAL_CHAR_STR]) {
         			case '-':
         				// unfortunately have to know the param type to know the appropriate default
         				switch ($user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR]) {
@@ -5768,6 +5769,21 @@ function fetchit7_strip_special_char_default($val) {
   return $newval;
 }
 
+function fetchit7_strip_special_char_allnone($val) {
+	$newval=$val;
+	if (strlen($val)) {
+		switch ($val[0]) {
+			case '-':
+			case '*':
+			case '+':
+				$newval = substr($val, 1);
+				break;
+			default:
+		}
+	}
+	return $newval;
+}
+
 function fetchit7_get_special_char_default($val) {
   $special_char = '';
   if (strlen($val)) {
@@ -5781,4 +5797,19 @@ function fetchit7_get_special_char_default($val) {
     }
   }
   return $special_char;
+}
+
+function fetchit7_get_special_char_allnone($val) {
+	$special_char = '';
+	if (strlen($val)) {
+		switch ($val[0]) {
+			case '-':
+			case '*':
+			case '+':
+				$special_char = $val[0];
+				break;
+			default:
+		}
+	}
+	return $special_char;
 }
