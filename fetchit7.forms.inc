@@ -241,15 +241,14 @@ function fetchit7_table_form($form, &$form_state) {
   $all_selections = array();
   $first_selection = null;
   $first_selections = array();
-  // create the render arrays for each case
+  /*
+   * create the render arrays for each case
+   */
   switch ($table_selection_type) {
-    case 'copy_single':
-      // single row selection and key field copy via radio buttons
-    case 'copy_multiple':
-      // multiple row selection and key field copy via check boxes
-    case 'delete_multiple':
-      // multiple row selection and record deletion via check boxes
-      // create the HTML tableselect header and options
+  	// for all three of these cases, use the HTML tableselect header and options
+    case 'copy_single': // single row selection and key field copy via radio buttons
+    case 'copy_multiple': // multiple row selection and key field copy via check boxes
+    case 'delete_multiple': // multiple row selection and record deletion via check boxes
       $header = array();
       $options = array();
       for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
@@ -265,12 +264,12 @@ function fetchit7_table_form($form, &$form_state) {
             if ($field_ndx == ($key_field_ndx - 1)) {
               // use this as the key for the options array
               $options_key = $db_value;
-              // its the index field
+              // it's the index field
               $all_selections[$db_value] = TRUE;
             }
             else {
               if ($row_ndx == 0) {
-                // its the first row
+                // it's the first row
                 $first_selection = $db_value;
                 $first_selections[$db_value] = TRUE;
                 if ($column_count < $table_headers_count) {
@@ -285,7 +284,7 @@ function fetchit7_table_form($form, &$form_state) {
             }
           }
         }
-        if (is_null($options_key)) {// selection enabled but no key field given - shame on you, user!!
+        if (is_null($options_key)) { // selection enabled but no key field given - shame on you, user!!
           $options_key = $row_ndx;
         }
         $options[$options_key] = $row;
@@ -347,11 +346,14 @@ function fetchit7_table_form($form, &$form_state) {
           break;
         default:
           $default_value = null;
-      } 
-      debug($default_value,'$default_value');
-      // create the HTML tableselect render array with a single select option
+      }
+      // check the default value created
+      // debug($default_value, '$default_value');
+      /* 
+       * create the HTML tableselect render array with a single select option
+       */
       $form['table'] = array(
-      	'#type' => 'tableselect',
+		'#type' => 'tableselect',
       	'#header' => $header,
       	'#options' => $options,
       	'#default_value' => $default_value,
@@ -359,15 +361,13 @@ function fetchit7_table_form($form, &$form_state) {
       	'#js_select' => $selectall_flag,
       	'#empty' => $table_empty_message,
       	'#weight' => $table_weight,
-			);
-	//no submit button if table is empty
-	//if ($row_count==0) $submit_button_flag = FALSE;
+	  );
+	  // no submit button if table is empty
+	  // if ($row_count==0) $submit_button_flag = FALSE;
       break;
-
+    // for all other cases, create a simple html table (NOT a tableselect)
     case 'none':
-    // simple html table display
     default:
-      // create the simple HTML table header and rows
       $header = array();
       $rows = array();
       for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
@@ -392,9 +392,16 @@ function fetchit7_table_form($form, &$form_state) {
         }
         $rows[] = $row;
       }
-
-      // create the HTML table render array
-      $form['table'] = array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#empty' => $table_empty_message, '#weight' => $table_weight, );
+      /*
+       * create the simple HTML table render array
+       */
+      $form['table'] = array(
+      		'#theme' => 'table',
+      		'#header' => $header,
+      		'#rows' => $rows,
+      		'#empty' => $table_empty_message,
+      		'#weight' => $table_weight,
+      );
   }
 
   // append record elements
@@ -413,11 +420,11 @@ function fetchit7_table_form($form, &$form_state) {
   }
 
   if ($addbody_flag) {
-	  $body = fetchit7_content_field_fetcher($nid, 'body', 'value');
-		$form['body'] = array('#type' => 'markup', '#markup' => $body, );
-	}
+    $body = fetchit7_content_field_fetcher($nid, 'body', 'value');
+    $form['body'] = array('#type' => 'markup', '#markup' => $body, );
+  }
 
- 	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
+  $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
   if ($submit_button_flag) {
     $form['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
   }
@@ -669,6 +676,7 @@ function fetchit7_param_form($form, &$form_state) {
 
   // get nid embedded into original form_id; format fetchit7_param_form_X### - nid starts at character 21
   $form_id = $form_state['build_info']['form_id'];
+  debug($form_id, microtime(true).' fetchit7_param_form: $form_id:');
   // to get here, this is definitely set
   //debug($form_state['build_info']);
   $nid = (int) substr($form_id, 21);
@@ -1309,11 +1317,11 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
 	 *     that way, the form redrawing code does not have to be very smart
 	 */
 	if(isset($form_state['triggering_element'])) {
-		debug($form_state['triggering_element']['#name'],'fetchit7_param_form_force_triggering_element: a triggering_element is set; the name is:');
+		debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is set; the name is:');
 		// blow up the element name to get the info out of it
 		$element_name_components = array();
 		$element_name_components = explode('_',$form_state['triggering_element']['#name']);
-		debug($element_name_components,'fetchit7_param_form_force_triggering_element: element name components:');
+		debug($element_name_components,microtime(true).' fetchit7_param_form_force_triggering_element: element name components:');
 		// create an internal drupal variable with the same name as the element, give it a boolean value of true
 		// this can be used to let the subsequent (re)render of the form know what just happened!
 		variable_set($form_state['triggering_element']['#name'],TRUE);
@@ -1321,13 +1329,13 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
 		$param_count = $form['param_count']['#value'];
 		for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
 			$element_name = $element_name_components[0].'_'.$element_name_components[1].'_'.$element_name_components[2].'_'.$element_name_components[3].'_'.$param_ndx;
-			debug($element_name,'fetchit7_param_form_element: element name:');
+			debug($element_name,microtime(true).' fetchit7_param_form_element: element name:');
 			variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
-			debug($form_state['values']['elements'][$element_name],'fetchit7_param_form_element: element value:');
+			debug($form_state['values']['elements'][$element_name],microtime(true).' fetchit7_param_form_element: element value:');
 		}
 		$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
 	} else {
-		//debug($form_state['triggering_element']['#name'],'Hello from the fetchit7_param_form_force_triggering_element function. element name:');
+		debug('',microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is NOT set');
 	}
 	/*
 	if (isset($form_state['input']['all'])) {
@@ -1358,20 +1366,20 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
  * Process form validation
  */
 function fetchit7_param_all_validate($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],'fetchit7_param_all_validate function: triggering element:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'fetchit7_param_all_validate function. triggering element variable value:');
+	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_all_validate function: triggering element:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_all_validate function. triggering element variable value:');
 	drupal_set_message(t('Successfully validated all button.'), 'status');
 }
 
 function fetchit7_param_none_validate($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],'fetchit7_param_none_validate function: triggering element:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'fetchit7_param_none_validate function: triggering element variable value:');
+	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_none_validate function: triggering element:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_none_validate function: triggering element variable value:');
 	drupal_set_message(t('Successfully validated none button.'), 'status');
 }
 
 function fetchit7_param_form_validate($form, &$form_state) {
 	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	debug($string,'fetchit7_param_form_validate function. $form[] param_count or $form_state[]:');
+	debug($string,microtime(true).' fetchit7_param_form_validate function. $form[] param_count or $form_state[]:');
 	$nid = $form['nid']['#value'];
 	//$row_ndx = 0;
 	//$param_ndx = 0;
@@ -1383,14 +1391,14 @@ function fetchit7_param_form_validate($form, &$form_state) {
 }
 
 function fetchit7_param_all_submit($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],'fetchit7_param_all_submit function: triggering element:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'fetchit7_param_all_submit function: triggering element variable value:');
+	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_all_submit function: triggering element:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_all_submit function: triggering element variable value:');
 	drupal_set_message(t('Successfully submitted all button.'), 'status');
 }
 
 function fetchit7_param_none_submit($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],'fetchit7_param_none_submit function: triggering element:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'fetchit7_param_none_submit function: triggering element variable value:');
+	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_none_submit function: triggering element:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_none_submit function: triggering element variable value:');
 	drupal_set_message(t('Successfully submitted none button.'), 'status');
 }
 
@@ -1506,13 +1514,14 @@ function fetchit7_param_form_submit($form, &$form_state) {
     }
   }
 
-  drupal_set_message(t('Successfully submitted changes.'), 'status');
+  drupal_set_message(t('Successfully submitted changes at '.microtime(true)), 'status');
 }
 
 function theme_fetchit7_param_form($variables) {
   $form = $variables['form'];
   $nid = $form['nid']['#value'];
   $form_id = $form['form_id']['#value'];
+  debug($form_id, microtime(true).' theme_fetchit7_param_form: $form_id:');
   //the drupal way is to do all the non display related preprocessing in a theme preprocessor function
   // ... move it there later ...
   $table_row_count = $form['table_rows']['#value'];
