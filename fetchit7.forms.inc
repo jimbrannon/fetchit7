@@ -1185,9 +1185,10 @@ function fetchit7_param_form($form, &$form_state) {
 	        $form['elements'][$element_name.'_allbtn'] = array(
 	        		'#type' => 'submit',
 	        		'#name' => $element_name.'_allbtn',
-	        		'#validate' => array(
-	        				'fetchit7_param_all_validate'
-	        		),
+	        		//'#validate' => array(
+	        		//		'fetchit7_param_all_validate'
+	        		//),
+	        		'#limit_validation_errors' => array(),
 	        		'#submit' => array(
 	        				'fetchit7_param_all_submit'
 	        		),
@@ -1197,9 +1198,10 @@ function fetchit7_param_form($form, &$form_state) {
 	        $form['elements'][$element_name.'_nonebtn'] = array(
 	        		'#type' => 'submit',
 	        		'#name' => $element_name.'_nonebtn',
-	        		'#validate' => array(
-	        				'fetchit7_param_none_validate'
-	        		),
+	        		'#limit_validation_errors' => array(),
+	        		//'#validate' => array(
+	        		//		'fetchit7_param_none_validate'
+	        		//),
 	        		'#submit' => array(
 	        				'fetchit7_param_none_submit'
 	        		),
@@ -1369,12 +1371,14 @@ function fetchit7_param_all_validate($form, &$form_state) {
 	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_all_validate function: triggering element:');
 	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_all_validate function. triggering element variable value:');
 	drupal_set_message(t('Successfully validated all button.'), 'status');
+	return;
 }
 
 function fetchit7_param_none_validate($form, &$form_state) {
 	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_none_validate function: triggering element:');
 	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_none_validate function: triggering element variable value:');
 	drupal_set_message(t('Successfully validated none button.'), 'status');
+	return;
 }
 
 function fetchit7_param_form_validate($form, &$form_state) {
