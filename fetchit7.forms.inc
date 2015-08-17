@@ -1290,18 +1290,40 @@ function fetchit7_param_form($form, &$form_state) {
   return $form;
 }
 
+//this function is called before drupal processes the form submit hook
 function fetchit7_param_form_force_triggering_element($form, &$form_state) {
-	if(isset($form_state['triggering_element']['#name'])) {
-		debug($form_state['triggering_element']['#name'],'Hello from the fetchit7_param_form_force_triggering_element function. element name:');
+	/*
+	 * the triggering element variable gets set based on which button was pressed
+	 * the idea is that it is set (has a value) right after the button is pressed,
+	 *   but NOT later (in the drupal form processing) when this function seems to get called again
+	 *   so checking with isset() is a way to add some code to fire RIGHT AFTER an all or nothing button is pressed
+	 *   but we want this function to do nothing on other calls
+	 *   the code we want to add should save in a drupal variable which button was pressed
+	 *     and clear out all the other button press saves so only one is ever set at a time
+	 *     then when the form is drawn it can look for this variable and set the default values accordingly
+	 *     also, we will have to save any changes the user has made to other form elements
+	 *     and restore them when the form is redrawn.
+	 *     this means essentially that EVERY form element will need to have it's state saved
+	 *     so it can be restored when the form is redrawn.  the one form element associated with the all or none
+	 *     button pressed will not save it's current state, but will save either a all or none state
+	 *     that way, the form redrawing code does not have to be very smart
+	 */
+	if(isset($form_state['triggering_element'])) {
+		debug($form_state['triggering_element']['#name'],'fetchit7_param_form_force_triggering_element: a triggering_element is set; the name is:');
+		// blow up the element name to get the info out of it
 		$element_name_components = array();
 		$element_name_components = explode('_',$form_state['triggering_element']['#name']);
-		debug($element_name_components,'Hello from the fetchit7_param_form_force_triggering_element function. element name components:');
+		debug($element_name_components,'fetchit7_param_form_force_triggering_element: element name components:');
+		// create an internal drupal variable with the same name as the element, give it a boolean value of true
+		// this can be used to let the subsequent (re)render of the form know what just happened!
 		variable_set($form_state['triggering_element']['#name'],TRUE);
 		//save the existing state of all the form elements
 		$param_count = $form['param_count']['#value'];
 		for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
 			$element_name = $element_name_components[0].'_'.$element_name_components[1].'_'.$element_name_components[2].'_'.$element_name_components[3].'_'.$param_ndx;
+			debug($element_name,'fetchit7_param_form_element: element name:');
 			variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
+			debug($form_state['values']['elements'][$element_name],'fetchit7_param_form_element: element value:');
 		}
 		$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
 	} else {
@@ -1336,20 +1358,20 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
  * Process form validation
  */
 function fetchit7_param_all_validate($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],'Hello from the parameter all validate function. From here the triggering element is:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'Hello from the parameter all validate function. From here the triggering element is:');
-	drupal_set_message(t('Successfully validated all.'), 'status');
+	debug($form_state['triggering_element']['#name'],'fetchit7_param_all_validate function: triggering element:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'fetchit7_param_all_validate function. triggering element variable value:');
+	drupal_set_message(t('Successfully validated all button.'), 'status');
 }
 
 function fetchit7_param_none_validate($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],'Hello from the parameter none validate function. From here the triggering element is:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'Hello from the parameter none validate function. From here the triggering element is:');
-	drupal_set_message(t('Successfully validated none.'), 'status');
+	debug($form_state['triggering_element']['#name'],'fetchit7_param_none_validate function: triggering element:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'fetchit7_param_none_validate function: triggering element variable value:');
+	drupal_set_message(t('Successfully validated none button.'), 'status');
 }
 
 function fetchit7_param_form_validate($form, &$form_state) {
 	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	debug($string,'Hello from the all important parameter input form validate function. From here it appears the param_count is:');
+	debug($string,'fetchit7_param_form_validate function. $form[] param_count or $form_state[]:');
 	$nid = $form['nid']['#value'];
 	//$row_ndx = 0;
 	//$param_ndx = 0;
@@ -1361,15 +1383,15 @@ function fetchit7_param_form_validate($form, &$form_state) {
 }
 
 function fetchit7_param_all_submit($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],'Hello from the parameter all submit function. From here the triggering element is:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'Hello from the parameter all submit function. From here the triggering element is:');
-	drupal_set_message(t('Successfully selected all.'), 'status');
+	debug($form_state['triggering_element']['#name'],'fetchit7_param_all_submit function: triggering element:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'fetchit7_param_all_submit function: triggering element variable value:');
+	drupal_set_message(t('Successfully submitted all button.'), 'status');
 }
 
 function fetchit7_param_none_submit($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],'Hello from the parameter none submit function. From here the triggering element is:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'Hello from the parameter none submit function. From here the triggering element is:');
-	drupal_set_message(t('Successfully selected none.'), 'status');
+	debug($form_state['triggering_element']['#name'],'fetchit7_param_none_submit function: triggering element:');
+	debug(variable_get($form_state['triggering_element']['#name'],FALSE),'fetchit7_param_none_submit function: triggering element variable value:');
+	drupal_set_message(t('Successfully submitted none button.'), 'status');
 }
 
 /**
