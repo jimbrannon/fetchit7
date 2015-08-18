@@ -1155,30 +1155,36 @@ function fetchit7_param_form($form, &$form_state) {
         switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_CHECKBOXES:
           case F_DR_CONTROL_DROPDOWN_MULTI:
+          	// first get the previously saved state...
             $db_value = fetchit_get_existing_selection_multiple($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
-            //check to see if there is an "interim state" we need to reset the control too
-	        //(in other words, the user hit a select All or select None button)
-	        //see if there is a stored variable with the name element_name_value
-			if (variable_get($element_name.'_value',FALSE)) {
+			debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
+            // next, check to see if there is an "interim state" to reset the control too
+	        //   (this happens when the user presses a select All or select None button)
+	        //   see if there is a stored variable with the name element_name_value
+			if (variable_get($element_name.'_set',FALSE)) {
 				// need to reset this control to an interim saved state
-				// set the default string to '' and then set the $db_value to the interim state
-        		$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]='';
-				debug(variable_get($element_name.'_value',FALSE),'saved element '.$element_name.' value is:');
-				$db_value = variable_get($element_name.'_value',FALSE);
+				// set the default string to FETCHIT7_FIELD_DEFAULT_PREVIOUS
+				//    and then set $db_value to the interim state, overwriting the previously selected state
+				//    then set the $user_field_data[] flag so that the fetchit 2 routines will use it,
+				//  essentially this is fooling the fetchit2 routines into thinking the interim state
+				//    is the previously selected state
+        		$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+				$db_value = variable_get($element_name.'_value','');
+			    debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
 				//and then finally erase the interim state flag...
-				variable_set($element_name.'_value',NULL);
+				variable_set($element_name.'_set',FALSE);
 			}
-            // also here is where we change the default if the all or none buttons were pressed
+            // finally, here is where we change the default if the all or none buttons were pressed for this element
             //   for this particular element
+            // at most only one of these should be true, but handle both separately so they get reset correctly,
+            //   just in case...
             if (variable_get($element_name.'_allbtn',FALSE)) {
             	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_ALL;
-            	//do the following in the submit button submit function
-            	//variable_set($element_name.'_allbtn',FALSE);
+            	variable_set($element_name.'_allbtn',FALSE);
             }
             if (variable_get($element_name.'_nonebtn',FALSE)) {
             	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_NONE;
-            	//do the following in the submit button submit function
-            	//variable_set($element_name.'_nonebtn',FALSE);
+            	variable_set($element_name.'_nonebtn',FALSE);
             }
             // only need to make these if it is this type of control
             // be sure to check isset in theme function, though
@@ -1217,6 +1223,24 @@ function fetchit7_param_form($form, &$form_state) {
           case F_DR_CONTROL_DATETIMESEL:
           case F_DR_CONTROL_POPUPDATE:
             $db_value = fetchit_get_existing_selection_single($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
+
+            debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
+            // next, check to see if there is an "interim state" to reset the control too
+            //   (this happens when the user presses a select All or select None button)
+            //   see if there is a stored variable with the name element_name_value
+            if (variable_get($element_name.'_set',FALSE)) {
+            	// need to reset this control to an interim saved state
+            	// set the default string to FETCHIT7_FIELD_DEFAULT_PREVIOUS
+            	//    and then set $db_value to the interim state, overwriting the previously selected state
+            	//    then set the $user_field_data[] flag so that the fetchit 2 routines will use it,
+            	//  essentially this is fooling the fetchit2 routines into thinking the interim state
+            	//    is the previously selected state
+            	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+            	$db_value = variable_get($element_name.'_value','');
+            	debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
+            	//and then finally erase the interim state flag...
+            	variable_set($element_name.'_set',FALSE);
+            }
             break;
           default:
         }
@@ -1233,12 +1257,22 @@ function fetchit7_param_form($form, &$form_state) {
         $form['param_data_table'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DATA_TBL_STR]);
         $form['param_data_ndx'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DATA_KEY_STR]);
         $form['param_data_uid'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DATA_UID_STR]);
+        // note that for the following - would like to eventually add the option for the all none buttons to be added automatically based on the size of the list
         $form['param_allnone'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR]);
         
         // the following creates the "renderable array" of the next parameter input control (drupal form element)
         //   to be displayed on this form ($nid)
         // stack these up in the array. "How" they are to be displayed will be handled by the theme function
-        $form['elements'][$element_name] = fetchit7_param_element_form($param_name, $data_tbl_ndx_type, $db_handle, $i + 1, $user_field_data, $nid, $showtitles, $db_value);
+        $form['elements'][$element_name] = 
+        	fetchit7_param_element_form(
+        			$param_name,
+        			$data_tbl_ndx_type,
+        			$db_handle,
+        			$i + 1,
+        			$user_field_data,
+        			$nid,
+        			$showtitles,
+        			$db_value);
         //debug($myform[$element_name],' pre-render $myform['.$element_name.']');
         $param_count++;
       }
@@ -1319,22 +1353,31 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
 	 *     that way, the form redrawing code does not have to be very smart
 	 */
 	if(isset($form_state['triggering_element'])) {
-		debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is set; the name is:');
+		$triggering_element_name = $form_state['triggering_element']['#name'];
+		debug($triggering_element_name,microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is set; the name is:');
 		// blow up the element name to get the info out of it
-		$element_name_components = array();
-		$element_name_components = explode('_',$form_state['triggering_element']['#name']);
-		debug($element_name_components,microtime(true).' fetchit7_param_form_force_triggering_element: element name components:');
-		// create an internal drupal variable with the same name as the element, give it a boolean value of true
-		// this can be used to let the subsequent (re)render of the form know what just happened!
-		variable_set($form_state['triggering_element']['#name'],TRUE);
-		//save the existing state of all the form elements
+		$triggering_element_name_components = array();
+		$triggering_element_name_components = explode('_',$triggering_element_name);
+		debug($triggering_element_name_components,microtime(true).' fetchit7_param_form_force_triggering_element: element name components:');
+		//save the existing state of ALL the form elements
 		$param_count = $form['param_count']['#value'];
 		for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
 			$element_name = $element_name_components[0].'_'.$element_name_components[1].'_'.$element_name_components[2].'_'.$element_name_components[3].'_'.$param_ndx;
 			debug($element_name,microtime(true).' fetchit7_param_form_element: element name:');
+			variable_set($element_name.'_set',true);
 			variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
 			debug($form_state['values']['elements'][$element_name],microtime(true).' fetchit7_param_form_element: element value:');
+			// set them all to false, then set the triggering to true afterwards
+			// notice that $element_name (the value/list control) is the base of $triggering_element_name (the all or none button)
+			variable_set($element_name.'_allbtn',false);
+			variable_set($element_name.'_nonebtn',false);
 		}
+		// create an internal drupal variable with the same name as the element, give it a boolean value of true
+		// this is used to let the subsequent (re)render of the form know that it is redrawing
+		//   after an all or none button press, because things happen differently in those cases
+		variable_set($triggering_element_name,true);
+		
+		// what is this for?
 		$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
 	} else {
 		debug('',microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is NOT set');
@@ -4110,17 +4153,17 @@ function fetchit_get_checkboxes_element($user_field_data, $user_field_ndx, $db_h
 				foreach ($db_values as $db_value) {
 					if (in_array($db_value, $options_keys)) {
 						$found_values[] = $db_value;
-		    	}
+					}
 				}
 				$defaults = $found_values;
 			} else {
-		    $defaults = array();
+				$defaults = array();
 			}
 		} else {
-	    $defaults = array();
+			$defaults = array();
 		}
-  } else {
-    $defaults = array();
+	} else {
+		$defaults = array();
 	}
 	
   // then set up the defaults based on the string they typed into the defaults attribute box
