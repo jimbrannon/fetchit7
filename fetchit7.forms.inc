@@ -1359,26 +1359,28 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
 		$triggering_element_name_components = array();
 		$triggering_element_name_components = explode('_',$triggering_element_name);
 		debug($triggering_element_name_components,microtime(true).' fetchit7_param_form_force_triggering_element: element name components:');
-		//save the existing state of ALL the form elements
-		$param_count = $form['param_count']['#value'];
-		for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
-			$element_name = $element_name_components[0].'_'.$element_name_components[1].'_'.$element_name_components[2].'_'.$element_name_components[3].'_'.$param_ndx;
-			debug($element_name,microtime(true).' fetchit7_param_form_element: element name:');
-			variable_set($element_name.'_set',true);
-			variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
-			debug($form_state['values']['elements'][$element_name],microtime(true).' fetchit7_param_form_element: element value:');
-			// set them all to false, then set the triggering to true afterwards
-			// notice that $element_name (the value/list control) is the base of $triggering_element_name (the all or none button)
-			variable_set($element_name.'_allbtn',false);
-			variable_set($element_name.'_nonebtn',false);
+		if ($triggering_element_name_components[0]=="fetchit7") {
+			//save the existing state of ALL the form elements
+			$param_count = $form['param_count']['#value'];
+			for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
+				$element_name = $triggering_element_name_components[0].'_'.$triggering_element_name_components[1].'_'.$triggering_element_name_components[2].'_'.$triggering_element_name_components[3].'_'.$param_ndx;
+				debug($element_name,microtime(true).' fetchit7_param_form_element: element name:');
+				variable_set($element_name.'_set',true);
+				variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
+				debug($form_state['values']['elements'][$element_name],microtime(true).' fetchit7_param_form_element: element value:');
+				// set them all to false, then set the triggering to true afterwards
+				// notice that $element_name (the value/list control) is the base of $triggering_element_name (the all or none button)
+				variable_set($element_name.'_allbtn',false);
+				variable_set($element_name.'_nonebtn',false);
+			}
+			// create an internal drupal variable with the same name as the element, give it a boolean value of true
+			// this is used to let the subsequent (re)render of the form know that it is redrawing
+			//   after an all or none button press, because things happen differently in those cases
+			variable_set($triggering_element_name,true);
+			
+			// what is this for?
+			$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
 		}
-		// create an internal drupal variable with the same name as the element, give it a boolean value of true
-		// this is used to let the subsequent (re)render of the form know that it is redrawing
-		//   after an all or none button press, because things happen differently in those cases
-		variable_set($triggering_element_name,true);
-		
-		// what is this for?
-		$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
 	} else {
 		debug('',microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is NOT set');
 	}
