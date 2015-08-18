@@ -676,7 +676,7 @@ function fetchit7_param_form($form, &$form_state) {
 
   // get nid embedded into original form_id; format fetchit7_param_form_X### - nid starts at character 21
   $form_id = $form_state['build_info']['form_id'];
-  debug($form_id, microtime(true).' fetchit7_param_form: $form_id:');
+  //debug($form_id, microtime(true).' fetchit7_param_form: $form_id:');
   // to get here, this is definitely set
   //debug($form_state['build_info']);
   $nid = (int) substr($form_id, 21);
@@ -1157,7 +1157,7 @@ function fetchit7_param_form($form, &$form_state) {
           case F_DR_CONTROL_DROPDOWN_MULTI:
           	// first get the previously saved state...
             $db_value = fetchit_get_existing_selection_multiple($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
-			debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
+			//debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
             // next, check to see if there is an "interim state" to reset the control too
 	        //   (this happens when the user presses a select All or select None button)
 	        //   see if there is a stored variable with the name element_name_value
@@ -1170,7 +1170,7 @@ function fetchit7_param_form($form, &$form_state) {
 				//    is the previously selected state
         		$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_PREVIOUS;
 				$db_value = variable_get($element_name.'_value','');
-			    debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
+			    //debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
 				//and then finally erase the interim state flag...
 				variable_set($element_name.'_set',FALSE);
 			}
@@ -1224,7 +1224,7 @@ function fetchit7_param_form($form, &$form_state) {
           case F_DR_CONTROL_POPUPDATE:
             $db_value = fetchit_get_existing_selection_single($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
 
-            debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
+            //debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
             // next, check to see if there is an "interim state" to reset the control too
             //   (this happens when the user presses a select All or select None button)
             //   see if there is a stored variable with the name element_name_value
@@ -1237,7 +1237,7 @@ function fetchit7_param_form($form, &$form_state) {
             	//    is the previously selected state
             	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_PREVIOUS;
             	$db_value = variable_get($element_name.'_value','');
-            	debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
+            	//debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
             	//and then finally erase the interim state flag...
             	variable_set($element_name.'_set',FALSE);
             }
@@ -1354,20 +1354,20 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
 	 */
 	if(isset($form_state['triggering_element'])) {
 		$triggering_element_name = $form_state['triggering_element']['#name'];
-		debug($triggering_element_name,microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is set; the name is:');
+		//debug($triggering_element_name,microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is set; the name is:');
 		// blow up the element name to get the info out of it
 		$triggering_element_name_components = array();
 		$triggering_element_name_components = explode('_',$triggering_element_name);
-		debug($triggering_element_name_components,microtime(true).' fetchit7_param_form_force_triggering_element: element name components:');
+		//debug($triggering_element_name_components,microtime(true).' fetchit7_param_form_force_triggering_element: element name components:');
 		if ($triggering_element_name_components[0]=="fetchit7") {
 			//save the existing state of ALL the form elements
 			$param_count = $form['param_count']['#value'];
 			for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
 				$element_name = $triggering_element_name_components[0].'_'.$triggering_element_name_components[1].'_'.$triggering_element_name_components[2].'_'.$triggering_element_name_components[3].'_'.$param_ndx;
-				debug($element_name,microtime(true).' fetchit7_param_form_element: element name:');
+				//debug($element_name,microtime(true).' fetchit7_param_form_element: element name:');
 				variable_set($element_name.'_set',true);
 				variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
-				debug($form_state['values']['elements'][$element_name],microtime(true).' fetchit7_param_form_element: element value:');
+				//debug($form_state['values']['elements'][$element_name],microtime(true).' fetchit7_param_form_element: element value:');
 				// set them all to false, then set the triggering to true afterwards
 				// notice that $element_name (the value/list control) is the base of $triggering_element_name (the all or none button)
 				variable_set($element_name.'_allbtn',false);
@@ -1382,7 +1382,7 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
 			$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
 		}
 	} else {
-		debug('',microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is NOT set');
+		//debug('',microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is NOT set');
 	}
 	/*
 	if (isset($form_state['input']['all'])) {
@@ -1413,22 +1413,22 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
  * Process form validation
  */
 function fetchit7_param_all_validate($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_all_validate function: triggering element:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_all_validate function. triggering element variable value:');
-	drupal_set_message(t('Successfully validated all button.'), 'status');
+	//debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_all_validate function: triggering element:');
+	//debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_all_validate function. triggering element variable value:');
+	//drupal_set_message(t('Successfully validated all button.'), 'status');
 	return;
 }
 
 function fetchit7_param_none_validate($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_none_validate function: triggering element:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_none_validate function: triggering element variable value:');
-	drupal_set_message(t('Successfully validated none button.'), 'status');
+	//debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_none_validate function: triggering element:');
+	//debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_none_validate function: triggering element variable value:');
+	//drupal_set_message(t('Successfully validated none button.'), 'status');
 	return;
 }
 
 function fetchit7_param_form_validate($form, &$form_state) {
-	$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-	debug($string,microtime(true).' fetchit7_param_form_validate function. $form[] param_count or $form_state[]:');
+	//$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	//debug($string,microtime(true).' fetchit7_param_form_validate function. $form[] param_count or $form_state[]:');
 	$nid = $form['nid']['#value'];
 	//$row_ndx = 0;
 	//$param_ndx = 0;
@@ -1440,15 +1440,15 @@ function fetchit7_param_form_validate($form, &$form_state) {
 }
 
 function fetchit7_param_all_submit($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_all_submit function: triggering element:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_all_submit function: triggering element variable value:');
-	drupal_set_message(t('Successfully submitted all button.'), 'status');
+	//debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_all_submit function: triggering element:');
+	//debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_all_submit function: triggering element variable value:');
+	//drupal_set_message(t('Successfully submitted all button.'), 'status');
 }
 
 function fetchit7_param_none_submit($form, &$form_state) {
-	debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_none_submit function: triggering element:');
-	debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_none_submit function: triggering element variable value:');
-	drupal_set_message(t('Successfully submitted none button.'), 'status');
+	//debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_none_submit function: triggering element:');
+	//debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_none_submit function: triggering element variable value:');
+	//drupal_set_message(t('Successfully submitted none button.'), 'status');
 }
 
 /**
@@ -1570,7 +1570,7 @@ function theme_fetchit7_param_form($variables) {
   $form = $variables['form'];
   $nid = $form['nid']['#value'];
   $form_id = $form['form_id']['#value'];
-  debug($form_id, microtime(true).' theme_fetchit7_param_form: $form_id:');
+  //debug($form_id, microtime(true).' theme_fetchit7_param_form: $form_id:');
   //the drupal way is to do all the non display related preprocessing in a theme preprocessor function
   // ... move it there later ...
   $table_row_count = $form['table_rows']['#value'];
