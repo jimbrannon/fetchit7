@@ -1188,32 +1188,39 @@ function fetchit7_param_form($form, &$form_state) {
             }
             // only need to make these if it is this type of control
             // be sure to check isset in theme function, though
-	        $form['elements'][$element_name.'_allbtn'] = array(
-	        		'#type' => 'submit',
-	        		'#name' => $element_name.'_allbtn',
-	        		//'#validate' => array(
-	        		//		'fetchit7_param_all_validate'
-	        		//),
-	        		'#limit_validation_errors' => array(),
-	        		'#submit' => array(
-	        				'fetchit7_param_all_submit'
-	        		),
-	        		'#buttontype' => 'button',
-	        		'#value' => t('All'),
-	        );
-	        $form['elements'][$element_name.'_nonebtn'] = array(
-	        		'#type' => 'submit',
-	        		'#name' => $element_name.'_nonebtn',
-	        		'#limit_validation_errors' => array(),
-	        		//'#validate' => array(
-	        		//		'fetchit7_param_none_validate'
-	        		//),
-	        		'#submit' => array(
-	        				'fetchit7_param_none_submit'
-	        		),
-	        		'#buttontype' => 'button',
-	        		'#value' => t('None'),
-	        );
+            switch ($user_field_data[$i][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR]) {
+            	case '-':
+            	case '*':
+            	case '+':
+			        $form['elements'][$element_name.'_allbtn'] = array(
+			        		'#type' => 'submit',
+			        		'#name' => $element_name.'_allbtn',
+			        		//'#validate' => array(
+			        		//		'fetchit7_param_all_validate'
+			        		//),
+			        		'#limit_validation_errors' => array(),
+			        		'#submit' => array(
+			        				'fetchit7_param_all_submit'
+			        		),
+			        		'#buttontype' => 'button',
+			        		'#value' => t('All'),
+			        );
+			        $form['elements'][$element_name.'_nonebtn'] = array(
+			        		'#type' => 'submit',
+			        		'#name' => $element_name.'_nonebtn',
+			        		'#limit_validation_errors' => array(),
+			        		//'#validate' => array(
+			        		//		'fetchit7_param_none_validate'
+			        		//),
+			        		'#submit' => array(
+			        				'fetchit7_param_none_submit'
+			        		),
+			        		'#buttontype' => 'button',
+			        		'#value' => t('None'),
+			        );
+            		break;
+            	default:
+            }
             break;
           case F_DR_CONTROL_DROPDOWN_SINGLE:
           case F_DR_CONTROL_RADIOBTN:
@@ -1562,8 +1569,7 @@ function fetchit7_param_form_submit($form, &$form_state) {
       $form_state['redirect'] = $redirect;
     }
   }
-
-  drupal_set_message(t('Successfully submitted changes at '.microtime(true)), 'status');
+  drupal_set_message(t('Successfully submitted changes.'), 'status');
 }
 
 function theme_fetchit7_param_form($variables) {
@@ -1585,6 +1591,7 @@ function theme_fetchit7_param_form($variables) {
   if ($table_row_count) {
     //figure out the table structure
     $param_count = $form['param_count']['#value'];
+    //debug($param_count,'$param_count');
     $table_column_count = intval(($param_count - 1) / $table_row_count) + 1;
     $table_headers = $form['table_headers']['#value'];
     $table_headers_count = count($table_headers);
@@ -1599,25 +1606,41 @@ function theme_fetchit7_param_form($variables) {
     }
     $rows = array();
     for ($row_ndx = 0; $row_ndx < $table_row_count; $row_ndx++) {
+      //debug($row_ndx,'$row_ndx');
       $row = array();
       for ($col_ndx = 0; $col_ndx < $table_column_count; $col_ndx++) {
-        // numbering goes down the columns first
+        //debug($col_ndx,'$col_ndx');
+      	// numbering goes down the columns first
         $p_ndx = $row_ndx + $col_ndx * $table_row_count;
+        //debug($p_ndx,'$p_ndx');
         if ($p_ndx < $param_count) {
           $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
+          //debug($element_name,'$element_name');
           if ($submit_button_flag) {
           	if (isset($form['elements'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
-	            $row[] = drupal_render($form['elements'][$element_name]).
-    	        			drupal_render($form['elements'][$element_name.'_allbtn']).
-        	    			drupal_render($form['elements'][$element_name.'_nonebtn']);
+                //debug($form['param_allnone'][$p_ndx]['#value'],'$form[param_allnone][$p_ndx][#value]');
+          		switch ($form['param_allnone'][$p_ndx]['#value']) {
+	          		case '-':
+		          		$row[] = drupal_render($form['elements'][$element_name.'_allbtn']).
+		        	    			drupal_render($form['elements'][$element_name.'_nonebtn']).
+		        	    			drupal_render($form['elements'][$element_name]);
+	          			break;
+	          		case '+':
+	          		case '*':
+		          		$row[] = drupal_render($form['elements'][$element_name]).
+		    	        			drupal_render($form['elements'][$element_name.'_allbtn']).
+		        	    			drupal_render($form['elements'][$element_name.'_nonebtn']);
+	          			break;
+	          		default:
+		          		$row[] = drupal_render($form['elements'][$element_name]);
+          	    }
           	} else {
           		$row[] = drupal_render($form['elements'][$element_name]);
           	}    
           } else {
           	$row[] = drupal_render($form['elements'][$element_name]);
           }
-        }
-        else {
+        } else {
           $sillyform[$p_ndx] = array(
           		'#type' => 'item',
           		'#title' => 'Empty Cell',
@@ -1635,16 +1658,29 @@ function theme_fetchit7_param_form($variables) {
     		'#weight' => $table_weight,
     		'#empty' => "Empty table.", );
     $output .= drupal_render($form['table']);
-  }
-  else {
+  } else {
     $param_count = $form['param_count']['#value'];
 	for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
 	  $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
 	  if ($submit_button_flag) {
-	  	$output .= drupal_render($form['elements'][$element_name]);
        	if (isset($form['elements'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
-	  		$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
-        	$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
+       		switch ($form['param_allnone'][$p_ndx]['#value']) {
+       			case '-':
+	  				$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
+	  				$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
+	  				$output .= drupal_render($form['elements'][$element_name]);
+       				break;
+       			case '+':
+       			case '*':
+       				$output .= drupal_render($form['elements'][$element_name]);
+       				$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
+       				$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
+       				break;
+       			default:
+       				$output .= drupal_render($form['elements'][$element_name]);
+       		}
+       	} else {
+       		$output .= drupal_render($form['elements'][$element_name]);
        	}
 	  } else {
 	  	$output .= drupal_render($form['elements'][$element_name]);
@@ -1652,7 +1688,7 @@ function theme_fetchit7_param_form($variables) {
 	}
   }
   $output .= '</div>';
-  $submit_button_flag = $form['submit_button_flag']['#value'];
+  //$submit_button_flag = $form['submit_button_flag']['#value'];
   if ($submit_button_flag) {
     $output .= '<div class="' . $form_id . '_submit">';
     $output .= drupal_render($form['actions']['submit']);
