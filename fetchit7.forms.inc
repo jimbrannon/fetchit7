@@ -6052,6 +6052,7 @@ function fetchit7_get_special_char_allnone($val) {
 		}
 	}
 	return $special_char;
+}
 
 function fetchit7_submit_button_weight_to_top($submit_weight=1) {
 	// the weights don't work as imagined because of how rendering works
@@ -6148,3 +6149,4 @@ function fetchit7_submit_button_weight_to_success_message($submit_weight=1) {
   }
 	return $submit_success_message;
 }
+
