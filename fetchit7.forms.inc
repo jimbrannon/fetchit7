@@ -1232,32 +1232,43 @@ function fetchit7_param_form($form, &$form_state) {
             }
             // only need to make these if it is this type of control
             // be sure to check isset in theme function, though
-	        $form['elements'][$element_name.'_allbtn'] = array(
-	        		'#type' => 'submit',
-	        		'#name' => $element_name.'_allbtn',
-	        		//'#validate' => array(
-	        		//		'fetchit7_param_all_validate'
-	        		//),
-	        		'#limit_validation_errors' => array(),
-	        		'#submit' => array(
-	        				'fetchit7_param_all_submit'
-	        		),
-	        		'#buttontype' => 'button',
-	        		'#value' => t('All'),
-	        );
-	        $form['elements'][$element_name.'_nonebtn'] = array(
-	        		'#type' => 'submit',
-	        		'#name' => $element_name.'_nonebtn',
-	        		'#limit_validation_errors' => array(),
-	        		//'#validate' => array(
-	        		//		'fetchit7_param_none_validate'
-	        		//),
-	        		'#submit' => array(
-	        				'fetchit7_param_none_submit'
-	        		),
-	        		'#buttontype' => 'button',
-	        		'#value' => t('None'),
-	        );
+            // and only need to create them if the user specifically said to in the first character of the default str
+            switch ($user_field_data[$i][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR]) {
+            	case '-':
+            	case '+':
+            		// create the render arrays for the all none buttons
+			        $form['elements'][$element_name.'_allbtn'] = array(
+			        		'#type' => 'submit',
+			        		'#name' => $element_name.'_allbtn',
+			        		//'#validate' => array(
+			        		//		'fetchit7_param_all_validate'
+			        		//),
+			        		'#limit_validation_errors' => array(),
+			        		'#submit' => array(
+			        				'fetchit7_param_all_submit'
+			        		),
+			        		'#buttontype' => 'button',
+			        		'#value' => t('All'),
+			        );
+			        $form['elements'][$element_name.'_nonebtn'] = array(
+			        		'#type' => 'submit',
+			        		'#name' => $element_name.'_nonebtn',
+			        		'#limit_validation_errors' => array(),
+			        		//'#validate' => array(
+			        		//		'fetchit7_param_none_validate'
+			        		//),
+			        		'#submit' => array(
+			        				'fetchit7_param_none_submit'
+			        		),
+			        		'#buttontype' => 'button',
+			        		'#value' => t('None'),
+			        );
+			        break;
+		        case '*':
+		        case '0':
+		        default:
+			        // do not create them
+            }
             break;
           case F_DR_CONTROL_DROPDOWN_SINGLE:
           case F_DR_CONTROL_RADIOBTN:
@@ -1653,30 +1664,39 @@ function theme_fetchit7_param_form($variables) {
           if ($submit_button_flag) {
           	// can't really have all none buttons if there is no submit button on the form,
           	// so here is where to figure out whether and where to put them around the param control
+        	//debug($p_ndx,'$p_ndx');
+        	//debug($form['param_allnone'][$p_ndx],'$form[\'param_allnone\'][$p_ndx]');
+        	//debug($form['param_allnone'][$p_ndx]['#value'],'$form[\'param_allnone\'][$p_ndx][\'#value\']');
           	switch ($form['param_allnone'][$p_ndx]['#value']) {
           		case '-': //top
-		          	if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
-			            $row[] = drupal_render($form['elements'][$element_name.'_allbtn']).
+		          	//if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+        				//debug('yes','draw buttons?');
+		          		$row[] = drupal_render($form['elements'][$element_name.'_allbtn']).
 		        	    			drupal_render($form['elements'][$element_name.'_nonebtn']).
 			            			drupal_render($form['elements'][$element_name]);
-		          	} else {
-		          		$row[] = drupal_render($form['elements'][$element_name]);
-		          	}    
+		          	//} else {
+        			//	debug('no','draw buttons?');
+		          	//	$row[] = drupal_render($form['elements'][$element_name]);
+		          	//}    
           			break;
           		case '+': //bottom
-					if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
-			            $row[] = drupal_render($form['elements'][$element_name]).
+          			//if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+        				//debug('yes','draw buttons?');
+          				$row[] = drupal_render($form['elements'][$element_name]).
 		    	        			drupal_render($form['elements'][$element_name.'_allbtn']).
 		        	    			drupal_render($form['elements'][$element_name.'_nonebtn']);
-		          	} else {
-		          		$row[] = drupal_render($form['elements'][$element_name]);
-		          	}    
+		          	//} else {
+        			//	debug('no','draw buttons?');
+		          	//	$row[] = drupal_render($form['elements'][$element_name]);
+		          	//}    
           			break;
           		case '*': //none
           		default:
+        			//debug('no','draw buttons?');
           			$row[] = drupal_render($form['elements'][$element_name]);
           	}
           } else {
+        	//debug('no','draw buttons?');
           	$row[] = drupal_render($form['elements'][$element_name]);
           }
         } else {
@@ -1706,23 +1726,24 @@ function theme_fetchit7_param_form($variables) {
 	  	// so here is where to figure out whether and where to put them around the param control
 	  	switch ($form['param_allnone'][$p_ndx]['#value']) {
 	  		case '-': //top
-	  			if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+	  			//if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
 			  		$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
 		        	$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
 		        	$output .= drupal_render($form['elements'][$element_name]);
-	  			} else {
-		        	$output .= drupal_render($form['elements'][$element_name]);
-	  			}
+	  			//} else {
+		        //	$output .= drupal_render($form['elements'][$element_name]);
+	  			//}
 	  			break;
 	  		case '+': //bottom
-	  			if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+	  			//if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
 		        	$output .= drupal_render($form['elements'][$element_name]);
 	  				$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
 		        	$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
-	  			} else {
-		        	$output .= drupal_render($form['elements'][$element_name]);
-	  			}
+	  			//} else {
+		        //	$output .= drupal_render($form['elements'][$element_name]);
+	  			//}
 	  			break;
+	  		case '0': //none
 	  		case '*': //none
 	  		default:
 		        $output .= drupal_render($form['elements'][$element_name]);
