@@ -1420,7 +1420,24 @@ function fetchit7_param_form_force_triggering_element($form, &$form_state) {
 				$element_name = $triggering_element_name_components[0].'_'.$triggering_element_name_components[1].'_'.$triggering_element_name_components[2].'_'.$triggering_element_name_components[3].'_'.$param_ndx;
 				//debug($element_name,microtime(true).' fetchit7_param_form_element: element name:');
 				variable_set($element_name.'_set',true);
-				variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
+				//have to trap the date control case, because it maps from a scalar in pg to an array in drupal, and the value handling is unique
+
+				$control_type = $form['elements'][$element_name]['#type'];
+				switch ($control_type) {
+					case 'date':
+						// the weird drupal core date element - an array of three values
+						$val_str = $form_state['values']['elements'][$element_name]['year'];
+						$val_str .= "-";
+						$val_str .= $form_state['values']['elements'][$element_name]['month'];
+						$val_str .= "-";
+						$val_str .= $form_state['values']['elements'][$element_name]['day'];
+						$val=$val_str;
+						break;
+					default:
+						$val = $form_state['values']['elements'][$element_name];
+						break;
+				}
+				variable_set($element_name.'_value',$val);
 				//debug($form_state['values']['elements'][$element_name],microtime(true).' fetchit7_param_form_element: element value:');
 				// set them all to false, then set the triggering to true afterwards
 				// notice that $element_name (the value/list control) is the base of $triggering_element_name (the all or none button)
