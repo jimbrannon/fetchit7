@@ -90,6 +90,15 @@ function fetchit7_table_form($form, &$form_state) {
 
   // get table selection table - this is required for the copy selection types
   $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+  $table_selection_default_flag = fetchit7_get_special_char_default($table_selection_table);
+  $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
+  //debug($table_selection_table,'before $table_selection_table');
+  //debug($table_selection_default_flag,'before $table_selection_default_flag');
+  if($table_selection_default_flag == '') {
+    $table_selection_default_flag = '-';
+  }
+  //debug($table_selection_table,'after $table_selection_table');
+  //debug($table_selection_default_flag,'after $table_selection_default_flag');
   $form['record_select_table'] = array('#type' => 'value', '#value' => $table_selection_table);
   if (in_array($table_selection_type, array('copy_single', 'copy_multiple'))) {
     if (!strlen($table_selection_table)) {
@@ -195,7 +204,6 @@ function fetchit7_table_form($form, &$form_state) {
   // skip implementing this for now ... until after testing is done
   //$existing_selections = fetchit_get_existing_selection_nid($db_handle,$db_type,$nid);
   //$existing_selections = fetchit_get_existing_selection_nid($db_handle,$db_type,$nid);
-
   // loop through the fields and determine if they are either a source data key field or a drupal user id field
   // these are not displayed in the table or tableselect element
   // the key field values will become the options[] array keys used in record selection,
@@ -219,15 +227,28 @@ function fetchit7_table_form($form, &$form_state) {
   }
 	//debug($uid_field_ndx,'$uid_field_ndx');
 	//debug($key_field_ndx,'$key_field_ndx');
-  // create the render arrays for each case
+  // create the data for no selection
+  $none_selection = null;
+  $none_selections = array();
+  // create the data for previous selection
+  $previous_selection = fetchit_get_existing_selection_single($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
+  $selections = fetchit_get_existing_selection_multiple($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
+  $previous_selections = array();
+  foreach ($selections as $selection) {
+     $previous_selections[$selection] = TRUE; 
+  }
+  // initialize the data for all and first selection
+  $all_selections = array();
+  $first_selection = null;
+  $first_selections = array();
+  /*
+   * create the render arrays for each case
+   */
   switch ($table_selection_type) {
-    case 'copy_single':
-    // single row selection and key field copy via radio buttons
-    case 'copy_multiple':
-    // multiple row selection and key field copy via check boxes
-    case 'delete_multiple':
-      // multiple row selection and record deletion via check boxes
-      // create the HTML tableselect header and options
+  	// for all three of these cases, use the HTML tableselect header and options
+    case 'copy_single': // single row selection and key field copy via radio buttons
+    case 'copy_multiple': // multiple row selection and key field copy via check boxes
+    case 'delete_multiple': // multiple row selection and record deletion via check boxes
       $header = array();
       $options = array();
       for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
@@ -243,12 +264,14 @@ function fetchit7_table_form($form, &$form_state) {
             if ($field_ndx == ($key_field_ndx - 1)) {
               // use this as the key for the options array
               $options_key = $db_value;
-              if ($row_ndx == 0) {
-                $default_value = $db_value;
-              }
+              // it's the index field
+              $all_selections[$db_value] = TRUE;
             }
             else {
               if ($row_ndx == 0) {
+                // it's the first row
+                $first_selection = $db_value;
+                $first_selections[$db_value] = TRUE;
                 if ($column_count < $table_headers_count) {
                   $header['column' . $column_count] = $table_headers[$column_count];
                 }
@@ -261,7 +284,7 @@ function fetchit7_table_form($form, &$form_state) {
             }
           }
         }
-        if (is_null($options_key)) {// selection enabled but no key field given - shame on you, user!!
+        if (is_null($options_key)) { // selection enabled but no key field given - shame on you, user!!
           $options_key = $row_ndx;
         }
         $options[$options_key] = $row;
@@ -269,17 +292,68 @@ function fetchit7_table_form($form, &$form_state) {
       if ($table_selection_type == 'copy_single') {
         $multiple_flag = FALSE;
         $selectall_flag = FALSE;
-        $default_value = 0;
       }
       else {
         $multiple_flag = TRUE;
         $selectall_flag = TRUE;
-        $default_value = array();
-        // reset to nothing selected
       }
-      // create the HTML tableselect render array with a single select option
+      // set the default based on the type and the flag
+      switch ($table_selection_type) {
+        case 'copy_single':
+          switch ($table_selection_default_flag) {
+            case '-':
+              $default_value = $first_selection;
+              break;
+            case '*':
+              $default_value = $previous_selection;
+              break;
+            case '+':
+              $default_value = $first_selection;
+              break;
+            default:
+              $default_value = $first_selection;
+          }
+          break;
+        case 'copy_multiple':
+          switch ($table_selection_default_flag) {
+            case '-':
+              $default_value = $none_selections;
+              break;
+            case '*':
+              $default_value = $previous_selections;
+              break;
+            case '+':
+              $default_value = $all_selections;
+              break;
+            default:
+              $default_value = $none_selections;
+          }
+          break;
+        case 'delete_multiple':
+          switch ($table_selection_default_flag) {
+            case '-':
+              $default_value = $none_selections;
+              break;
+            case '*':
+              $default_value = $none_selections;
+              break;
+            case '+':
+              $default_value = $all_selections;
+              break;
+            default:
+              $default_value = $none_selections;
+          }
+          break;
+        default:
+          $default_value = null;
+      }
+      // check the default value created
+      // debug($default_value, '$default_value');
+      /* 
+       * create the HTML tableselect render array with a single select option
+       */
       $form['table'] = array(
-      	'#type' => 'tableselect',
+		'#type' => 'tableselect',
       	'#header' => $header,
       	'#options' => $options,
       	'#default_value' => $default_value,
@@ -287,15 +361,13 @@ function fetchit7_table_form($form, &$form_state) {
       	'#js_select' => $selectall_flag,
       	'#empty' => $table_empty_message,
       	'#weight' => $table_weight,
-			);
-	//no submit button if table is empty
-	//if ($row_count==0) $submit_button_flag = FALSE;
+	  );
+	  // no submit button if table is empty
+	  // if ($row_count==0) $submit_button_flag = FALSE;
       break;
-
+    // for all other cases, create a simple html table (NOT a tableselect)
     case 'none':
-    // simple html table display
     default:
-      // create the simple HTML table header and rows
       $header = array();
       $rows = array();
       for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
@@ -320,9 +392,16 @@ function fetchit7_table_form($form, &$form_state) {
         }
         $rows[] = $row;
       }
-
-      // create the HTML table render array
-      $form['table'] = array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#empty' => $table_empty_message, '#weight' => $table_weight, );
+      /*
+       * create the simple HTML table render array
+       */
+      $form['table'] = array(
+      		'#theme' => 'table',
+      		'#header' => $header,
+      		'#rows' => $rows,
+      		'#empty' => $table_empty_message,
+      		'#weight' => $table_weight,
+      );
   }
 
   // append record elements
@@ -341,11 +420,11 @@ function fetchit7_table_form($form, &$form_state) {
   }
 
   if ($addbody_flag) {
-	  $body = fetchit7_content_field_fetcher($nid, 'body', 'value');
-		$form['body'] = array('#type' => 'markup', '#markup' => $body, );
-	}
+    $body = fetchit7_content_field_fetcher($nid, 'body', 'value');
+    $form['body'] = array('#type' => 'markup', '#markup' => $body, );
+  }
 
- 	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
+  $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
   if ($submit_button_flag) {
     $form['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
   }
@@ -597,6 +676,7 @@ function fetchit7_param_form($form, &$form_state) {
 
   // get nid embedded into original form_id; format fetchit7_param_form_X### - nid starts at character 21
   $form_id = $form_state['build_info']['form_id'];
+  //debug($form_id, microtime(true).' fetchit7_param_form: $form_id:');
   // to get here, this is definitely set
   //debug($form_state['build_info']);
   $nid = (int) substr($form_id, 21);
@@ -720,27 +800,29 @@ function fetchit7_param_form($form, &$form_state) {
     return $form;
   }
   // optional
+  //should return an array
   $param_titles = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_title', 'values'));
   //should return an array
   $param_descriptions = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_desc', 'values'));
-  //should return an array
   // i equivocate on this, but for now is optional - there is a default control type that is picked based on the output field type
+  //should return an array
   $param_types = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_type', 'values'));
-  //should return an array
   // weights are integers, but leave these input values as strings until later
-  $param_weights = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_weight', 'values'));
   //should return an array
+  $param_weights = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_weight', 'values'));
   //debug($param_weights,'$param_weights');
   // boolean, but leave these input values as strings until later, also can deal with default values then
+  //should return an array
   $param_enabled = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_enabled', 'values'));
-  //should return an array
   // boolean, but leave these input values as strings until later, also can deal with default values then
+  //should return an array
   $param_required = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_required', 'values'));
-  //should return an array
-  // optional
-  $param_str = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_parstr', 'values'));
-  //should return an array
 
+  // optional
+  //should return an array
+  $param_str = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_parstr', 'values'));
+
+  //should return an array
   $param_list_tbl = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_list_tbl', 'values'));
   //should return an array
   $param_list_key = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_list_key', 'values'));
@@ -749,15 +831,16 @@ function fetchit7_param_form($form, &$form_state) {
   //should return an array
   $param_list_uid = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_list_uid', 'values'));
   //should return an array
+  // note that the default strings in this array might have a "special" initial char, which will be handled later
   $param_list_def = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_list_def', 'values'));
+  
   //should return an array
-
+  // note that the database table names in this array might have a "special" initial char, which will be handled later
   $param_data_tbl = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_data_tbl', 'values'));
   //should return an array
   $param_data_key = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_data_key', 'values'));
   //should return an array
   $param_data_uid = array_map('trim', fetchit7_content_field_fetcher($nid, 'fetchit7_field_par_fld_data_uid', 'values'));
-  //should return an array
 
   //use the above arrays to contruct the $user_field_data array allowing the use of the fetchit2 code AMAP
   // note that param names DEFINES the count of the fields
@@ -887,23 +970,103 @@ function fetchit7_param_form($form, &$form_state) {
     }
 
     //$param_list_def F_DR_FIELD_DEFAULT_STR
+    // adding something new here - if the first char is a special character:
+    //   - means put all and none buttons above, 
+    //   * and + means put all and none buttons below
+    // also strip the special allnone button character from the default value if it is there (- * +)
     if ($field_index < count($param_list_def)) {
       if (strlen($param_list_def[$field_index])) {
-        $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = $param_list_def[$field_index];
+        $user_field_data[$field_index][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR] = fetchit7_get_special_char_allnone($param_list_def[$field_index]);
+        $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = fetchit7_strip_special_char_allnone($param_list_def[$field_index]);
       }
       else {
         $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        $user_field_data[$field_index][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR] = '';
       }
     }
     else {
       $user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+      $user_field_data[$field_index][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR] = '';
     }
 
     //$param_data_tbl F_DR_FIELD_DATA_TBL_STR
-    // this is required
+    // this is a required value
+    // adding something new here - if the first char is a special character:
+    //   - means default selection is none
+    //   * means default selection is previous selection
+    //   + means default selection is all
+    // also strip the special character from the table name if it is there (- * +)
+    //   only doing this because it could be confusing to the fetchit user to have special characters
+    //   on selectable tables but not parameters - so support it on both, even though it is not
+    //   necessary on parameters
     if ($field_index < count($param_data_tbl)) {
       if (strlen($param_data_tbl[$field_index])) {
-        $user_field_data[$field_index][F_DR_FIELD_DATA_TBL_STR] = $param_data_tbl[$field_index];
+        $user_field_data[$field_index][FETCHIT7_DEFAULT_SPECIAL_CHAR_STR] = fetchit7_get_special_char_default($param_data_tbl[$field_index]);
+        $user_field_data[$field_index][F_DR_FIELD_DATA_TBL_STR] = fetchit7_strip_special_char_default($param_data_tbl[$field_index]);
+        // if we have a special character on the table name
+        if (strlen($user_field_data[$field_index][FETCHIT7_DEFAULT_SPECIAL_CHAR_STR])) {
+        	// then set the default via the param default field if it isn't set already
+        	if ($user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR]=='') {
+        		switch ($user_field_data[$field_index][FETCHIT7_DEFAULT_SPECIAL_CHAR_STR]) {
+        			case '-':
+        				// unfortunately have to know the param type to know the appropriate default
+        				switch ($user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR]) {
+        					case F_DR_CONTROL_DROPDOWN_SINGLE:
+        					case F_DR_CONTROL_RADIOBTN:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_FIRST;
+        						break;
+        					case F_DR_CONTROL_CHECKBOXES:
+        					case F_DR_CONTROL_DROPDOWN_MULTI:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_NONE;
+        						break;
+        					case F_DR_CONTROL_CHECKBOX:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_FALSE;
+        						break;
+        					default:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        				}
+        				break;
+        			case '*':
+        				// unfortunately have to know the param type to know the appropriate default
+        				switch ($user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR]) {
+        					case F_DR_CONTROL_DROPDOWN_SINGLE:
+        					case F_DR_CONTROL_RADIOBTN:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+        						break;
+        					case F_DR_CONTROL_CHECKBOXES:
+        					case F_DR_CONTROL_DROPDOWN_MULTI:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+        						break;
+        					case F_DR_CONTROL_CHECKBOX:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+        						break;
+        					default:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        				}
+        				break;
+        			case '+':
+        		        // unfortunately have to know the param type to know the appropriate default
+        				switch ($user_field_data[$field_index][F_DR_FIELD_INPUT_TYPE_STR]) {
+        					case F_DR_CONTROL_DROPDOWN_SINGLE:
+        					case F_DR_CONTROL_RADIOBTN:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_FIRST;
+        						break;
+        					case F_DR_CONTROL_CHECKBOXES:
+        					case F_DR_CONTROL_DROPDOWN_MULTI:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_ALL;
+        						break;
+        					case F_DR_CONTROL_CHECKBOX:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = FETCHIT7_FIELD_DEFAULT_TRUE;
+        						break;
+        					default:
+        						$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        				}
+        				break;
+        			default:
+        				$user_field_data[$field_index][F_DR_FIELD_DEFAULT_STR] = '';
+        		}
+        	}
+        }
       }
       else {
         // can't have a default here, too many complications
@@ -979,10 +1142,12 @@ function fetchit7_param_form($form, &$form_state) {
         $j++;
       }
       //debug($data_tbl_ndx_type,'fetchit7_param_form $data_tbl_ndx_type');
-      if (strlen(trim($data_tbl_ndx_type))) {// if we have a type, then an index field was found, and then we can continue building the parameter input control
+      // if we have a type, then an index field was found,
+      //   and then we can continue building the parameter input control
+      if (strlen(trim($data_tbl_ndx_type))) {
         $grp_ndx = 0;
+        //create a unique element name string
         $element_name = fetchit_make_element_name($nid, $grp_ndx, $param_count);
-
         // set a default value to pass into the element generator
         // this value is used unless the user specified a default value in the configuration
         // get the last entered value from the selection table
@@ -990,7 +1155,72 @@ function fetchit7_param_form($form, &$form_state) {
         switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_CHECKBOXES:
           case F_DR_CONTROL_DROPDOWN_MULTI:
+          	// first get the previously saved state...
             $db_value = fetchit_get_existing_selection_multiple($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
+			//debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
+            // next, check to see if there is an "interim state" to reset the control too
+	        //   (this happens when the user presses a select All or select None button)
+	        //   see if there is a stored variable with the name element_name_value
+			if (variable_get($element_name.'_set',FALSE)) {
+				// need to reset this control to an interim saved state
+				// set the default string to FETCHIT7_FIELD_DEFAULT_PREVIOUS
+				//    and then set $db_value to the interim state, overwriting the previously selected state
+				//    then set the $user_field_data[] flag so that the fetchit 2 routines will use it,
+				//  essentially this is fooling the fetchit2 routines into thinking the interim state
+				//    is the previously selected state
+        		$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+				$db_value = variable_get($element_name.'_value','');
+			    //debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
+				//and then finally erase the interim state flag...
+				variable_set($element_name.'_set',FALSE);
+			}
+            // finally, here is where we change the default if the all or none buttons were pressed for this element
+            //   for this particular element
+            // at most only one of these should be true, but handle both separately so they get reset correctly,
+            //   just in case...
+            if (variable_get($element_name.'_allbtn',FALSE)) {
+            	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_ALL;
+            	variable_set($element_name.'_allbtn',FALSE);
+            }
+            if (variable_get($element_name.'_nonebtn',FALSE)) {
+            	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_NONE;
+            	variable_set($element_name.'_nonebtn',FALSE);
+            }
+            // only need to make these if it is this type of control
+            // be sure to check isset in theme function, though
+            switch ($user_field_data[$i][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR]) {
+            	case '-':
+            	case '*':
+            	case '+':
+			        $form['elements'][$element_name.'_allbtn'] = array(
+			        		'#type' => 'submit',
+			        		'#name' => $element_name.'_allbtn',
+			        		//'#validate' => array(
+			        		//		'fetchit7_param_all_validate'
+			        		//),
+			        		'#limit_validation_errors' => array(),
+			        		'#submit' => array(
+			        				'fetchit7_param_all_submit'
+			        		),
+			        		'#buttontype' => 'button',
+			        		'#value' => t('All'),
+			        );
+			        $form['elements'][$element_name.'_nonebtn'] = array(
+			        		'#type' => 'submit',
+			        		'#name' => $element_name.'_nonebtn',
+			        		'#limit_validation_errors' => array(),
+			        		//'#validate' => array(
+			        		//		'fetchit7_param_none_validate'
+			        		//),
+			        		'#submit' => array(
+			        				'fetchit7_param_none_submit'
+			        		),
+			        		'#buttontype' => 'button',
+			        		'#value' => t('None'),
+			        );
+            		break;
+            	default:
+            }
             break;
           case F_DR_CONTROL_DROPDOWN_SINGLE:
           case F_DR_CONTROL_RADIOBTN:
@@ -1000,6 +1230,24 @@ function fetchit7_param_form($form, &$form_state) {
           case F_DR_CONTROL_DATETIMESEL:
           case F_DR_CONTROL_POPUPDATE:
             $db_value = fetchit_get_existing_selection_single($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
+
+            //debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
+            // next, check to see if there is an "interim state" to reset the control too
+            //   (this happens when the user presses a select All or select None button)
+            //   see if there is a stored variable with the name element_name_value
+            if (variable_get($element_name.'_set',FALSE)) {
+            	// need to reset this control to an interim saved state
+            	// set the default string to FETCHIT7_FIELD_DEFAULT_PREVIOUS
+            	//    and then set $db_value to the interim state, overwriting the previously selected state
+            	//    then set the $user_field_data[] flag so that the fetchit 2 routines will use it,
+            	//  essentially this is fooling the fetchit2 routines into thinking the interim state
+            	//    is the previously selected state
+            	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+            	$db_value = variable_get($element_name.'_value','');
+            	//debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
+            	//and then finally erase the interim state flag...
+            	variable_set($element_name.'_set',FALSE);
+            }
             break;
           default:
         }
@@ -1016,11 +1264,22 @@ function fetchit7_param_form($form, &$form_state) {
         $form['param_data_table'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DATA_TBL_STR]);
         $form['param_data_ndx'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DATA_KEY_STR]);
         $form['param_data_uid'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][F_DR_FIELD_DATA_UID_STR]);
-
+        // note that for the following - would like to eventually add the option for the all none buttons to be added automatically based on the size of the list
+        $form['param_allnone'][$param_count] = array('#type' => 'value', '#value' => $user_field_data[$i][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR]);
+        
         // the following creates the "renderable array" of the next parameter input control (drupal form element)
         //   to be displayed on this form ($nid)
         // stack these up in the array. "How" they are to be displayed will be handled by the theme function
-        $form['elements'][$element_name] = fetchit7_param_element_form($param_name, $data_tbl_ndx_type, $db_handle, $i + 1, $user_field_data, $nid, $showtitles, $db_value);
+        $form['elements'][$element_name] = 
+        	fetchit7_param_element_form(
+        			$param_name,
+        			$data_tbl_ndx_type,
+        			$db_handle,
+        			$i + 1,
+        			$user_field_data,
+        			$nid,
+        			$showtitles,
+        			$db_value);
         //debug($myform[$element_name],' pre-render $myform['.$element_name.']');
         $param_count++;
       }
@@ -1073,26 +1332,130 @@ function fetchit7_param_form($form, &$form_state) {
     //  '#type' => 'actions',
     //);
     //debug($submit_weight,'$submit_weight');
-    $form['actions']['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+    $form['actions']['submit'] = array(
+    		'#type' => 'submit',
+    		'#value' => $submit_label,
+    		'#weight' => $submit_weight, );
   }
-
+  $form['#after_build'][] = 'fetchit7_param_form_force_triggering_element';
   return $form;
 }
 
+//this function is called before drupal processes the form submit hook
+function fetchit7_param_form_force_triggering_element($form, &$form_state) {
+	/*
+	 * the triggering element variable gets set based on which button was pressed
+	 * the idea is that it is set (has a value) right after the button is pressed,
+	 *   but NOT later (in the drupal form processing) when this function seems to get called again
+	 *   so checking with isset() is a way to add some code to fire RIGHT AFTER an all or nothing button is pressed
+	 *   but we want this function to do nothing on other calls
+	 *   the code we want to add should save in a drupal variable which button was pressed
+	 *     and clear out all the other button press saves so only one is ever set at a time
+	 *     then when the form is drawn it can look for this variable and set the default values accordingly
+	 *     also, we will have to save any changes the user has made to other form elements
+	 *     and restore them when the form is redrawn.
+	 *     this means essentially that EVERY form element will need to have it's state saved
+	 *     so it can be restored when the form is redrawn.  the one form element associated with the all or none
+	 *     button pressed will not save it's current state, but will save either a all or none state
+	 *     that way, the form redrawing code does not have to be very smart
+	 */
+	if(isset($form_state['triggering_element'])) {
+		$triggering_element_name = $form_state['triggering_element']['#name'];
+		//debug($triggering_element_name,microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is set; the name is:');
+		// blow up the element name to get the info out of it
+		$triggering_element_name_components = array();
+		$triggering_element_name_components = explode('_',$triggering_element_name);
+		//debug($triggering_element_name_components,microtime(true).' fetchit7_param_form_force_triggering_element: element name components:');
+		if ($triggering_element_name_components[0]=="fetchit7") {
+			//save the existing state of ALL the form elements
+			$param_count = $form['param_count']['#value'];
+			for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
+				$element_name = $triggering_element_name_components[0].'_'.$triggering_element_name_components[1].'_'.$triggering_element_name_components[2].'_'.$triggering_element_name_components[3].'_'.$param_ndx;
+				//debug($element_name,microtime(true).' fetchit7_param_form_element: element name:');
+				variable_set($element_name.'_set',true);
+				variable_set($element_name.'_value',$form_state['values']['elements'][$element_name]);
+				//debug($form_state['values']['elements'][$element_name],microtime(true).' fetchit7_param_form_element: element value:');
+				// set them all to false, then set the triggering to true afterwards
+				// notice that $element_name (the value/list control) is the base of $triggering_element_name (the all or none button)
+				variable_set($element_name.'_allbtn',false);
+				variable_set($element_name.'_nonebtn',false);
+			}
+			// create an internal drupal variable with the same name as the element, give it a boolean value of true
+			// this is used to let the subsequent (re)render of the form know that it is redrawing
+			//   after an all or none button press, because things happen differently in those cases
+			variable_set($triggering_element_name,true);
+			
+			// what is this for?
+			$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
+		}
+	} else {
+		//debug('',microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is NOT set');
+	}
+	/*
+	if (isset($form_state['input']['all'])) {
+		$string=$form_state['input']['all'];
+		$form_state['triggering_element'] = $form['all'];
+	    debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears all was pressed:');
+	} elseif (isset($form_state['input']['none'])) {
+		$string=$form_state['input']['none'];
+		$form_state['triggering_element'] = $form['none'];
+	    debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears none was pressed:');
+	} elseif (isset($form_state['input']['actions']['submit'])) {
+		$string=$form_state['input']['actions']['submit'];
+		$form_state['triggering_element'] = $form['actions']['submit'];
+	    debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears submit was pressed:');
+	} else {
+		if (isset($form_state['triggering_element'])) {
+			$string=$form_state['triggering_element'];
+			debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears nothing was pressed (yet?) but triggering element is:');
+		} else {
+			$string=null;
+			debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears nothing was pressed (yet?) but triggering element is:');
+		}
+	}
+	*/
+	return $form;
+}
 /**
  * Process form validation
  */
+function fetchit7_param_all_validate($form, &$form_state) {
+	//debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_all_validate function: triggering element:');
+	//debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_all_validate function. triggering element variable value:');
+	//drupal_set_message(t('Successfully validated all button.'), 'status');
+	return;
+}
+
+function fetchit7_param_none_validate($form, &$form_state) {
+	//debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_none_validate function: triggering element:');
+	//debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_none_validate function: triggering element variable value:');
+	//drupal_set_message(t('Successfully validated none button.'), 'status');
+	return;
+}
+
 function fetchit7_param_form_validate($form, &$form_state) {
-  //$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
-  //debug($string,'Hello from the all important parameter input form validate function. From here it appears the param_count is:');
-  $nid = $form['nid']['#value'];
-  //$row_ndx = 0;
-  //$param_ndx = 0;
-  //$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
-  //debug($element_name,'$element_name');
-  //$control_type = $form['elements'][$element_name]['#type'];
-  //debug($control_type,'$control_type');
-  //debug($form_state['values']['elements'],'$form_state[values][elements]');
+	//$string = $form['param_count']['#value'].' or '.$form_state['values']['param_count'];
+	//debug($string,microtime(true).' fetchit7_param_form_validate function. $form[] param_count or $form_state[]:');
+	$nid = $form['nid']['#value'];
+	//$row_ndx = 0;
+	//$param_ndx = 0;
+	//$element_name = fetchit_make_element_name($nid,$row_ndx,$param_ndx);
+	//debug($element_name,'$element_name');
+	//$control_type = $form['elements'][$element_name]['#type'];
+	//debug($control_type,'$control_type');
+	//debug($form_state['values']['elements'],'$form_state[values][elements]');
+}
+
+function fetchit7_param_all_submit($form, &$form_state) {
+	//debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_all_submit function: triggering element:');
+	//debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_all_submit function: triggering element variable value:');
+	//drupal_set_message(t('Successfully submitted all button.'), 'status');
+}
+
+function fetchit7_param_none_submit($form, &$form_state) {
+	//debug($form_state['triggering_element']['#name'],microtime(true).' fetchit7_param_none_submit function: triggering element:');
+	//debug(variable_get($form_state['triggering_element']['#name'],FALSE),microtime(true).' fetchit7_param_none_submit function: triggering element variable value:');
+	//drupal_set_message(t('Successfully submitted none button.'), 'status');
 }
 
 /**
@@ -1206,7 +1569,6 @@ function fetchit7_param_form_submit($form, &$form_state) {
       $form_state['redirect'] = $redirect;
     }
   }
-
   drupal_set_message(t('Successfully submitted changes.'), 'status');
 }
 
@@ -1214,10 +1576,13 @@ function theme_fetchit7_param_form($variables) {
   $form = $variables['form'];
   $nid = $form['nid']['#value'];
   $form_id = $form['form_id']['#value'];
-  //the drupal way is to do all the non display related preprocessing in a theme preprocessor function ... move it there later ...
+  //debug($form_id, microtime(true).' theme_fetchit7_param_form: $form_id:');
+  //the drupal way is to do all the non display related preprocessing in a theme preprocessor function
+  // ... move it there later ...
   $table_row_count = $form['table_rows']['#value'];
   //debug($table_row_count,'$table_row_count');
   $table_weight = $form['table_weight']['#value'];
+  $submit_button_flag = $form['submit_button_flag']['#value'];
   //debug($table_weight,'$table_weight');
   //figure out the formatting
   $output = '<div class="' . $form_id . '_params">';
@@ -1226,6 +1591,7 @@ function theme_fetchit7_param_form($variables) {
   if ($table_row_count) {
     //figure out the table structure
     $param_count = $form['param_count']['#value'];
+    //debug($param_count,'$param_count');
     $table_column_count = intval(($param_count - 1) / $table_row_count) + 1;
     $table_headers = $form['table_headers']['#value'];
     $table_headers_count = count($table_headers);
@@ -1240,34 +1606,89 @@ function theme_fetchit7_param_form($variables) {
     }
     $rows = array();
     for ($row_ndx = 0; $row_ndx < $table_row_count; $row_ndx++) {
+      //debug($row_ndx,'$row_ndx');
       $row = array();
       for ($col_ndx = 0; $col_ndx < $table_column_count; $col_ndx++) {
-        // numbering goes down the columns first
+        //debug($col_ndx,'$col_ndx');
+      	// numbering goes down the columns first
         $p_ndx = $row_ndx + $col_ndx * $table_row_count;
+        //debug($p_ndx,'$p_ndx');
         if ($p_ndx < $param_count) {
           $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
-          $row[] = drupal_render($form['elements'][$element_name]);
-        }
-        else {
-          $sillyform[$p_ndx] = array('#type' => 'item', '#title' => 'Empty Cell', '#markup' => "I am an empty cell.", );
+          //debug($element_name,'$element_name');
+          if ($submit_button_flag) {
+          	if (isset($form['elements'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+                //debug($form['param_allnone'][$p_ndx]['#value'],'$form[param_allnone][$p_ndx][#value]');
+          		switch ($form['param_allnone'][$p_ndx]['#value']) {
+	          		case '-':
+		          		$row[] = drupal_render($form['elements'][$element_name.'_allbtn']).
+		        	    			drupal_render($form['elements'][$element_name.'_nonebtn']).
+		        	    			drupal_render($form['elements'][$element_name]);
+	          			break;
+	          		case '+':
+	          		case '*':
+		          		$row[] = drupal_render($form['elements'][$element_name]).
+		    	        			drupal_render($form['elements'][$element_name.'_allbtn']).
+		        	    			drupal_render($form['elements'][$element_name.'_nonebtn']);
+	          			break;
+	          		default:
+		          		$row[] = drupal_render($form['elements'][$element_name]);
+          	    }
+          	} else {
+          		$row[] = drupal_render($form['elements'][$element_name]);
+          	}    
+          } else {
+          	$row[] = drupal_render($form['elements'][$element_name]);
+          }
+        } else {
+          $sillyform[$p_ndx] = array(
+          		'#type' => 'item',
+          		'#title' => 'Empty Cell',
+          		'#markup' => "I am an empty cell.", );
           $row[] = drupal_render($sillyform[$p_ndx]);
         }
       }
       $rows[] = $row;
     }
     //debug($table_weight,'$table_weight');
-    $form['table'] = array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#weight' => $table_weight, '#empty' => "Empty table.", );
+    $form['table'] = array(
+    		'#theme' => 'table',
+    		'#header' => $header,
+    		'#rows' => $rows,
+    		'#weight' => $table_weight,
+    		'#empty' => "Empty table.", );
     $output .= drupal_render($form['table']);
-  }
-  else {
+  } else {
     $param_count = $form['param_count']['#value'];
-		for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
-			$element_name = fetchit_make_element_name($nid, 0, $p_ndx);
-			$output .= drupal_render($form['elements'][$element_name]);
-		}
+	for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
+	  $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
+	  if ($submit_button_flag) {
+       	if (isset($form['elements'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+       		switch ($form['param_allnone'][$p_ndx]['#value']) {
+       			case '-':
+	  				$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
+	  				$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
+	  				$output .= drupal_render($form['elements'][$element_name]);
+       				break;
+       			case '+':
+       			case '*':
+       				$output .= drupal_render($form['elements'][$element_name]);
+       				$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
+       				$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
+       				break;
+       			default:
+       				$output .= drupal_render($form['elements'][$element_name]);
+       		}
+       	} else {
+       		$output .= drupal_render($form['elements'][$element_name]);
+       	}
+	  } else {
+	  	$output .= drupal_render($form['elements'][$element_name]);
+	  }
+	}
   }
   $output .= '</div>';
-  $submit_button_flag = $form['submit_button_flag']['#value'];
+  //$submit_button_flag = $form['submit_button_flag']['#value'];
   if ($submit_button_flag) {
     $output .= '<div class="' . $form_id . '_submit">';
     $output .= drupal_render($form['actions']['submit']);
@@ -2524,8 +2945,9 @@ function fetchit_get_db_handle($nid) {
         }
         // create the pg connection
         $db_string = "host=$db_host port=$db_port user=$db_login password=$db_password dbname=$db_name";
-				//debug($db_string,'$db_string');
+		//debug($db_string,'fetchit_get_db_handle '.$nid.' $db_string');
         $db_handle = pg_connect($db_string);
+		//debug($db_handle,'fetchit_get_db_handle '.$nid.' $db_handle');
         break;
       case FETCHIT7_DBTYPE_NAME_MYSQL:
         //'mysql':
@@ -2540,7 +2962,10 @@ function fetchit_get_db_handle($nid) {
 }
 
 function fetchit_run_query($db_type, $db_handle, $query) {
-  switch ($db_type) {
+	//debug($db_type,'fetchit_run_query $db_type');
+	//debug($db_handle,'fetchit_run_query $db_handle');
+	//debug($query,'fetchit_run_query $query');
+	switch ($db_type) {
     case FETCHIT7_DBTYPE_NAME_PGSQL:
       //'postgresql':
       $result = pg_query($db_handle, $query);
@@ -2778,6 +3203,7 @@ function fetchit_get_existing_selection_nid($db_handle, $db_type, $nid) {
           case 'copy_single':
             // radio button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+            $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_get_existing_selection_single($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
@@ -2787,6 +3213,7 @@ function fetchit_get_existing_selection_nid($db_handle, $db_type, $nid) {
           case 'copy_multiple':
             // check boxes button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+            $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_get_existing_selection_multiple($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
@@ -2814,6 +3241,7 @@ function fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $val) {
           case 'copy_single':
             // radio button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+            $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_set_existing_selection_single($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field, $val);
@@ -2823,6 +3251,7 @@ function fetchit_set_existing_selection_nid($db_handle, $db_type, $nid, $val) {
           case 'copy_multiple':
             // check boxes button record selection
             $table_selection_table = trim(fetchit7_content_field_fetcher($nid, 'table_selection_table', 'value'));
+            $table_selection_table = fetchit7_strip_special_char_default($table_selection_table);
             $user_uid_field = trim(fetchit7_content_field_fetcher($nid, 'uid_field', 'value'));
             $key_field = trim(fetchit7_content_field_fetcher($nid, 'key_field', 'value'));
             $result = fetchit_set_existing_selection_multiple($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field, $val);
@@ -3762,17 +4191,17 @@ function fetchit_get_checkboxes_element($user_field_data, $user_field_ndx, $db_h
 				foreach ($db_values as $db_value) {
 					if (in_array($db_value, $options_keys)) {
 						$found_values[] = $db_value;
-		    	}
+					}
 				}
 				$defaults = $found_values;
 			} else {
-		    $defaults = array();
+				$defaults = array();
 			}
 		} else {
-	    $defaults = array();
+			$defaults = array();
 		}
-  } else {
-    $defaults = array();
+	} else {
+		$defaults = array();
 	}
 	
   // then set up the defaults based on the string they typed into the defaults attribute box
@@ -4319,7 +4748,7 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
 				foreach ($db_values as $db_value) {
 					if (in_array($db_value, $options_keys)) {
 						$found_values[] = $db_value;
-		    	}
+					}
 				}
 				$defaults = $found_values;
 			} else {
@@ -4328,42 +4757,41 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
 		} else {
 	    $defaults = array();
 		}
-  } else {
-    $defaults = array();
+	} else {
+    	$defaults = array();
 	}
 	
-  // then set up the defaults based on the string they typed into the defaults attribute box
-  if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-    switch ($entered) {
-	    case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
-	      // over write defaults with the value they entered last time
-	      // already set
-	      break;
-	    case FETCHIT7_FIELD_DEFAULT_TRUE:
-		    $default = $options_keys[1];
+	// then set up the defaults based on the string they typed into the defaults attribute box
+	if (strlen($entered = trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
+		switch ($entered) {
+			case FETCHIT7_FIELD_DEFAULT_PREVIOUS:
+				// over write defaults with the value they entered last time
+				// already set
 				break;
-	    case FETCHIT7_FIELD_DEFAULT_FALSE:
-		    $default = $options_keys[0];
+			case FETCHIT7_FIELD_DEFAULT_TRUE:
+		    	$default = $options_keys[1];
 				break;
-	    case FETCHIT7_FIELD_DEFAULT_NONE:
-	    case FETCHIT7_FIELD_DEFAULT_BLANK:
-	      $defaults = array('');
-	      break;
-	    case FETCHIT7_FIELD_DEFAULT_FIRST:
-	      $defaults = array($options_keys[0]);
-	      break;
-	    case FETCHIT7_FIELD_DEFAULT_ALL:
-	      $defaults = $options_keys;
-	      break;
-	    default:
-	      $userdefaults = explode(',', $entered);
-	      if (count($userdefaults)) {
-	        $defaults = $userdefaults;
-	      }
-	      else {
-	        $defaults = array('');
-	      }
-	  }
+			case FETCHIT7_FIELD_DEFAULT_FALSE:
+				$default = $options_keys[0];
+				break;
+			case FETCHIT7_FIELD_DEFAULT_NONE:
+	    	case FETCHIT7_FIELD_DEFAULT_BLANK:
+	      		$defaults = array('');
+	      		break;
+	    	case FETCHIT7_FIELD_DEFAULT_FIRST:
+	      		$defaults = array($options_keys[0]);
+	      		break;
+	    	case FETCHIT7_FIELD_DEFAULT_ALL:
+				$defaults = $options_keys;
+			break;
+		default:
+			$userdefaults = explode(',', $entered);
+			if (count($userdefaults)) {
+				$defaults = $userdefaults;
+			} else {
+	        	$defaults = array('');
+	      	}
+	  	}
 	}
 
   if ($showtitles) {
@@ -5492,8 +5920,17 @@ function fetchit_booleantointeger($val) {
 }
 
 function fetchit7_get_control_list() {
-  return array(// add 1 to make array_search() easier.  subtract 1 later...
-  F_DR_CONTROL_TEXTBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_TEXTBOX, F_DR_CONTROL_DATESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATESEL, F_DR_CONTROL_DROPDOWN_SINGLE + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_SINGLE, F_DR_CONTROL_RADIOBTN + 1 => FETCHIT7_CONTROLTYPE_NAME_RADIOBTN, F_DR_CONTROL_CHECKBOXES + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOXES, F_DR_CONTROL_DROPDOWN_MULTI + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_MULTI, F_DR_CONTROL_CHECKBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOX, F_DR_CONTROL_DATETIMESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATETIMESEL, F_DR_CONTROL_POPUPDATE + 1 => FETCHIT7_CONTROLTYPE_NAME_POPUPDATE, );
+	return array(// add 1 to make array_search() easier.  subtract 1 later...
+		F_DR_CONTROL_TEXTBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_TEXTBOX,
+		F_DR_CONTROL_DATESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATESEL,
+		F_DR_CONTROL_DROPDOWN_SINGLE + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_SINGLE,
+		F_DR_CONTROL_RADIOBTN + 1 => FETCHIT7_CONTROLTYPE_NAME_RADIOBTN,
+		F_DR_CONTROL_CHECKBOXES + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOXES,
+		F_DR_CONTROL_DROPDOWN_MULTI + 1 => FETCHIT7_CONTROLTYPE_NAME_DROPDOWN_MULTI,
+		F_DR_CONTROL_CHECKBOX + 1 => FETCHIT7_CONTROLTYPE_NAME_CHECKBOX,
+		F_DR_CONTROL_DATETIMESEL + 1 => FETCHIT7_CONTROLTYPE_NAME_DATETIMESEL,
+		F_DR_CONTROL_POPUPDATE + 1 => FETCHIT7_CONTROLTYPE_NAME_POPUPDATE,
+	);
 }
 
 function fetchit7_get_control_list_string() {
@@ -5507,4 +5944,64 @@ function fetchit7_get_control_list_string() {
     ++$count;
   }
   return $control_list_string;
+}
+
+function fetchit7_strip_special_char_default($val) {
+  $newval=$val;
+  if (strlen($val)) {
+    switch ($val[0]) {
+      case '-':
+      case '*':
+      case '+':
+        $newval = substr($val, 1);
+        break;
+      default:
+    }
+  }
+  return $newval;
+}
+
+function fetchit7_strip_special_char_allnone($val) {
+	$newval=$val;
+	if (strlen($val)) {
+		switch ($val[0]) {
+			case '-':
+			case '*':
+			case '+':
+				$newval = substr($val, 1);
+				break;
+			default:
+		}
+	}
+	return $newval;
+}
+
+function fetchit7_get_special_char_default($val) {
+  $special_char = '';
+  if (strlen($val)) {
+    switch ($val[0]) {
+      case '-':
+      case '*':
+      case '+':
+        $special_char = $val[0];
+        break;
+      default:
+    }
+  }
+  return $special_char;
+}
+
+function fetchit7_get_special_char_allnone($val) {
+	$special_char = '';
+	if (strlen($val)) {
+		switch ($val[0]) {
+			case '-':
+			case '*':
+			case '+':
+				$special_char = $val[0];
+				break;
+			default:
+		}
+	}
+	return $special_char;
 }
