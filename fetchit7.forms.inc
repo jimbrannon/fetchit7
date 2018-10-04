@@ -23,10 +23,16 @@ function fetchit7_table_form($form, &$form_state) {
   $parameter_select_flag = FALSE;
   $text_input_flag = FALSE;
   $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
+  // the following does not work
   $table_weight = -8;
-  // it goes at the top of the form
-  $submit_weight = 8;
-  // it goes at the bottom of the form
+  // the weights don't work as imagined because of how rendering works
+  // so use this as a place to enter other options
+  // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
+  $submit_weight = 1;
+	$submit_button_flag = FALSE;
+	$submit_button_top = FALSE;
+	$submit_button_bottom = TRUE;
+	$submit_success_message = TRUE;
 
   // get nid embedded into original form_id; format fetchit7_table_form_X### - nid starts at 21
   $form_id = $form_state['build_info']['form_id'];
@@ -165,8 +171,14 @@ function fetchit7_table_form($form, &$form_state) {
         $submit_label = 'Submit';
     }
   }
-  // get table weight value
+  // get submit button weight value
   $submit_weight = trim(fetchit7_content_field_fetcher($nid, 'submit_weight', 'value'));
+  // the weights don't work as imagined because of how rendering works
+  // so use this as a place to enter other options
+  // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
+	$submit_button_top = fetchit7_submit_button_weight_to_top($submit_weight);
+	$submit_button_bottom = fetchit7_submit_button_weight_to_bottom($submit_weight);
+	$submit_success_message = fetchit7_submit_button_weight_to_success_message($submit_weight);
 
   // get the source data into a data object
   if (!($db_data_object = fetchit_get_data_object($db_type, $db_handle, $view_name, $user_uid_field))) {
@@ -345,9 +357,18 @@ function fetchit7_table_form($form, &$form_state) {
 		$form['body'] = array('#type' => 'markup', '#markup' => $body, );
 	}
 
- 	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
+  $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
+  $form['submit_button_top'] = array('#type' => 'value', '#value' => $submit_button_top, );
+  $form['submit_button_bottom'] = array('#type' => 'value', '#value' => $submit_button_bottom, );
+  $form['submit_success_message'] = array('#type' => 'value', '#value' => $submit_success_message, );
+	// create the render array for the submit button if the table type needs it
   if ($submit_button_flag) {
-    $form['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	if ($submit_button_top) {
+  		$form['submit_top'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	}
+  	if ($submit_button_bottom) {
+  		$form['submit_bottom'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	}
   }
 
   //$form['#validate'][] = 'fetchit7_table_form_validate';
@@ -425,6 +446,8 @@ function fetchit7_table_form_submit($form, &$form_state) {
   $record_select = $form['record_select']['#value'];
   $db_type = $form['db_type']['#value'];
   $db_handle = $form['db_handle']['#value'];
+  $submit_success_message = $form['submit_success_message']['#value'];
+	
 	//debug($record_select,'submit $record_select');
   switch ($record_select) {
     case 'none':
@@ -539,22 +562,30 @@ function fetchit7_table_form_submit($form, &$form_state) {
   }
 
   // reset the text
-  drupal_set_message(t('Successfully submitted changes.'), 'status');
+  if ($submit_success_message) drupal_set_message(t('Successfully submitted changes.'), 'status');
 }
 
 function theme_fetchit7_table_form($variables) {
   $form = $variables['form'];
   $form_id = $form['form_id']['#value'];
+	$submit_button_flag = $form['submit_button_flag']['#value'];
+	$submit_button_top = $form['submit_button_top']['#value'];
+	$submit_button_bottom = $form['submit_button_bottom']['#value'];
+	$addbody_flag = $form['addbody_flag']['#value'];
+	$output = '';
+	if ($submit_button_flag && $submit_button_top) {
+    $output .= '<div class="' . $form_id . '_submit_top">';
+		$output .= drupal_render($form['submit_top']);
+    $output .= '</div>';
+	}
   $output = '<div class="' . $form_id . '_table">';
   $output .= drupal_render($form['table']);
   $output .= '</div>';
-	$submit_button_flag = $form['submit_button_flag']['#value'];
-	if ($submit_button_flag) {
-    $output .= '<div class="' . $form_id . '_submit">';
-		$output .= drupal_render($form['submit']);
+	if ($submit_button_flag && $submit_button_bottom) {
+    $output .= '<div class="' . $form_id . '_submit_bottom">';
+		$output .= drupal_render($form['submit_bottom']);
     $output .= '</div>';
 	}
-	$addbody_flag = $form['addbody_flag']['#value'];
 	if ($addbody_flag) {
     $output .= '<div class="' . $form_id . '_body">';
 		$output .= drupal_render($form['body']);
@@ -590,6 +621,14 @@ function theme_fetchit7_table_form($variables) {
  */
 function fetchit7_param_form($form, &$form_state) {
   $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
+	// the weights don't work as imagined because of how rendering works
+  // so use this as a place to enter other options
+  // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
+  $submit_weight = 1;
+	$submit_button_flag = TRUE;
+	$submit_button_top = FALSE;
+	$submit_button_bottom = TRUE;
+	$submit_success_message = TRUE;
   // some things we can put in the $form
   //$form['#attached']['css'] = array(drupal_get_path('module', 'block') . '/block.css');
   $form['elements'] = array();
@@ -653,10 +692,10 @@ function fetchit7_param_form($form, &$form_state) {
   // use it if something is entered.   if not offer a default of Submit
   $submit_label = trim(fetchit7_content_field_fetcher($nid, 'fetchit7_field_submit_label', 'value'));
   if (strlen($submit_label)) {
-    $submit_flag = TRUE;
+    $submit_button_flag = TRUE;
   }
   else {
-    $submit_flag = TRUE;
+    $submit_button_flag = TRUE;
     $submit_label = 'Submit';
     // in case we HAVE to have a button
   }
@@ -665,7 +704,12 @@ function fetchit7_param_form($form, &$form_state) {
   // submit button weight should be a single integer value
   // use it if something is entered.   if not offer a default of 10 - puts it at or close to the bottom of the form
   $submit_weight = fetchit7_content_field_fetcher($nid, 'fetchit7_field_submit_weight', 'value');
-  $form['submit_weight'] = array('#type' => 'value', '#value' => $submit_weight);
+  // the weights don't work as imagined because of how rendering works
+  // so use this as a place to enter other options
+  // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
+	$submit_button_top = fetchit7_submit_button_weight_to_top($submit_weight);
+	$submit_button_bottom = fetchit7_submit_button_weight_to_bottom($submit_weight);
+	$submit_success_message = fetchit7_submit_button_weight_to_success_message($submit_weight);
 
   // redirectl should be a single string value
   // optional, use it if something is entered.   if not set it to an empty string
@@ -991,6 +1035,74 @@ function fetchit7_param_form($form, &$form_state) {
           case F_DR_CONTROL_CHECKBOXES:
           case F_DR_CONTROL_DROPDOWN_MULTI:
             $db_value = fetchit_get_existing_selection_multiple($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
+			//debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
+            // next, check to see if there is an "interim state" to reset the control too
+	        //   (this happens when the user presses a select All or select None button)
+	        //   see if there is a stored variable with the name element_name_value
+			if (variable_get($element_name.'_set',FALSE)) {
+				// need to reset this control to an interim saved state
+				// set the default string to FETCHIT7_FIELD_DEFAULT_PREVIOUS
+				//    and then set $db_value to the interim state, overwriting the previously selected state
+				//    then set the $user_field_data[] flag so that the fetchit 2 routines will use it,
+				//  essentially this is fooling the fetchit2 routines into thinking the interim state
+				//    is the previously selected state
+        		$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+				$db_value = variable_get($element_name.'_value','');
+			    //debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
+				//and then finally erase the interim state flag...
+				variable_set($element_name.'_set',FALSE);
+			}
+            // finally, here is where we change the default if the all or none buttons were pressed for this element
+            //   for this particular element
+            // at most only one of these should be true, but handle both separately so they get reset correctly,
+            //   just in case...
+            if (variable_get($element_name.'_allbtn',FALSE)) {
+            	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_ALL;
+            	variable_set($element_name.'_allbtn',FALSE);
+            }
+            if (variable_get($element_name.'_nonebtn',FALSE)) {
+            	$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_NONE;
+            	variable_set($element_name.'_nonebtn',FALSE);
+            }
+            // only need to make these if it is this type of control
+            // be sure to check isset in theme function, though
+            // and only need to create them if the user specifically said to in the first character of the default str
+            switch ($user_field_data[$i][FETCHIT7_ALLNONE_SPECIAL_CHAR_STR]) {
+            	case '-':
+            	case '+':
+            		// create the render arrays for the all none buttons
+			        $form['elements'][$element_name.'_allbtn'] = array(
+			        		'#type' => 'submit',
+			        		'#name' => $element_name.'_allbtn',
+			        		//'#validate' => array(
+			        		//		'fetchit7_param_all_validate'
+			        		//),
+			        		'#limit_validation_errors' => array(),
+			        		'#submit' => array(
+			        				'fetchit7_param_all_submit'
+			        		),
+			        		'#buttontype' => 'button',
+			        		'#value' => t('All'),
+			        );
+			        $form['elements'][$element_name.'_nonebtn'] = array(
+			        		'#type' => 'submit',
+			        		'#name' => $element_name.'_nonebtn',
+			        		'#limit_validation_errors' => array(),
+			        		//'#validate' => array(
+			        		//		'fetchit7_param_none_validate'
+			        		//),
+			        		'#submit' => array(
+			        				'fetchit7_param_none_submit'
+			        		),
+			        		'#buttontype' => 'button',
+			        		'#value' => t('None'),
+			        );
+			        break;
+		        case '*':
+		        case '0':
+		        default:
+			        // do not create them
+            }
             break;
           case F_DR_CONTROL_DROPDOWN_SINGLE:
           case F_DR_CONTROL_RADIOBTN:
@@ -1065,20 +1177,114 @@ function fetchit7_param_form($form, &$form_state) {
    }
    */
 
-  $submit_button_flag = TRUE;
-  $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag);
+ 	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
+  $form['submit_button_top'] = array('#type' => 'value', '#value' => $submit_button_top, );
+  $form['submit_button_bottom'] = array('#type' => 'value', '#value' => $submit_button_bottom, );
+  $form['submit_success_message'] = array('#type' => 'value', '#value' => $submit_success_message, );
   if ($submit_button_flag) {
-    //$form['actions'] = array(
-    //  '#tree' => FALSE,
-    //  '#type' => 'actions',
-    //);
-    //debug($submit_weight,'$submit_weight');
-    $form['actions']['submit'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	if ($submit_button_top) {
+	    $form['actions']['submit_top'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	}
+  	if ($submit_button_bottom) {
+	    $form['actions']['submit_bottom'] = array('#type' => 'submit', '#value' => $submit_label, '#weight' => $submit_weight, );
+  	}
   }
 
   return $form;
 }
 
+//this function is called before drupal processes the form submit hook
+function fetchit7_param_form_force_triggering_element($form, &$form_state) {
+	/*
+	 * the triggering element variable gets set based on which button was pressed
+	 * the idea is that it is set (has a value) right after the button is pressed,
+	 *   but NOT later (in the drupal form processing) when this function seems to get called again
+	 *   so checking with isset() is a way to add some code to fire RIGHT AFTER an all or nothing button is pressed
+	 *   but we want this function to do nothing on other calls
+	 *   the code we want to add should save in a drupal variable which button was pressed
+	 *     and clear out all the other button press saves so only one is ever set at a time
+	 *     then when the form is drawn it can look for this variable and set the default values accordingly
+	 *     also, we will have to save any changes the user has made to other form elements
+	 *     and restore them when the form is redrawn.
+	 *     this means essentially that EVERY form element will need to have it's state saved
+	 *     so it can be restored when the form is redrawn.  the one form element associated with the all or none
+	 *     button pressed will not save it's current state, but will save either a all or none state
+	 *     that way, the form redrawing code does not have to be very smart
+	 */
+	if(isset($form_state['triggering_element'])) {
+		$triggering_element_name = $form_state['triggering_element']['#name'];
+		//debug($triggering_element_name,microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is set; the name is:');
+		// blow up the element name to get the info out of it
+		$triggering_element_name_components = array();
+		$triggering_element_name_components = explode('_',$triggering_element_name);
+		//debug($triggering_element_name_components,microtime(true).' fetchit7_param_form_force_triggering_element: element name components:');
+		if ($triggering_element_name_components[0]=="fetchit7") {
+			//save the existing state of ALL the form elements
+			$param_count = $form['param_count']['#value'];
+			for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
+				$element_name = $triggering_element_name_components[0].'_'.$triggering_element_name_components[1].'_'.$triggering_element_name_components[2].'_'.$triggering_element_name_components[3].'_'.$param_ndx;
+				//debug($element_name,microtime(true).' fetchit7_param_form_element: element name:');
+				variable_set($element_name.'_set',true);
+				//have to trap the date control case, because it maps from a scalar in pg to an array in drupal, and the value handling is unique
+
+				$control_type = $form['elements'][$element_name]['#type'];
+				switch ($control_type) {
+					case 'date':
+						// the weird drupal core date element - an array of three values
+						$val_str = $form_state['values']['elements'][$element_name]['year'];
+						$val_str .= "-";
+						$val_str .= $form_state['values']['elements'][$element_name]['month'];
+						$val_str .= "-";
+						$val_str .= $form_state['values']['elements'][$element_name]['day'];
+						$val=$val_str;
+						break;
+					default:
+						$val = $form_state['values']['elements'][$element_name];
+						break;
+				}
+				variable_set($element_name.'_value',$val);
+				//debug($form_state['values']['elements'][$element_name],microtime(true).' fetchit7_param_form_element: element value:');
+				// set them all to false, then set the triggering to true afterwards
+				// notice that $element_name (the value/list control) is the base of $triggering_element_name (the all or none button)
+				variable_set($element_name.'_allbtn',false);
+				variable_set($element_name.'_nonebtn',false);
+			}
+			// create an internal drupal variable with the same name as the element, give it a boolean value of true
+			// this is used to let the subsequent (re)render of the form know that it is redrawing
+			//   after an all or none button press, because things happen differently in those cases
+			variable_set($triggering_element_name,true);
+			
+			// what is this for?
+			$form_state['triggering_element'] = $form['elements'][$form_state['triggering_element']['#name']];
+		}
+	} else {
+		//debug('',microtime(true).' fetchit7_param_form_force_triggering_element: a triggering_element is NOT set');
+	}
+	/*
+	if (isset($form_state['input']['all'])) {
+		$string=$form_state['input']['all'];
+		$form_state['triggering_element'] = $form['all'];
+	    debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears all was pressed:');
+	} elseif (isset($form_state['input']['none'])) {
+		$string=$form_state['input']['none'];
+		$form_state['triggering_element'] = $form['none'];
+	    debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears none was pressed:');
+	} elseif (isset($form_state['input']['actions']['submit'])) {
+		$string=$form_state['input']['actions']['submit'];
+		$form_state['triggering_element'] = $form['actions']['submit'];
+	    debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears submit was pressed:');
+	} else {
+		if (isset($form_state['triggering_element'])) {
+			$string=$form_state['triggering_element'];
+			debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears nothing was pressed (yet?) but triggering element is:');
+		} else {
+			$string=null;
+			debug($string,'Hello from the fetchit7_param_form_force_triggering_element function. From here it appears nothing was pressed (yet?) but triggering element is:');
+		}
+	}
+	*/
+	return $form;
+}
 /**
  * Process form validation
  */
@@ -1103,6 +1309,7 @@ function fetchit7_param_form_submit($form, &$form_state) {
   $db_type = $form['db_type']['#value'];
   $db_handle = $form['db_handle']['#value'];
   $param_count = $form['param_count']['#value'];
+	$submit_success_message = $form['submit_success_message']['#value'];
   for ($param_ndx = 0; $param_ndx < $param_count; $param_ndx++) {
     $param_data_table = $form['param_data_table'][$param_ndx]['#value'];
     $param_data_ndx = $form['param_data_ndx'][$param_ndx]['#value'];
@@ -1207,22 +1414,26 @@ function fetchit7_param_form_submit($form, &$form_state) {
     }
   }
 
-  drupal_set_message(t('Successfully submitted changes.'), 'status');
+  if ($submit_success_message) drupal_set_message(t('Successfully submitted changes.'), 'status');
 }
 
 function theme_fetchit7_param_form($variables) {
   $form = $variables['form'];
   $nid = $form['nid']['#value'];
   $form_id = $form['form_id']['#value'];
+	$submit_button_flag = $form['submit_button_flag']['#value'];
+	$submit_button_top = $form['submit_button_top']['#value'];
+	$submit_button_bottom = $form['submit_button_bottom']['#value'];
   //the drupal way is to do all the non display related preprocessing in a theme preprocessor function ... move it there later ...
   $table_row_count = $form['table_rows']['#value'];
-  //debug($table_row_count,'$table_row_count');
   $table_weight = $form['table_weight']['#value'];
-  //debug($table_weight,'$table_weight');
-  //figure out the formatting
-  $output = '<div class="' . $form_id . '_params">';
-  //$output  = '';
-
+	$output = '';
+	if ($submit_button_flag && $submit_button_top) {
+    $output .= '<div class="' . $form_id . '_submit_top">';
+    $output .= drupal_render($form['actions']['submit_top']);
+    $output .= '</div>';
+	}
+  $output .= '<div class="' . $form_id . '_params">';
   if ($table_row_count) {
     //figure out the table structure
     $param_count = $form['param_count']['#value'];
@@ -1246,10 +1457,49 @@ function theme_fetchit7_param_form($variables) {
         $p_ndx = $row_ndx + $col_ndx * $table_row_count;
         if ($p_ndx < $param_count) {
           $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
-          $row[] = drupal_render($form['elements'][$element_name]);
-        }
-        else {
-          $sillyform[$p_ndx] = array('#type' => 'item', '#title' => 'Empty Cell', '#markup' => "I am an empty cell.", );
+          if ($submit_button_flag) {
+          	// can't really have all none buttons if there is no submit button on the form,
+          	// so here is where to figure out whether and where to put them around the param control
+        	//debug($p_ndx,'$p_ndx');
+        	//debug($form['param_allnone'][$p_ndx],'$form[\'param_allnone\'][$p_ndx]');
+        	//debug($form['param_allnone'][$p_ndx]['#value'],'$form[\'param_allnone\'][$p_ndx][\'#value\']');
+          	switch ($form['param_allnone'][$p_ndx]['#value']) {
+          		case '-': //top
+		          	//if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+        				//debug('yes','draw buttons?');
+		          		$row[] = drupal_render($form['elements'][$element_name.'_allbtn']).
+		        	    			drupal_render($form['elements'][$element_name.'_nonebtn']).
+			            			drupal_render($form['elements'][$element_name]);
+		          	//} else {
+        			//	debug('no','draw buttons?');
+		          	//	$row[] = drupal_render($form['elements'][$element_name]);
+		          	//}    
+          			break;
+          		case '+': //bottom
+          			//if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+        				//debug('yes','draw buttons?');
+          				$row[] = drupal_render($form['elements'][$element_name]).
+		    	        			drupal_render($form['elements'][$element_name.'_allbtn']).
+		        	    			drupal_render($form['elements'][$element_name.'_nonebtn']);
+		          	//} else {
+        			//	debug('no','draw buttons?');
+		          	//	$row[] = drupal_render($form['elements'][$element_name]);
+		          	//}    
+          			break;
+          		case '*': //none
+          		default:
+        			//debug('no','draw buttons?');
+          			$row[] = drupal_render($form['elements'][$element_name]);
+          	}
+          } else {
+        	//debug('no','draw buttons?');
+          	$row[] = drupal_render($form['elements'][$element_name]);
+          }
+        } else {
+          $sillyform[$p_ndx] = array(
+          		'#type' => 'item',
+          		'#title' => 'Empty Cell',
+          		'#markup' => "I am an empty cell.", );
           $row[] = drupal_render($sillyform[$p_ndx]);
         }
       }
@@ -1258,21 +1508,48 @@ function theme_fetchit7_param_form($variables) {
     //debug($table_weight,'$table_weight');
     $form['table'] = array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#weight' => $table_weight, '#empty' => "Empty table.", );
     $output .= drupal_render($form['table']);
-  }
-  else {
+  } else {
     $param_count = $form['param_count']['#value'];
-		for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
-			$element_name = fetchit_make_element_name($nid, 0, $p_ndx);
-			$output .= drupal_render($form['elements'][$element_name]);
-		}
+	for ($p_ndx=0; $p_ndx < $param_count; $p_ndx++) {
+	  $element_name = fetchit_make_element_name($nid, 0, $p_ndx);
+	  if ($submit_button_flag) {
+	  	// can't really have all none buttons if there is no submit button on the form,
+	  	// so here is where to figure out whether and where to put them around the param control
+	  	switch ($form['param_allnone'][$p_ndx]['#value']) {
+	  		case '-': //top
+	  			//if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+			  		$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
+		        	$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
+		        	$output .= drupal_render($form['elements'][$element_name]);
+	  			//} else {
+		        //	$output .= drupal_render($form['elements'][$element_name]);
+	  			//}
+	  			break;
+	  		case '+': //bottom
+	  			//if (isset($form['param_allnone'][$element_name.'_allbtn']) && isset($form['elements'][$element_name.'_nonebtn'])) {
+		        	$output .= drupal_render($form['elements'][$element_name]);
+	  				$output .= drupal_render($form['elements'][$element_name.'_allbtn']);
+		        	$output .= drupal_render($form['elements'][$element_name.'_nonebtn']);
+	  			//} else {
+		        //	$output .= drupal_render($form['elements'][$element_name]);
+	  			//}
+	  			break;
+	  		case '0': //none
+	  		case '*': //none
+	  		default:
+		        $output .= drupal_render($form['elements'][$element_name]);
+	  	}
+	  } else {
+	  	$output .= drupal_render($form['elements'][$element_name]);
+	  }
+	}
   }
   $output .= '</div>';
-  $submit_button_flag = $form['submit_button_flag']['#value'];
-  if ($submit_button_flag) {
-    $output .= '<div class="' . $form_id . '_submit">';
-    $output .= drupal_render($form['actions']['submit']);
+	if ($submit_button_flag && $submit_button_bottom) {
+    $output .= '<div class="' . $form_id . '_submit_bottom">';
+    $output .= drupal_render($form['actions']['submit_bottom']);
     $output .= '</div>';
-  }
+	}
   $addbody_flag = $form['addbody_flag']['#value'];
   if ($addbody_flag) {
     $output .= '<div class="' . $form_id . '_body">';
@@ -1310,6 +1587,14 @@ function theme_fetchit7_param_form($variables) {
  */
 function fetchit7_egrid_form($form, &$form_state) {
   $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
+	// the weights don't work as imagined because of how rendering works
+  // so use this as a place to enter other options
+  // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
+  $submit_weight = 1;
+	$submit_button_flag = TRUE;
+	$submit_button_top = FALSE;
+	$submit_button_bottom = TRUE;
+	$submit_success_message = TRUE;
   // some things we can put in the $form
   //$form['#attached']['css'] = array(drupal_get_path('module', 'block') . '/block.css');
   $form['elements'] = array();
@@ -1423,19 +1708,29 @@ function fetchit7_egrid_form($form, &$form_state) {
   // use it if something is entered.   if not offer a default of Submit
   $submit_label = trim(fetchit7_content_field_fetcher($nid, 'fetchit7_field_submit_label', 'value'));
   if (strlen($submit_label)) {
-    $submit_flag = TRUE;
+    $submit_button_flag = TRUE;
   }
   else {
-    $submit_flag = TRUE;
+    $submit_button_flag = TRUE;
     $submit_label = 'Submit';
     // in case we HAVE to have a button
   }
   $form['submit_label'] = array('#type' => 'value', '#value' => $submit_label);
+ 	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag);
 
   // submit button weight should be a single integer value
   // use it if something is entered.   if not offer a default of 10 - puts it at or close to the bottom of the form
   $submit_weight = fetchit7_content_field_fetcher($nid, 'fetchit7_field_submit_weight', 'value');
   $form['submit_weight'] = array('#type' => 'value', '#value' => $submit_weight);
+  // the weights don't work as imagined because of how rendering works
+  // so use this as a place to enter other options
+  // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
+	$submit_button_top = fetchit7_submit_button_weight_to_top($submit_weight);
+	$submit_button_bottom = fetchit7_submit_button_weight_to_bottom($submit_weight);
+	$submit_success_message = fetchit7_submit_button_weight_to_success_message($submit_weight);
+  $form['submit_button_top'] = array('#type' => 'value', '#value' => $submit_button_top);
+  $form['submit_button_bottom'] = array('#type' => 'value', '#value' => $submit_button_bottom);
+  $form['submit_success_message'] = array('#type' => 'value', '#value' => $submit_success_message);
 
   // redirectl should be a single string value
   // optional, use it if something is entered.   if not set it to an empty string
@@ -1938,23 +2233,22 @@ function fetchit7_egrid_form($form, &$form_state) {
 					$hidden); // this is used to draw a special value type form element so that it's in the form 
   	}
   }
-  //debug('fetchit7_egrid_form 6');
-
-  $submit_button_flag = TRUE;
-  $form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag);
   if ($submit_button_flag) {
-    //$form['actions'] = array(
-    //  '#tree' => FALSE,
-    //  '#type' => 'actions',
-    //);
-    //debug($submit_weight,'$submit_weight');
-    $form['actions']['submit'] = array(
-    	'#type' => 'submit',
-    	'#value' => $submit_label,
-    	'#weight' => $submit_weight,
-		);
+  	if ($submit_button_top) {
+	    $form['actions']['submit_top'] = array(
+	    	'#type' => 'submit',
+	    	'#value' => $submit_label,
+	    	'#weight' => $submit_weight,
+			);
+  	}
+  	if ($submit_button_bottom) {
+	    $form['actions']['submit_bottom'] = array(
+	    	'#type' => 'submit',
+	    	'#value' => $submit_label,
+	    	'#weight' => $submit_weight,
+			);
+  	}
   }
-  //debug('fetchit7_egrid_form 7');
 
   return $form;
 }
@@ -1977,7 +2271,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 	$db_handle = $form['db_handle']['#value'];
 	$table_name = $form['view_name']['#value'];
 	$appendrecord = $form['appendrecord']['#value'];
-	//debug(!$appendrecord,'!$appendrecord');
+	$submit_success_message = $form['submit_success_message']['#value'];
 	if (!$appendrecord) {
 		//clear out the existing records
 		$result = fetchit_remove_records($db_handle,$db_type,$table_name,$user_uid_field);
@@ -2100,7 +2394,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
     }
   }
 	
-  drupal_set_message(t('Successfully submitted changes.'), 'status');
+  if ($submit_success_message) drupal_set_message(t('Successfully submitted changes.'), 'status');
 }
 
 function theme_fetchit7_egrid_form($variables) {
@@ -2108,15 +2402,19 @@ function theme_fetchit7_egrid_form($variables) {
   $form = $variables['form'];
   $nid = $form['nid']['#value'];
   $form_id = $form['form_id']['#value'];
+	$submit_button_flag = $form['submit_button_flag']['#value'];
+	$submit_button_top = $form['submit_button_top']['#value'];
+	$submit_button_bottom = $form['submit_button_bottom']['#value'];
   //the drupal way is to do all the non display related preprocessing in a theme preprocessor function ... move it there later ...
   $table_row_count = $form['table_rows']['#value'];
-  //debug($table_row_count,'$table_row_count');
   $table_weight = $form['table_weight']['#value'];
-  //debug($table_weight,'$table_weight');
-  //figure out the formatting
-  $output = '<div class="' . $form_id . '_egrid">';
-  //$output  = '';
-
+	$output = '';
+	if ($submit_button_flag && $submit_button_top) {
+    $output .= '<div class="' . $form_id . '_submit_top">';
+    $output .= drupal_render($form['actions']['submit_top']);
+    $output .= '</div>';
+	}
+  $output .= '<div class="' . $form_id . '_egrid">';
   if ($table_row_count) {
 	  //debug('theme_fetchit7_egrid_form 2');
     //figure out the table structure
@@ -2170,13 +2468,10 @@ function theme_fetchit7_egrid_form($variables) {
    		}
   	}
   }
-	//debug('theme_fetchit7_egrid_form 4');
-	
   $output .= '</div>';
-  $submit_button_flag = $form['submit_button_flag']['#value'];
-  if ($submit_button_flag) {
-    $output .= '<div class="' . $form_id . '_submit">';
-    $output .= drupal_render($form['actions']['submit']);
+  if ($submit_button_flag && $submit_button_bottom) {
+    $output .= '<div class="' . $form_id . '_submit_bottom">';
+    $output .= drupal_render($form['actions']['submit_bottom']);
     $output .= '</div>';
   }
   $addbody_flag = $form['addbody_flag']['#value'];
@@ -3081,7 +3376,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 7;
+              //$size = 7;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3145,7 +3441,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 7;
+              //$size = 7;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3166,7 +3463,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 7;
+              //$size = 7;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
@@ -3179,7 +3477,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = (int)$size_string;
         }
         else {
-          $size = 7;
+          //$size = 7;
+          $size = FETCHIT7_OPTIONS_TEXTBOX_SIZE;
         }
         if (strlen(trim($db_value))) {
           $default = (int)$db_value;
@@ -3226,7 +3525,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 9;
+              //$size = 9;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_NUMBER_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3247,7 +3547,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 9;
+              //$size = 9;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_NUMBER_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
@@ -3524,7 +3825,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+              //$size = 20;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3545,7 +3847,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+              //$size = 20;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
@@ -3557,7 +3860,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = (int)$size_string;
         }
         else {
-          $size = 20;
+          //$size = 20;
+          $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
         }
         $default = $db_value;
         //$weight = $user_field_ndx - 1;
@@ -3584,7 +3888,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+              //$size = 20;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
             break;
@@ -3605,7 +3910,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
               $size = (int)$size_string;
             }
             else {
-              $size = 20;
+              //$size = 20;
+              $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
             }
             return fetchit_get_textbox_element($user_field_data, $user_field_ndx - 1, $size, $showtitles, $db_value);
         }
@@ -3619,7 +3925,8 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
           $size = (int)$size_string;
         }
         else {
-          $size = 40;
+          //$size = 40;
+          $size = FETCHIT7_OPTIONS_TEXTBOX_TEXT_SIZE;
         }
         $default = $db_value;
         //if (strlen(trim($user_field_data[$user_field_ndx - 1][FETCHIT7_FIELD_WEIGHT_STR]))) {
@@ -3647,7 +3954,8 @@ function fetchit_get_textbox_element($user_field_data, $user_field_ndx, $size, $
   // $db_value is a scalar, NOT an array
 
   $default = '';
-  $maxlength = 255;
+  //$maxlength = 255;
+  $maxlength = FETCHIT7_OPTIONS_TEXTBOX_MAXLENGTH;
 
   // process the value stored in the output table already for this parameter/user
   // convert whatever it is to a string...this is a text box, after all!
@@ -4030,12 +4338,16 @@ function fetchit_get_select_element($user_field_data, $user_field_ndx, $db_handl
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $default = $options_keys[0];
-    $empty_value = '';
+   	// remove as test
+    //$default = $options_keys[0];
+      $default = '';
+      $empty_value = '';
   }
   else {
-    $default = $options_keys[0];
-    $empty_value = '';
+   	// remove as test
+    //$default = $options_keys[0];
+      $default = '';
+      $empty_value = '';
   }
 	
 	// if it is set, use the passed in default
@@ -4045,7 +4357,9 @@ function fetchit_get_select_element($user_field_data, $user_field_ndx, $db_handl
       $default = $db_value;
     }
     else {
-      $default = $options_keys[0];
+    	// remove as test
+      //$default = $options_keys[0];
+      $default = '';
     }
 	}
 	
@@ -4303,11 +4617,14 @@ function fetchit_get_selectmultiple_element($user_field_data, $user_field_ndx, $
   // figure out the default values to be selected
   // start with a default selection based on whether the control requires a value or not
   if ($required) {
-    $defaults = array($options_keys[0]);
+  	// remove as test
+    // $defaults = array($options_keys[0]);
+    $defaults = array();
     $empty_value = '';
   }
   else {
-    $defaults = array('');
+    //$defaults = array('');
+    $defaults = array();
     $empty_value = '';
   }
 
@@ -5508,3 +5825,160 @@ function fetchit7_get_control_list_string() {
   }
   return $control_list_string;
 }
+
+function fetchit7_strip_special_char_default($val) {
+  $newval=$val;
+  if (strlen($val)) {
+    switch ($val[0]) {
+      case '-':
+      case '*':
+      case '+':
+        $newval = substr($val, 1);
+        break;
+      default:
+    }
+  }
+  return $newval;
+}
+
+function fetchit7_strip_special_char_allnone($val) {
+	$newval=$val;
+	if (strlen($val)) {
+		switch ($val[0]) {
+			case '-':
+			case '*':
+			case '+':
+				$newval = substr($val, 1);
+				break;
+			default:
+		}
+	}
+	return $newval;
+}
+
+function fetchit7_get_special_char_default($val) {
+  $special_char = '';
+  if (strlen($val)) {
+    switch ($val[0]) {
+      case '-':
+      case '*':
+      case '+':
+        $special_char = $val[0];
+        break;
+      default:
+    }
+  }
+  return $special_char;
+}
+
+function fetchit7_get_special_char_allnone($val) {
+	$special_char = '';
+	if (strlen($val)) {
+		switch ($val[0]) {
+			case '-':
+			case '*':
+			case '+':
+				$special_char = $val[0];
+				break;
+			default:
+		}
+	}
+	return $special_char;
+}
+
+function fetchit7_submit_button_weight_to_top($submit_weight=1) {
+	// the weights don't work as imagined because of how rendering works
+  // so use this as a place to enter other options
+  // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
+  switch ($submit_weight) {
+		case 0:
+			$submit_button_top = FALSE;
+			break;
+		case 1:
+			$submit_button_top = FALSE;
+			break;
+		case 2:
+			$submit_button_top = TRUE;
+			break;
+		case 3:
+			$submit_button_top = TRUE;
+			break;
+		case -1:
+			$submit_button_top = FALSE;
+			break;
+		case -2:
+			$submit_button_top = TRUE;
+			break;
+		case -3:
+			$submit_button_top = TRUE;
+			break;
+		default:
+			$submit_button_top = FALSE;
+  }
+	return $submit_button_top;
+}
+
+function fetchit7_submit_button_weight_to_bottom($submit_weight=1) {
+	// the weights don't work as imagined because of how rendering works
+  // so use this as a place to enter other options
+  // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
+  switch ($submit_weight) {
+		case 0:
+			$submit_button_bottom = FALSE;
+			break;
+		case 1:
+			$submit_button_bottom = TRUE;
+			break;
+		case 2:
+			$submit_button_bottom = FALSE;
+			break;
+		case 3:
+			$submit_button_bottom = TRUE;
+			break;
+		case -1:
+			$submit_button_bottom = TRUE;
+			break;
+		case -2:
+			$submit_button_bottom = FALSE;
+			break;
+		case -3:
+			$submit_button_bottom = TRUE;
+			break;
+		default:
+			$submit_button_bottom = TRUE;
+  }
+	return $submit_button_bottom;
+}
+
+function fetchit7_submit_button_weight_to_success_message($submit_weight=1) {
+	// the weights don't work as imagined because of how rendering works
+  // so use this as a place to enter other options
+  // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
+  switch ($submit_weight) {
+		case 0:
+			$submit_success_message = TRUE;
+			break;
+		case 1:
+			$submit_success_message = TRUE;
+			break;
+		case 2:
+			$submit_success_message = TRUE;
+			break;
+		case 3:
+			$submit_success_message = TRUE;
+			break;
+		case -1:
+			$submit_success_message = FALSE;
+			break;
+		case -2:
+			$submit_success_message = FALSE;
+			break;
+		case -3:
+			$submit_success_message = FALSE;
+			break;
+		default:
+			$submit_success_message = TRUE;
+  }
+	return $submit_success_message;
+}
+
