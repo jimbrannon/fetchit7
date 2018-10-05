@@ -60,6 +60,7 @@ define("F_DR_FIELD_TITLE_STR","title");
 define("F_DR_FIELD_DESC_STR","desc");
 define("F_DR_FIELD_INPUT_TYPE_STR","input_type");
 define("F_DR_FIELD_DEFAULT_STR","default");
+define("FETCHIT7_ALLNONE_SPECIAL_CHAR_STR","allnone_specialcharacter");
 define("F_DR_FIELD_DISABLED_STR","disabled");
 define("F_DR_FIELD_REQUIRED_STR","required");
 define("F_DR_FIELD_VALIDATE_STR","validate");
@@ -70,6 +71,8 @@ define("FETCHIT7_FIELD_HIDDEN_STR","hidden");
 
 // these are the array keys used for field input list table parameters
 define("F_DR_FIELD_LIST_TBL_STR","list_tbl");
+//define("F_DR_FIELD_LIST_TBL_CHAR_STR","list_tbl_char");
+define("FETCHIT7_DEFAULT_SPECIAL_CHAR_STR","default_specialcharacter");
 define("FETCHIT7_FIELD_LIST_NDX_STR","list_ndx"); //define("F_DR_LIST_TBL_NDX_FLD","stored");
 define("FETCHIT7_FIELD_LIST_DSP_STR","list_dsp"); //define("F_DR_LIST_TBL_DSP_FLD","displayed");
 define("F_DR_FIELD_LIST_UID_STR","list_uid"); //define("F_DR_LIST_TBL_UID_FLD","drupal_userid");
