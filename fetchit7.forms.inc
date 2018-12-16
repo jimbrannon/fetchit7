@@ -659,7 +659,7 @@ function theme_fetchit7_table_form($variables) {
   //debug($submit_button_bottom)
 	$output = '';
   $output .= '<div class="' . $form_id . '_submit_debug">';
-  $output .= str($submit_button_flag);
+  $output .= (string) $submit_button_flag;
   $output .= '</div>';
 	if ($submit_button_flag && $submit_button_top) {
     $output .= '<div class="' . $form_id . '_submit_top">';
