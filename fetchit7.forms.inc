@@ -246,8 +246,10 @@ function fetchit7_table_form($form, &$form_state) {
   $previous_selection = fetchit_get_existing_selection_single($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
   $selections = fetchit_get_existing_selection_multiple($db_handle, $db_type, $table_selection_table, $key_field, $user_uid_field);
   $previous_selections = array();
-  foreach ($selections as $selection) {
-     $previous_selections[$selection] = TRUE; 
+  if (is_array($selections)) {
+    foreach ($selections as $selection) {
+       $previous_selections[$selection] = TRUE; 
+    }
   }
   // initialize the data for all and first selection
   $all_selections = array();
@@ -651,6 +653,10 @@ function theme_fetchit7_table_form($variables) {
 	$submit_button_top = $form['submit_button_top']['#value'];
 	$submit_button_bottom = $form['submit_button_bottom']['#value'];
 	$addbody_flag = $form['addbody_flag']['#value'];
+  drupal_set_message($submit_button_top)
+  debug($submit_button_top)
+  drupal_set_message($submit_button_bottom)
+  debug($submit_button_bottom)
 	$output = '';
 	if ($submit_button_flag && $submit_button_top) {
     $output .= '<div class="' . $form_id . '_submit_top">';
