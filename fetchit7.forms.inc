@@ -1355,7 +1355,8 @@ function fetchit7_param_form($form, &$form_state) {
    $row[] = drupal_render($myform[$element_name]);
    //debug(drupal_render($myform[$element_name]),' post-render $myform['.$element_name.']');
    } else {
-   $sillyform[$p_ndx] = array('#type' => 'item','#title' => 'Empty Cell','#markup' => "I am an empty cell.",);
+//   $sillyform[$p_ndx] = array('#type' => 'item','#title' => 'Empty Cell','#markup' => "I am an empty cell.",);
+   $sillyform[$p_ndx] = array('#type' => 'item','#title' => '','#markup' => "",);
    $row[] = drupal_render($sillyform[$p_ndx]);
    //$row[] = $p_ndx;
    }
@@ -1719,8 +1720,10 @@ function theme_fetchit7_param_form($variables) {
         } else {
           $sillyform[$p_ndx] = array(
           		'#type' => 'item',
-          		'#title' => 'Empty Cell',
-          		'#markup' => "I am an empty cell.", );
+//          		'#title' => 'Empty Cell',
+          		'#title' => '',
+          		'#markup' => "", );
+//          		'#markup' => "I am an empty cell.", );
           $row[] = drupal_render($sillyform[$p_ndx]);
         }
       }
@@ -5306,10 +5309,12 @@ function fetchit_get_date_select_element($user_field_data, $user_field_ndx, $dat
   $form = array();
   $default = format_date(time(), 'custom', 'Y-m-d H:i:s');
   if (strlen(trim($db_value))) {
-    $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s', 0);
+//    $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s', 0);
+    $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s', NULL);
   }
   if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-    $default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]), 'custom', 'Y-m-d H:i:s', 0);
+//    $default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]), 'custom', 'Y-m-d H:i:s', 0);
+    $default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]), 'custom', 'Y-m-d H:i:s', NULL);
   }
   if (!strlen(trim($date_format)))
     $date_format = 'Y-m-d g:i:s A';
@@ -5343,10 +5348,12 @@ function fetchit_get_date_popup_element($user_field_data, $user_field_ndx, $date
   $form = array();
   $default = format_date(time(), 'custom', 'Y-m-d H:i:s');
   if (strlen(trim($db_value))) {
-    $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s', 0);
+//    $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s', 0);
+    $default = format_date(strtotime($db_value), 'custom', 'Y-m-d H:i:s',NULL);
   }
   if (strlen(trim($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]))) {
-    $default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]), 'custom', 'Y-m-d H:i:s', 0);
+//    $default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]), 'custom', 'Y-m-d H:i:s', 0);
+    $default = format_date(strtotime($user_field_data[$user_field_ndx][F_DR_FIELD_DEFAULT_STR]), 'custom', 'Y-m-d H:i:s', NULL);
   }
   if (!strlen(trim($date_format)))
     $date_format = 'Y-m-d g:i:s A';
@@ -5365,7 +5372,8 @@ function fetchit_get_date_popup_element($user_field_data, $user_field_ndx, $date
     '#description' => $description, '#weight' => $weight, );
   }
   else {
-    $form = array('#type' => 'date_popup', '#default_value' => $default, '#date_format' => $date_format, '#date_year_range' => $year_range, //'-3:+3'
+//    $form = array('#title_display'='invisible', '#type' => 'date_popup', '#default_value' => $default, '#date_format' => $date_format, '#date_year_range' => $year_range, //'-3:+3'
+    $form = array('#title_display' => 'attribute', '#type' => 'date_popup', '#default_value' => $default, '#date_format' => $date_format, '#date_year_range' => $year_range, //'-3:+3'
     '#weight' => $weight, );
   }
 
