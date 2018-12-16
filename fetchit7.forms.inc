@@ -657,10 +657,7 @@ function theme_fetchit7_table_form($variables) {
   //debug($submit_button_top)
   //drupal_set_message(t('$submit_button_bottom'),'status')
   //debug($submit_button_bottom)
-	$output = '';
-  $output .= '<div class="' . $form_id . '_submit_debug">';
-  $output .= (string) $submit_button_flag;
-  $output .= '</div>';
+	$output = 'HO HO HO';
 	if ($submit_button_flag && $submit_button_top) {
     $output .= '<div class="' . $form_id . '_submit_top">';
 		$output .= drupal_render($form['submit_top']);
