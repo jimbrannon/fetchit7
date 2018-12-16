@@ -653,17 +653,13 @@ function theme_fetchit7_table_form($variables) {
 	$submit_button_top = $form['submit_button_top']['#value'];
 	$submit_button_bottom = $form['submit_button_bottom']['#value'];
 	$addbody_flag = $form['addbody_flag']['#value'];
-  //drupal_set_message(t('$submit_button_top'),'status')
-  //debug($submit_button_top)
-  //drupal_set_message(t('$submit_button_bottom'),'status')
-  //debug($submit_button_bottom)
-	$output = 'HO HO HO';
+	$output = '';
 	if ($submit_button_flag && $submit_button_top) {
     $output .= '<div class="' . $form_id . '_submit_top">';
 		$output .= drupal_render($form['submit_top']);
     $output .= '</div>';
 	}
-  $output = '<div class="' . $form_id . '_table">';
+  $output .= '<div class="' . $form_id . '_table">';
   $output .= drupal_render($form['table']);
   $output .= '</div>';
 	if ($submit_button_flag && $submit_button_bottom) {
