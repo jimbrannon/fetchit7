@@ -1989,20 +1989,24 @@ function fetchit7_egrid_form($form, &$form_state) {
   // get the source table meta data
   $row_count = fetchit_get_row_count($db_type, $db_data_object);
   $form['row_count'] = array('#type' => 'value', '#value' => $row_count);
+  drupal_set_message($row_count);
   $field_count = fetchit_get_field_count($db_type, $db_data_object);
   $form['field_count'] = array('#type' => 'value', '#value' => $field_count);
+  drupal_set_message($field_count);
   $field_names = array();
   if (!($field_names = fetchit_get_field_names($db_type, $db_data_object))) {
     drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the source data table field names.", 'error');
     return $form;
   }
   $form['field_names'] = array('#type' => 'value', '#value' => $field_names);
+  debug($field_names);
   $field_types = array();
   if (!($field_types = fetchit_get_field_types($db_type, $db_data_object))) {
     drupal_set_message("An error occurred in fetchit7_table_form (nid = $nid) when accessing the source data table field types.", 'error');
     return $form;
   }
   $form['field_types'] = array('#type' => 'value', '#value' => $field_types);
+  debug($field_types);
 
   // check that the key and uid fields are in the table
   // no key field means no delete query
@@ -2405,6 +2409,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       //   this string format and inserted back into the source table's array field(s)
       if ($itsarealrecord) {
 	      $value = fetchit_get_data($db_type,$db_data_object,$r,$i);
+        debug($r, $i, $value);
 				//if ($i==1) debug('reading from table: $value='.$value);
         // eventually, the whole table is stored in 'sourcetable' in case it is needed later
 	      $form['sourcetable'][$r][$i] = array('#type' => 'value', '#value' => $value);
