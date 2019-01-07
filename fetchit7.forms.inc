@@ -3660,15 +3660,15 @@ function convertpgstringtoarray($pgstring) {
 }
 
 function convertarraytopgstring($values) {
-  $pgstring = "{"
-  $firstitem = TRUE
+  $pgstring = "{";
+  $firstitem = TRUE;
   foreach ($values as $value) {
     if (!$firstitem) {
-      $pgstring .= ","
+      $pgstring .= ",";
     }
-    $pgstring .= strval($value)
+    $pgstring .= strval($value);
   }
-  $pgstring .= "}"
+  $pgstring .= "}";
   return $pgstring;
 }
 
