@@ -2409,7 +2409,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       //   this string format and inserted back into the source table's array field(s)
       if ($itsarealrecord) {
 	      $value = fetchit_get_data($db_type,$db_data_object,$r,$i);
-        debug($r, $i, $value);
+        debug("$itsarealrecord, $r, $i, $value", $itsarealrecord, $r, $i, $value);
 				//if ($i==1) debug('reading from table: $value='.$value);
         // eventually, the whole table is stored in 'sourcetable' in case it is needed later
 	      $form['sourcetable'][$r][$i] = array('#type' => 'value', '#value' => $value);
@@ -2443,6 +2443,7 @@ function fetchit7_egrid_form($form, &$form_state) {
 	          $default_value = $value;
 	      }
       } else {
+        debug("$itsarealrecord, $r, $i, $value", $itsarealrecord, $r, $i, $value);
       	$default_value='';
       }
 			//debug('field '.$i.' converted to default: $default_value='.$default_value);
