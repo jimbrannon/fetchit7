@@ -1201,25 +1201,25 @@ function fetchit7_param_form($form, &$form_state) {
         switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
           case F_DR_CONTROL_CHECKBOXES:
           case F_DR_CONTROL_DROPDOWN_MULTI:
-          	// first get the previously saved state...
+            // first get the previously saved state...
             $db_value = fetchit_get_existing_selection_multiple($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
-			//debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
+            //debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
             // next, check to see if there is an "interim state" to reset the control too
-	        //   (this happens when the user presses a select All or select None button)
-	        //   see if there is a stored variable with the name element_name_value
-			if (variable_get($element_name.'_set',FALSE)) {
-				// need to reset this control to an interim saved state
-				// set the default string to FETCHIT7_FIELD_DEFAULT_PREVIOUS
-				//    and then set $db_value to the interim state, overwriting the previously selected state
-				//    then set the $user_field_data[] flag so that the fetchit 2 routines will use it,
-				//  essentially this is fooling the fetchit2 routines into thinking the interim state
-				//    is the previously selected state
-        		$user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_PREVIOUS;
-				$db_value = variable_get($element_name.'_value','');
-			    //debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
-				//and then finally erase the interim state flag...
-				variable_set($element_name.'_set',FALSE);
-			}
+            //   (this happens when the user presses a select All or select None button)
+            //   see if there is a stored variable with the name element_name_value
+            if (variable_get($element_name.'_set',FALSE)) {
+              // need to reset this control to an interim saved state
+              // set the default string to FETCHIT7_FIELD_DEFAULT_PREVIOUS
+              //    and then set $db_value to the interim state, overwriting the previously selected state
+              //    then set the $user_field_data[] flag so that the fetchit 2 routines will use it,
+              //  essentially this is fooling the fetchit2 routines into thinking the interim state
+              //    is the previously selected state
+              $user_field_data[$i][F_DR_FIELD_DEFAULT_STR]=FETCHIT7_FIELD_DEFAULT_PREVIOUS;
+              $db_value = variable_get($element_name.'_value','');
+              //debug($db_value,microtime(true).' creating form element '.$element_name.'. RESETTING default value to');
+              //and then finally erase the interim state flag...
+              variable_set($element_name.'_set',FALSE);
+            }
             // finally, here is where we change the default if the all or none buttons were pressed for this element
             //   for this particular element
             // at most only one of these should be true, but handle both separately so they get reset correctly,
@@ -1239,7 +1239,7 @@ function fetchit7_param_form($form, &$form_state) {
             	case '-':
             	case '+':
             		// create the render arrays for the all none buttons
-			        $form['elements'][$element_name.'_allbtn'] = array(
+                $form['elements'][$element_name.'_allbtn'] = array(
 			        		'#type' => 'submit',
 			        		'#name' => $element_name.'_allbtn',
 			        		//'#validate' => array(
@@ -1251,8 +1251,8 @@ function fetchit7_param_form($form, &$form_state) {
 			        		),
 			        		'#buttontype' => 'button',
 			        		'#value' => t('All'),
-			        );
-			        $form['elements'][$element_name.'_nonebtn'] = array(
+                );
+                $form['elements'][$element_name.'_nonebtn'] = array(
 			        		'#type' => 'submit',
 			        		'#name' => $element_name.'_nonebtn',
 			        		'#limit_validation_errors' => array(),
@@ -1264,23 +1264,22 @@ function fetchit7_param_form($form, &$form_state) {
 			        		),
 			        		'#buttontype' => 'button',
 			        		'#value' => t('None'),
-			        );
-			        break;
-		        case '*':
-		        case '0':
-		        default:
-			        // do not create them
+                );
+                break;
+              case '*':
+              case '0':
+              default:
+			         // do not create them
             }
             break;
-          case F_DR_CONTROL_DROPDOWN_SINGLE:
           case F_DR_CONTROL_RADIOBTN:
+          case F_DR_CONTROL_DROPDOWN_SINGLE:
           case F_DR_CONTROL_TEXTBOX:
           case F_DR_CONTROL_CHECKBOX:
           case F_DR_CONTROL_DATESEL:
           case F_DR_CONTROL_DATETIMESEL:
           case F_DR_CONTROL_POPUPDATE:
             $db_value = fetchit_get_existing_selection_single($db_handle, $db_type, $data_tbl, $data_ndx, $data_uid);
-
             //debug($db_value,microtime(true).' creating form element '.$element_name.'. Default value set to');
             // next, check to see if there is an "interim state" to reset the control too
             //   (this happens when the user presses a select All or select None button)
@@ -1374,7 +1373,6 @@ function fetchit7_param_form($form, &$form_state) {
    $form['elements'] = $myform;
    }
    */
-
  	$form['submit_button_flag'] = array('#type' => 'value', '#value' => $submit_button_flag, );
   $form['submit_button_top'] = array('#type' => 'value', '#value' => $submit_button_top, );
   $form['submit_button_bottom'] = array('#type' => 'value', '#value' => $submit_button_bottom, );
@@ -1819,7 +1817,7 @@ function theme_fetchit7_param_form($variables) {
 function fetchit7_egrid_form($form, &$form_state) {
   $addbody_flag = TRUE; // until we have a flag for this it on the fetchit7 form
 	// the weights don't work as imagined because of how rendering works
-  // so use this as a place to enter other options
+  // so use $submit_weight as a place to enter other options
   // 0 - no button, 1 - button at bottom, 2 - button at top, 3 - buttons at both, (+) submit success messages, (-) no submit success messages
   $submit_weight = 1;
 	$submit_button_flag = TRUE;
@@ -2390,15 +2388,38 @@ function fetchit7_egrid_form($form, &$form_state) {
       // this value is used unless the user specified a default value in the configuration
       // get the last entered value from the selection table
       // depending on the control type, this is either a single value or an array of values...
-      // but because this is an egrid, it must be an array containing a single value
+      // in original egrid, array fields were not supported, so only a single value per field was possible
+      //   so a single value was returned for single value control types
+      //   and an array containing a single value was returned for multi value control types
+      // starting Jan 2019, array fields will be supported
+      //   therefore array fields must use multi value controls (like checkboxes and dropdown multiselect)
+      //   and the array of values in the field will be mapped to a PHP array of values
+      //     to use as the control's default value
+      // note that array field types from pg start with an underscore, _int4 instead of int4
+      //   use this to detect when to create an array of values as a default for a control
+      // pg array fields returns a value that is a string containing a list in the form '{1,2,3,...}'
+      //   that must be parsed by the fetchit7 PHP code into a PHP integer array
+      // initially, only support integer array fields, and assume they contain the indices of a selected subset
+      //   of records from the REQUIRED associated table that contains the full list of possible values
+      // also when the egrid form is submitted, the multi value control selections will be converted back into
+      //   this string format and inserted back into the source table's array field(s)
       if ($itsarealrecord) {
 	      $value = fetchit_get_data($db_type,$db_data_object,$r,$i);
 				//if ($i==1) debug('reading from table: $value='.$value);
-	      $form['sourcetable'][$r][$i] = array('#type' => 'value', '#value' => $value); // the whole table is stored here in case it is needed
+        // eventually, the whole table is stored in 'sourcetable' in case it is needed later
+	      $form['sourcetable'][$r][$i] = array('#type' => 'value', '#value' => $value);
 	      switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
 	        case F_DR_CONTROL_CHECKBOXES:
 	        case F_DR_CONTROL_DROPDOWN_MULTI:
-	          $default_value = array($value);
+            if ($field_types[$i][0] == "_") {
+              // the source field is a pg array field,
+              // so set the default control value to an array containing potentially multiple values
+              $default_value = convertpgstringtoarray($value);
+            } else {
+              // the source field is a single valued field,
+              // so set the default control value to an array containing a single value
+              $default_value = array($value);
+            }
 	          break;
 	        case F_DR_CONTROL_DROPDOWN_SINGLE:
 	        case F_DR_CONTROL_RADIOBTN:
@@ -2439,6 +2460,22 @@ function fetchit7_egrid_form($form, &$form_state) {
       // set the index that determines whether the user specified the control element type ($user_field_ndx>0)
       // or not ($user_field_ndx=0)
       // for egrid, because we set defaults above, this can be >0
+      // ----------------------------------------------------------------------------------------------------------------------
+      // jhb January 2019
+      // ----------------------------------------------------------------------------------------------------------------------
+      // the following code change (who made it?) removes the ability for the fetchit7_param_element_form() function
+      //   to automatically choose the control types if the fetchit7 user did not specifiy them already
+      //   in other words, the user MUST specify a control type for every field in the source table
+      //   and MUST specify a multi-select control (with an associated selection table) if the field is an array field
+      //
+      // leave it this way for now...therefore only need to update the "default value" code above
+      //   (convert a string to an integer array)
+      //   and the code in the submit function that saves the multi-selection back to the pg array field
+      //   (convert an integer array to a string)
+      //
+      // later this feature can be restored, and the code in fetchit7_param_element_form() will need to be updated
+      //   to support array fields in the source table, automatically creating multiselect controls for them
+      // ----------------------------------------------------------------------------------------------------------------------
       if ($user_control[$i]) {
         $user_field_ndx = $i + 1;
       }
@@ -2450,18 +2487,18 @@ function fetchit7_egrid_form($form, &$form_state) {
       // the following creates the "renderable array" of the next parameter input control (drupal form element)
       //   to be displayed on this form ($nid)
       // stack these up in the array. "How" they are to be displayed will be handled by the theme function
-      $form['elements'][$element_name] = 
+      $form['elements'][$element_name] =
       	fetchit7_param_element_form(
       		$field_names[$i],
-      		$field_types[$i], 
-      		$db_handle, 
-      		$user_field_ndx, 
-      		$user_field_data, 
-      		$nid, 
-      		$showtitles, 
-      		$default_value, 
-      		$enabled, // 
-					$hidden); // this is used to draw a special value type form element so that it's in the form 
+      		$field_types[$i],
+      		$db_handle,
+      		$user_field_ndx,
+      		$user_field_data,
+      		$nid,
+      		$showtitles,
+      		$default_value,
+      		$enabled,
+					$hidden); // this is used to draw a special value type form element so that it's in the form
   	}
   }
   if ($submit_button_flag) {
@@ -2567,7 +2604,15 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 		          $values = array_filter($form_state['values']['elements'][$element_name]);
 							if (count($values)) {
 								$options_keys = array_keys($values);
-								$tmp_val_str = $options_keys[0]; //only one record so only one value
+                if ($field_types[$field_ndx][0] == "_") {
+                  // the source field is a pg array field,
+                  // so create a pg style array value string containing potentially multiple values
+                  $tmp_val_str = convertarraytopgstring($options_keys);
+                } else {
+                  // the source field is a single valued field,
+                  // so set the default control value to an array containing a single value
+                  $tmp_val_str = $options_keys[0]; //only one value per record, so use the first value
+                }
 							} else {
 								// nothing selected
 								$tmp_val_str = '';
@@ -2581,7 +2626,15 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 		        $values = array_filter($form_state['values']['elements'][$element_name]);
 						if (count($values)) {
 							$options_keys = array_keys($values);
-							$tmp_val_str = $options_keys[0]; //only one record so only one value
+                if ($field_types[$field_ndx][0] == "_") {
+                  // the source field is a pg array field,
+                  // so create a pg style array value string containing potentially multiple values
+                  $tmp_val_str = convertarraytopgstring($options_keys);
+                } else {
+                  // the source field is a single valued field,
+                  // so set the default control value to an array containing a single value
+                  $tmp_val_str = $options_keys[0]; //only one value per record, so use the first value
+                }
 						} else {
 							// nothing selected
 							$tmp_val_str = '';
@@ -3589,6 +3642,34 @@ function fetchit_parse_parameter_string($parameter_name, $parameter_string) {
   }
   // search the list
   return null;
+}
+
+function convertpgstringtoarray($pgstring) {
+  $values = array();
+  $list_delimiter = ",";
+  $list_enclosure = "{}";
+  // make the list
+  $trimmed = trim($pgstring);
+  if (strlen($trimmed)) {
+    $trimmed = trim($trimmed, $list_enclosure);
+    if (strlen($trimmed)) {
+        $values = explode($list_delimiter, $trimmed);
+    }
+  }
+  return $values;
+}
+
+function convertarraytopgstring($values) {
+  $pgstring = "{"
+  $firstitem = TRUE
+  foreach ($values as $value) {
+    if (!$firstitem) {
+      $pgstring .= ","
+    }
+    $pgstring .= strval($value)
+  }
+  $pgstring .= "}"
+  return $pgstring;
 }
 
 //function fetchit7_param_element_form ($form,&$form_state,$field_name,$field_type,$db_handle,$user_field_ndx,$user_field_data,$nid,$showtitles,$db_value) {
@@ -5518,6 +5599,20 @@ function fetchit_make_val_str($val, $field_type) {
     case 'int8':
     // a long integer from a pg database
     case 'integer':
+      // a generic type
+      if ($val == "") {
+        return "NULL";
+      }
+      else {
+        return strval(intval($val));
+      }
+    case '_int2':
+    // a small integer from a pg database
+    case '_int4':
+    // an integer from a pg database
+    case '_int8':
+    // a long integer from a pg database
+    case '_integer':
       // a generic type
       if ($val == "") {
         return "NULL";
