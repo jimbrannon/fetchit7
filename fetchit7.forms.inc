@@ -2418,8 +2418,8 @@ function fetchit7_egrid_form($form, &$form_state) {
               //debug('arrayfield');
               // the source field is a pg array field,
               // so set the default control value to an array containing potentially multiple values
-              //$default_value = convertpgstringtoarray($value);
-              $default_value = array(0);
+              $default_value = convertpgstringtoarray($value);
+              //$default_value = array(0);
               //debug($default_value);
             } else {
               //debug('plainfield');
@@ -2507,6 +2507,7 @@ function fetchit7_egrid_form($form, &$form_state) {
       		$default_value,
       		$enabled,
 					$hidden); // this is used to draw a special value type form element so that it's in the form
+      debug();
   	}
   }
   if ($submit_button_flag) {
@@ -2737,7 +2738,7 @@ function theme_fetchit7_egrid_form($variables) {
         $element_name = fetchit_make_element_name($nid, $row_ndx, $fld_ndx);
 				$hidden = fetchit_booleantointeger($form['param_hidden'][$fld_ndx]['#value']);
 	    	if (!$hidden) { // hidden fields should have been created with a non-renderable control element type
-          debug($form['elements'][$element_name]);
+          //debug($form['elements'][$element_name]);
         	$row[] = drupal_render($form['elements'][$element_name]);
 				}
    		}
@@ -3749,10 +3750,13 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
       }
       break;
     case 'int2':
+    case '_int2':
     // a small integer from a pg database
     case 'int4':
+    case '_int4':
     // an integer from a pg database
     case 'int8':
+    case '_int8':
       // a long integer from a pg database
       if ($hidden) return array('#type' => 'value','#value' => $db_value);
       if ($user_field_ndx) {// the user specified something
