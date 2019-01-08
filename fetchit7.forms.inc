@@ -2418,7 +2418,8 @@ function fetchit7_egrid_form($form, &$form_state) {
               debug('arrayfield');
               // the source field is a pg array field,
               // so set the default control value to an array containing potentially multiple values
-              $default_value = convertpgstringtoarray($value);
+              //$default_value = convertpgstringtoarray($value);
+              $default_value = array(0);
               debug($default_value);
             } else {
               debug('plainfield');
