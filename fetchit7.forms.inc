@@ -1984,6 +1984,10 @@ function fetchit7_egrid_form($form, &$form_state) {
       return $form;
     }
   }
+
+  debug('$db_data_object', $db_data_object);
+  debug('pg_fetch_result($db_data_object, 0, 0)', pg_fetch_result($db_data_object, 0, 0);
+
   //debug('fetchit7_egrid_form 2');
 
   // get the source table meta data
