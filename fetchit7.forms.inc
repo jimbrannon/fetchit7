@@ -2647,13 +2647,12 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 							$tmp_val_str = $form_state['values']['elements'][$element_name];
 						}
 				}
-        debug($tmp_val_str);
-        debug($field_types[$field_ndx]);
 				$val_str .= fetchit_make_val_str($tmp_val_str,$field_types[$field_ndx]);
         debug($val_str);
 			}
 		}
 		$query .= "$val_str)";
+    debug($val_str)
 		//drupal_set_message($query);
 		$result = fetchit_run_query($db_type,$db_handle,$query);
 	}
