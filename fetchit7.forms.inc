@@ -1985,8 +1985,14 @@ function fetchit7_egrid_form($form, &$form_state) {
     }
   }
 
-  debug('$db_data_object', $db_data_object);
-  debug('pg_fetch_result($db_data_object, 0, 0)', pg_fetch_result($db_data_object, 0, 0));
+  debug(pg_fetch_result($db_data_object, 0, 0));
+  debug(pg_fetch_result($db_data_object, 0, 1));
+  debug(pg_fetch_result($db_data_object, 0, 2));
+  debug(pg_fetch_result($db_data_object, 0, 3));
+  debug(pg_fetch_result($db_data_object, 1, 0));
+  debug(pg_fetch_result($db_data_object, 1, 1));
+  debug(pg_fetch_result($db_data_object, 1, 2));
+  debug(pg_fetch_result($db_data_object, 1, 3));
 
   //debug('fetchit7_egrid_form 2');
 
