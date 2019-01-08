@@ -2603,9 +2603,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
                 if ($field_types[$field_ndx][0] == "_") {
                   // the source field is a pg array field,
                   // so create a pg style array value string containing potentially multiple values
-                  debug($options_keys);
                   $tmp_val_str = convertarraytopgstring($options_keys);
-                  debug($tmp_val_str);
                 } else {
                   // the source field is a single valued field,
                   // so set the default control value to an array containing a single value
@@ -3657,6 +3655,7 @@ function convertarraytopgstring($values) {
       $pgstring .= ",";
     }
     $pgstring .= strval($value);
+    $firstitem = FALSE;
   }
   $pgstring .= "}";
   return $pgstring;
