@@ -2653,7 +2653,6 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 		//drupal_set_message($query);
 		$result = fetchit_run_query($db_type,$db_handle,$query);
 	}
-
   $postqry = trim(fetchit7_content_field_fetcher($nid, 'post_function', 'value'));
   if (isset($postqry)) {
     if (strlen($postqry)) {
@@ -2668,19 +2667,16 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
       }
 		}
 	}
-
   $redirect = trim(fetchit7_content_field_fetcher($nid, 'redirect', 'value'));
   if (isset($redirect)) {
     if (strlen($redirect)) {
       $form_state['redirect'] = $redirect;
     }
   }
-	
   if ($submit_success_message) drupal_set_message(t('Successfully submitted changes.'), 'status');
 }
 
 function theme_fetchit7_egrid_form($variables) {
-  //debug('theme_fetchit7_egrid_form 1');
   $form = $variables['form'];
   $nid = $form['nid']['#value'];
   $form_id = $form['form_id']['#value'];
@@ -2698,7 +2694,6 @@ function theme_fetchit7_egrid_form($variables) {
 	}
   $output .= '<div class="' . $form_id . '_egrid">';
   if ($table_row_count) {
-	  //debug('theme_fetchit7_egrid_form 2');
     //figure out the table structure
     $row_count = $form['row_count']['#value'];
     $field_count = $form['field_count']['#value'];
@@ -2709,7 +2704,6 @@ function theme_fetchit7_egrid_form($variables) {
     $header = array();
     for ($fld_ndx = 0; $fld_ndx < $field_count; $fld_ndx++) {
 			$hidden = fetchit_booleantointeger($form['param_hidden'][$fld_ndx]['#value']);
-	    //debug($fld_ndx.' '.$theval.' '.$hidden,'$fld_ndx $theval $hidden');
     	if (!$hidden) { // hidden fields should have been created with a non-renderable control element type
 	      if ($col_count < $table_headers_count) {
 	        $header[] = $table_headers[$col_count];
@@ -2727,18 +2721,15 @@ function theme_fetchit7_egrid_form($variables) {
         $element_name = fetchit_make_element_name($nid, $row_ndx, $fld_ndx);
 				$hidden = fetchit_booleantointeger($form['param_hidden'][$fld_ndx]['#value']);
 	    	if (!$hidden) { // hidden fields should have been created with a non-renderable control element type
-          //debug($form['elements'][$element_name]);
         	$row[] = drupal_render($form['elements'][$element_name]);
 				}
    		}
       $rows[] = $row;
   	}
-  	//debug($table_weight,'$table_weight');
   	$form['table'] = array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#weight' => $table_weight, '#empty' => "Empty table.", );
   	$output .= drupal_render($form['table']);
   }
   else {
-  	//debug('theme_fetchit7_egrid_form 3');
     $row_count = $form['row_count']['#value'];
     $field_count = $form['field_count']['#value'];
     for ($row_ndx = 0; $row_ndx < $row_count; $row_ndx++) {
