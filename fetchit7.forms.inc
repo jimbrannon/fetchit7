@@ -2507,7 +2507,6 @@ function fetchit7_egrid_form($form, &$form_state) {
       		$default_value,
       		$enabled,
 					$hidden); // this is used to draw a special value type form element so that it's in the form
-      debug();
   	}
   }
   if ($submit_button_flag) {
