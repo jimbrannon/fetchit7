@@ -2648,7 +2648,6 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 			}
 		}
 		$query .= "$val_str)";
-		//drupal_set_message($query);
 		$result = fetchit_run_query($db_type,$db_handle,$query);
 	}
   $postqry = trim(fetchit7_content_field_fetcher($nid, 'post_function', 'value'));
