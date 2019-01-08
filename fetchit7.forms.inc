@@ -2405,28 +2405,28 @@ function fetchit7_egrid_form($form, &$form_state) {
       //   this string format and inserted back into the source table's array field(s)
       if ($itsarealrecord) {
 	      $value = fetchit_get_data($db_type,$db_data_object,$r,$i);
-        debug($value);
+        //debug($value);
 				//if ($i==1) debug('reading from table: $value='.$value);
         // eventually, the whole table is stored in 'sourcetable' in case it is needed later
-        debug($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]);
+        //debug($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]);
 	      $form['sourcetable'][$r][$i] = array('#type' => 'value', '#value' => $value);
 	      switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
 	        case F_DR_CONTROL_CHECKBOXES:
 	        case F_DR_CONTROL_DROPDOWN_MULTI:
-            debug('MULTI');
+            //debug('MULTI');
             if ($field_types[$i][0] == "_") {
-              debug('arrayfield');
+              //debug('arrayfield');
               // the source field is a pg array field,
               // so set the default control value to an array containing potentially multiple values
               //$default_value = convertpgstringtoarray($value);
               $default_value = array(0);
-              debug($default_value);
+              //debug($default_value);
             } else {
-              debug('plainfield');
+              //debug('plainfield');
               // the source field is a single valued field,
               // so set the default control value to an array containing a single value
               $default_value = array($value);
-              debug($default_value);
+              //debug($default_value);
             }
 	          break;
 	        case F_DR_CONTROL_DROPDOWN_SINGLE:
@@ -2737,6 +2737,7 @@ function theme_fetchit7_egrid_form($variables) {
         $element_name = fetchit_make_element_name($nid, $row_ndx, $fld_ndx);
 				$hidden = fetchit_booleantointeger($form['param_hidden'][$fld_ndx]['#value']);
 	    	if (!$hidden) { // hidden fields should have been created with a non-renderable control element type
+          debug($form['elements'][$element_name]);
         	$row[] = drupal_render($form['elements'][$element_name]);
 				}
    		}
