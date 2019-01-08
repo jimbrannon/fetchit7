@@ -2405,28 +2405,19 @@ function fetchit7_egrid_form($form, &$form_state) {
       //   this string format and inserted back into the source table's array field(s)
       if ($itsarealrecord) {
 	      $value = fetchit_get_data($db_type,$db_data_object,$r,$i);
-        //debug($value);
-				//if ($i==1) debug('reading from table: $value='.$value);
         // eventually, the whole table is stored in 'sourcetable' in case it is needed later
-        //debug($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]);
 	      $form['sourcetable'][$r][$i] = array('#type' => 'value', '#value' => $value);
 	      switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
 	        case F_DR_CONTROL_CHECKBOXES:
 	        case F_DR_CONTROL_DROPDOWN_MULTI:
-            //debug('MULTI');
             if ($field_types[$i][0] == "_") {
-              //debug('arrayfield');
               // the source field is a pg array field,
               // so set the default control value to an array containing potentially multiple values
               $default_value = convertpgstringtoarray($value);
-              //$default_value = array(0);
-              //debug($default_value);
             } else {
-              //debug('plainfield');
               // the source field is a single valued field,
               // so set the default control value to an array containing a single value
               $default_value = array($value);
-              //debug($default_value);
             }
 	          break;
 	        case F_DR_CONTROL_DROPDOWN_SINGLE:
@@ -2448,7 +2439,6 @@ function fetchit7_egrid_form($form, &$form_state) {
       } else {
       	$default_value='';
       }
-			//debug('field '.$i.' converted to default: $default_value='.$default_value);
 
       // add everything else to the form we might need in the theme, validate, or submit functions
       //$form['param_count'] = array('#type' => 'value','#value' => ($param_count+1)); // update this each time through
@@ -2597,8 +2587,6 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 							$tmp_val_str .= "-";
 							$tmp_val_str .= $form['elements'][$element_name]['#default_value']['day'];
 						} else {
-							//debug($element_name,'$element_name');
-							//debug($form_state,'$form_state');
 							$tmp_val_str = $form_state['values']['elements'][$element_name]['year'];
 							$tmp_val_str .= "-";
 							$tmp_val_str .= $form_state['values']['elements'][$element_name]['month'];
@@ -2615,7 +2603,9 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
                 if ($field_types[$field_ndx][0] == "_") {
                   // the source field is a pg array field,
                   // so create a pg style array value string containing potentially multiple values
+                  debug($options_keys);
                   $tmp_val_str = convertarraytopgstring($options_keys);
+                  debug($tmp_val_str);
                 } else {
                   // the source field is a single valued field,
                   // so set the default control value to an array containing a single value
@@ -3748,15 +3738,17 @@ function fetchit7_param_element_form($field_name, $field_type, $db_handle, $user
         return $form;
       }
       break;
+    // a small integer from a pg database
     case 'int2':
     case '_int2':
-    // a small integer from a pg database
+    // an integer from a pg database
     case 'int4':
     case '_int4':
-    // an integer from a pg database
+    case 'integer':
+    case '_integer':
+    // a long integer from a pg database
     case 'int8':
     case '_int8':
-      // a long integer from a pg database
       if ($hidden) return array('#type' => 'value','#value' => $db_value);
       if ($user_field_ndx) {// the user specified something
         switch ($user_field_data[$user_field_ndx-1][F_DR_FIELD_INPUT_TYPE_STR]) {
@@ -5579,8 +5571,6 @@ function expand_date_fetchit($element) {
  *
  */
 function fetchit_make_val_str($val, $field_type) {
-  //debug($val,'$val');
-  //debug($field_type,'$field_type');
   switch (strtolower(trim($field_type))) {
     case 'bool':
     // a boolean from a pg database
@@ -5627,10 +5617,10 @@ function fetchit_make_val_str($val, $field_type) {
     case '_integer':
       // a generic type
       if ($val == "") {
-        return "NULL";
+        return "{}";
       }
       else {
-        return strval(intval($val));
+        return $val;
       }
     case 'numeric':
     // a "numeric" real number field from a pg database
