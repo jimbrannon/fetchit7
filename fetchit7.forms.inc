@@ -2629,6 +2629,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
                   // the source field is a pg array field,
                   // so create a pg style array value string containing potentially multiple values
                   $tmp_val_str = convertarraytopgstring($options_keys);
+                  debug($tmp_val_str);
                 } else {
                   // the source field is a single valued field,
                   // so set the default control value to an array containing a single value
@@ -2652,7 +2653,7 @@ function fetchit7_egrid_form_submit($form, &$form_state) {
 			}
 		}
 		$query .= "$val_str)";
-    debug($val_str)
+    debug($query);
 		//drupal_set_message($query);
 		$result = fetchit_run_query($db_type,$db_handle,$query);
 	}
