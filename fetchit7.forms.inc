@@ -5608,19 +5608,19 @@ function fetchit_make_val_str($val, $field_type) {
       else {
         return strval(intval($val));
       }
+    // these are pg integer array field types
+    // the array from the multiselect should already be converted to a list in a string "{1,2,3}"
+    // so only need to 'quote it' for the SQL INSERT statement
     case '_int2':
-    // a small integer from a pg database
     case '_int4':
-    // an integer from a pg database
     case '_int8':
-    // a long integer from a pg database
     case '_integer':
       // a generic type
       if ($val == "") {
-        return "{}";
+        return "'{}'";
       }
       else {
-        return $val;
+        return "'".$val."'";
       }
     case 'numeric':
     // a "numeric" real number field from a pg database
