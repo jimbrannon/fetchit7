@@ -2408,16 +2408,20 @@ function fetchit7_egrid_form($form, &$form_state) {
         debug($value);
 				//if ($i==1) debug('reading from table: $value='.$value);
         // eventually, the whole table is stored in 'sourcetable' in case it is needed later
+        debug($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]);
 	      $form['sourcetable'][$r][$i] = array('#type' => 'value', '#value' => $value);
 	      switch ($user_field_data[$i][F_DR_FIELD_INPUT_TYPE_STR]) {
 	        case F_DR_CONTROL_CHECKBOXES:
 	        case F_DR_CONTROL_DROPDOWN_MULTI:
+            debug('MULTI');
             if ($field_types[$i][0] == "_") {
+              debug('arrayfield');
               // the source field is a pg array field,
               // so set the default control value to an array containing potentially multiple values
               $default_value = convertpgstringtoarray($value);
               debug($default_value);
             } else {
+              debug('plainfield');
               // the source field is a single valued field,
               // so set the default control value to an array containing a single value
               $default_value = array($value);
